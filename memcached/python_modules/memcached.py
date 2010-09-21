@@ -209,7 +209,7 @@ def metric_init(params):
 
     # Tokyo Tyrant
     if "type" in params and params["type"].lower().find("tokyo") == 0:
-        dtmp = descriptors[:] # copy list
+        dtmp = descriptors[:]
         for d in dtmp:
             if d["name"] in [
                 mp+"_bytes_read",
@@ -277,8 +277,6 @@ if __name__ == '__main__':
         params = {
             "host"  : "localhost",
             "port"  : 11211,
-            # "metrix_prefix" : "mc101",
-
             # "host"  : "tt101",
             # "port"  : 1978,
             # "type"  : "Tokyo Tyrant",
@@ -286,13 +284,6 @@ if __name__ == '__main__':
             "debug" : True,
             }
         metric_init(params)
-
-  #       for d in descriptors:
-  #           print '''  metric {
-  #   name  = "%s"
-  #   title = "%s"
-  #   value_threshold = 0
-  # }''' % (d["name"], d["description"])
 
         while True:
             for d in descriptors:
@@ -305,113 +296,3 @@ if __name__ == '__main__':
     except:
         traceback.print_exc()
         os._exit(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
