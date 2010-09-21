@@ -1,0 +1,16 @@
+diskpart
+===============
+
+python module for ganglia 3.1.
+
+"diskpart" send metrics on disk pattition.
+
+ * total size [GB]
+ * used  size [GB]
+ * total number of inode
+ * used  number of inode
+
+## AUTHOR
+
+HIROSE Masaaki <hirose31@gmail.com>
+
