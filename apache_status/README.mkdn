@@ -1,0 +1,12 @@
+apache_status
+===============
+
+python module for ganglia 3.1.
+
+"apache_status" sends metrics on Apache process status refering to
+server-status(mod_status.so).
+
+## AUTHOR
+
+HIROSE Masaaki <hirose31@gmail.com>
+
