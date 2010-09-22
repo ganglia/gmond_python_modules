@@ -316,8 +316,8 @@ def metric_cleanup():
 if __name__ == '__main__':
     try:
         params = {
-            "host"  : "memcache01-memcached-content",
-            "port"  : 12345,
+            "host"  : "localhost",
+            "port"  : 11211,
             # "host"  : "tt101",
             # "port"  : 1978,
             # "type"  : "Tokyo Tyrant",
