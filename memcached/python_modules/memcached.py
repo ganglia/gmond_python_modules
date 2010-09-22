@@ -19,6 +19,13 @@ def dprint(f, *v):
     if Debug:
         print >>sys.stderr, "DEBUG: "+f % v
 
+def floatable(str):
+    try:
+        float(str)
+        return True
+    except:
+        return False
+
 class UpdateMetricThread(threading.Thread):
 
     def __init__(self, params):
@@ -29,6 +36,7 @@ class UpdateMetricThread(threading.Thread):
         if "refresh_rate" in params:
             self.refresh_rate = int(params["refresh_rate"])
         self.metric       = {}
+        self.last_metric       = {}
         self.timeout      = 2
 
         self.host         = "localhost"
@@ -60,7 +68,7 @@ class UpdateMetricThread(threading.Thread):
     def update_metric(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         msg  = ""
-
+        self.last_metric = self.metric.copy()
         try:
             dprint("connect %s:%d", self.host, self.port)
             sock.connect((self.host, self.port))
@@ -86,12 +94,21 @@ class UpdateMetricThread(threading.Thread):
 
         for m in msg.split("\r\n"):
             d = m.split(" ")
-            if len(d) == 3 and d[0] == "STAT":
-                self.metric[self.mp+"_"+d[1]] = int(d[2]) if d[2].isdigit() else d[2]
+            if len(d) == 3 and d[0] == "STAT" and floatable(d[2]):
+                self.metric[self.mp+"_"+d[1]] = float(d[2])
 
     def metric_of(self, name):
         val = 0
-        if name in self.metric:
+        mp = name.split("_")[0]
+        if name.rsplit("_",1)[1] == "rate" and name.rsplit("_",1)[0] in self.metric:
+            _Lock.acquire()
+            name = name.rsplit("_",1)[0]
+            if name in self.last_metric:
+                num = self.metric[name]-self.last_metric[name]
+                period = self.metric[mp+"_time"]-self.last_metric[mp+"_time"]
+                val = num/period
+            _Lock.release()
+        elif name in self.metric:
             _Lock.acquire()
             val = self.metric[name]
             _Lock.release()
@@ -117,8 +134,8 @@ def metric_init(params):
         'name'        : 'XXX',
         'call_back'   : metric_of,
         'time_max'    : 60,
-        'value_type'  : 'uint',
-        'format'      : '%d',
+        'value_type'  : 'float',
+        'format'      : '%.0f',
         'units'       : 'XXX',
         'slope'       : 'XXX', # zero|positive|negative|both
         'description' : 'XXX',
@@ -206,10 +223,34 @@ def metric_init(params):
                 "slope"      : "positive",
                 "description": "Number of items that have been requested and not found",
                 }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_get_hits_rate",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Hits per second",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_get_misses_rate",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Misses per second",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_cmd_get_rate",
+                "units"      : "commands",
+                "slope"      : "both",
+                "description": "Gets per second",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_cmd_set_rate",
+                "units"      : "commands",
+                "slope"      : "both",
+                "description": "Sets per second",
+                }))
 
     # Tokyo Tyrant
     if "type" in params and params["type"].lower().find("tokyo") == 0:
-        dtmp = descriptors[:] # copy list
+        dtmp = descriptors[:]
         for d in dtmp:
             if d["name"] in [
                 mp+"_bytes_read",
@@ -275,10 +316,8 @@ def metric_cleanup():
 if __name__ == '__main__':
     try:
         params = {
-            "host"  : "localhost",
-            "port"  : 11211,
-            # "metrix_prefix" : "mc101",
-
+            "host"  : "memcache01-memcached-content",
+            "port"  : 12345,
             # "host"  : "tt101",
             # "port"  : 1978,
             # "type"  : "Tokyo Tyrant",
@@ -286,13 +325,6 @@ if __name__ == '__main__':
             "debug" : True,
             }
         metric_init(params)
-
-  #       for d in descriptors:
-  #           print '''  metric {
-  #   name  = "%s"
-  #   title = "%s"
-  #   value_threshold = 0
-  # }''' % (d["name"], d["description"])
 
         while True:
             for d in descriptors:
@@ -305,113 +337,3 @@ if __name__ == '__main__':
     except:
         traceback.print_exc()
         os._exit(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
