@@ -106,7 +106,10 @@ class UpdateMetricThread(threading.Thread):
             if name in self.last_metric:
                 num = self.metric[name]-self.last_metric[name]
                 period = self.metric[mp+"_time"]-self.last_metric[mp+"_time"]
-                val = num/period
+                try:
+                    val = num/period
+                except ZeroDivisionError:
+                    val = 0
             _Lock.release()
         elif name in self.metric:
             _Lock.acquire()
