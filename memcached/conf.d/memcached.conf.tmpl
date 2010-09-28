@@ -14,16 +14,15 @@ modules {
     }
 
     param refresh_rate {
-        value = 15
+      value = 15
     }
 
     param metrix_prefix {
-        value = "__HOSTNAME__"
+      value = "__HOSTNAME__"
     }
     param spoof_host {
-        value = "__IPADDRESS__:__HOSTNAME__"
+      value = "__IPADDRESS__:__HOSTNAME__"
     }
-
   }
 }
 
@@ -44,6 +43,16 @@ collection_group {
   metric {
     name  = "__HOSTNAME___cmd_set"
     title = "Cumulative number of storage reqs"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_get_rate"
+    title = "Retrieval reqs/sec"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_set_rate"
+    title = "Storage reqs/sec"
     value_threshold = 0
   }
   metric {
@@ -86,6 +95,15 @@ collection_group {
     title = "Number of items that have been requested and not found"
     value_threshold = 0
   }
+  metric {
+    name  = "__HOSTNAME___get_hits_rate"
+    title = "Hits/sec"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___get_misses_rate"
+    title = "Misses/sec"
+    value_threshold = 0
+  }
 
 }
-
