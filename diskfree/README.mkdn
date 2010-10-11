@@ -8,4 +8,4 @@ This module reads a list of mountpoints from the "mounts" parameter (probably
 
 ## AUTHOR
 
-Author: Michael Conigliaro <mike [at] conigliaro [dot] org>
+Author: Michael Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

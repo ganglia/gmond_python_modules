@@ -15,4 +15,4 @@ metrics:
 
 ## AUTHOR
 
-Author: Michael Conigliaro <mike [at] conigliaro [dot] org>
+Author: Michael Conigliaro &lt;mike [at] conigliaro [dot] org&gt;
