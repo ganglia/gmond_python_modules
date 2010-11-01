@@ -1,0 +1,29 @@
+mongodb
+===============
+
+Python module for ganglia 3.1.
+
+This module parses output from the db.serverStatus() command and creates
+"mongodb_*" metrics (i.e. all the metrics from the mongostat command):
+
+ * Inserts per second
+ * Queries per second
+ * Updates per second
+ * Deletes per second
+ * Getmores per second
+ * Commands per second
+ * Flushes per second
+ * Memory-mapped Data
+ * Process Virtual Size
+ * Process Resident Size
+ * Page Faults per second
+ * Global Write Lock Ratio
+ * BTree Page Miss Ratio
+ * Total Operations Waiting for Lock
+ * Readers Waiting for Lock
+ * Writers Waiting for Lock
+ * Open Connections
+
+## AUTHOR
+
+Author: Michael Conigliaro &lt;mike [at] conigliaro [dot] org&gt;
