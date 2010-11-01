@@ -7,71 +7,92 @@ import time
 
 
 name_prefix = 'tokyo_tyrant_'
-stats_command = None
-descriptors = list()
+params = {
+    'stats_command' : 'tcrmgr inform -st localhost'
+}
+metrics = {
+    'time'   : 0,
+    'values' : {}
+}
+delta_metrics = {}
+metrics_cache_max = 1
+
+
+# return all metrics
+def get_metrics():
+
+    global metrics
+
+    if (time.time() - metrics['time']) > metrics_cache_max:
+
+        # get raw metric data
+        io = os.popen(params['stats_command'])
+
+        # convert to list
+        metrics_list = io.readlines()
+
+        metrics['time'] = time.time()
+        for line in metrics_list:
+            (name, value) = line.strip().split()
+            metrics['values'][name] = value
+
+    return metrics
 
 
 # return a value for the requested metric
-def metric_handler(name):
+def get_value(name):
 
-    # remove prefix from name
-    name = name[len(name_prefix):]
+    metrics = get_metrics()
 
-    # read command output
-    cmd = os.popen(stats_command)
-    stdout = cmd.readlines()
+    try:
+        name = name[len(name_prefix):] # remove prefix from name
+        result = metrics['values'][name]
+    except KeyError:
+        result = 0
 
-    # return value for selected metric
-    for line in stdout:
-        (metric, value) = line.strip().split()
-        if metric == name:
-            return value
+    return result
 
 
 # return change over time for the requested metric
-def metric_delta_handler(name):
+def get_delta(name):
 
-    # get current time/value
-    curr_time = time.time()
-    curr_value = float(metric_handler(name))
+    global delta_metrics
 
-    # read last time/value from file
-    last_value_file = "/tmp/%s.last" % (name)
+    # get current metrics
+    curr_metrics = get_metrics()
+
+    # get delta
     try:
-        last_time = os.path.getmtime(last_value_file)
-        f = open(last_value_file)
-        last_value = float(f.read().strip())
-    except OSError:
-        last_time = None
-        last_value = None
+        name = name[len(name_prefix):] # remove prefix from name
+        delta = (float(curr_metrics['values'][name]) - float(delta_metrics[name]['value']))/(curr_metrics['time'] - delta_metrics[name]['time'])
+    except KeyError:
+        delta = 0
 
-    # compute delta
-    if not last_time:
-        delta = 0.0
-    else:
-        delta = (curr_value - last_value)/(curr_time - last_time)
-
-    # write current value to file
-    f = open(last_value_file, 'w')
-    f.write(str(curr_value))
+    # update last metrics
+    delta_metrics[name] = {
+        'value' : get_metrics()['values'][name],
+        'time'  : get_metrics()['time']
+    }
 
     return delta
 
 
 # initialize metric descriptors
-def metric_init(params):
-    global stats_command
-    global descriptors
+def metric_init(lparams):
 
-    stats_command = params['stats_command']
+    global params
 
+    # set parameters
+    for key in lparams:
+      params[key] = lparams[key]
+
+    # define descriptors
     time_max = 60
     groups = 'tokyo tyrant'
-
     descriptors = [
         {
             'name': name_prefix + 'rnum',
-            'call_back': metric_handler,
+            'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
             'units': '',
@@ -82,7 +103,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'size',
-            'call_back': metric_handler,
+            'call_back': get_value,
             'time_max': time_max,
             'value_type': 'double',
             'units': 'Bytes',
@@ -93,7 +114,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'delay',
-            'call_back': metric_handler,
+            'call_back': get_value,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Secs',
@@ -104,7 +125,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_put',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -115,7 +136,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_out',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -126,7 +147,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_get',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -137,7 +158,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_put_miss',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -148,7 +169,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_out_miss',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -159,7 +180,7 @@ def metric_init(params):
         },
         {
             'name': name_prefix + 'cnt_get_miss',
-            'call_back': metric_delta_handler,
+            'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
             'units': 'Ops/Sec',
@@ -180,9 +201,9 @@ def metric_cleanup():
 
 # the following code is for debugging and testing
 if __name__ == '__main__':
-    params = {'stats_command': 'cat ./tcrmgr'}
-    metric_init(params)
-    for d in descriptors:
-        print '%s = %s' % (d['name'], d['call_back'](d['name']))
-
-
+    descriptors = metric_init({'stats_command': 'ssh tokyotyrant.example.com tcrmgr inform -st localhost'})
+    while True:
+        for d in descriptors:
+            print '%s = %s' % (d['name'], d['call_back'](d['name']))
+        print "\n"
+        time.sleep(10)
