@@ -101,7 +101,7 @@ def metric_init(lparams):
 
     # set parameters
     for key in lparams:
-      params[key] = lparams[key]
+        params[key] = lparams[key]
 
     # define descriptors
     time_max = 60
