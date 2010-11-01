@@ -5,7 +5,9 @@ import os
 
 
 name_prefix = 'disk_free_'
-descriptors = list()
+params = {
+    'mounts' : '/proc/mounts'
+}
 
 
 # return a value for the requested metric
@@ -27,8 +29,13 @@ def metric_handler(name):
 
 
 # initialize metric descriptors
-def metric_init(params):
-    global descriptors
+def metric_init(lparams):
+
+    global params
+
+    # set parameters
+    for key in lparams:
+        params[key] = lparams[key]
 
     # read mounts file
     try:
@@ -36,7 +43,8 @@ def metric_init(params):
     except IOError:
         return 0
 
-    # parse mounts
+    # parse mounts and create descriptors
+    descriptors = []
     for line in f:
         if line.startswith('/'):
             mount_info = line.split()
@@ -69,9 +77,6 @@ def metric_cleanup():
 
 # the following code is for debugging and testing
 if __name__ == '__main__':
-    params = {'mounts': 'mounts'}
-    metric_init(params)
+    descriptors = metric_init({'mounts': '/proc/mounts'})
     for d in descriptors:
         print '%s = %s' % (d['name'], d['call_back'](d['name']))
-
-
