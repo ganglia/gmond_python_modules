@@ -1,0 +1,21 @@
+beanstalk
+===============
+
+python module for ganglia 3.1.
+
+*NOTE*: [beanstalkc](https://github.com/earl/beanstalkc/) *must* be in your python path.
+
+This module connects to a [beanstalkd](http://kr.github.com/beanstalkd/) instance and grabs some metrics:
+
+ * current-connections
+ * total-jobs
+ * current-jobs-ready
+ * current-jobs-buried
+ * current-jobs-delayed
+ * current-waiting
+ * job-timeouts
+ * cmd-bury
+
+## AUTHOR
+
+Stephen Holiday <stephen.holiday@gmail.com>
