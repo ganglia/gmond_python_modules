@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 
 import json
@@ -8,20 +9,21 @@ import sys
 import time
 
 
-name_prefix = 'mongodb_'
-params = {
+NAME_PREFIX = 'mongodb_'
+PARAMS = {
     'stats_command' : 'mongo --quiet --eval "printjson(db.serverStatus())"'
 }
-metrics = {
+METRICS = {
     'time'   : 0,
     'values' : {}
 }
-delta_metrics = {}
-metrics_cache_max = 1
+DELTA_METRICS = {}
+METRICS_CACHE_MAX = 1
 
 
-# flatten a dict (i.e. dict['a']['b']['c'] => dict['a_b_c'])
 def flatten(d, pre = '', sep = '_'):
+    """Flatten a dict (i.e. dict['a']['b']['c'] => dict['a_b_c'])"""
+
     new_d = {}
     for k,v in d.items():
         if type(v) == dict:
@@ -31,15 +33,15 @@ def flatten(d, pre = '', sep = '_'):
     return new_d
 
 
-# return all metrics
 def get_metrics():
+    """Return all metrics"""
 
-    global metrics
+    global METRICS
 
-    if (time.time() - metrics['time']) > metrics_cache_max:
+    if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
         # get raw metric data
-        io = os.popen(params['stats_command'])
+        io = os.popen(PARAMS['stats_command'])
 
         # clean up
         metrics_str = ''.join(io.readlines()).strip() # convert to string
@@ -49,20 +51,20 @@ def get_metrics():
         fresh_metrics = flatten(json.loads(metrics_str))
 
         # update cache
-        metrics['time'] = time.time()
+        METRICS['time'] = time.time()
         for name,value in fresh_metrics.items():
-            metrics['values'][name] = value
+            METRICS['values'][name] = value
 
-    return metrics
+    return METRICS
 
 
-# return a value for the requested metric
 def get_value(name):
+    """Return a value for the requested metric"""
 
     metrics = get_metrics()
 
     try:
-        name = name[len(name_prefix):] # remove prefix from name
+        name = name[len(NAME_PREFIX):] # remove prefix from name
         result = metrics['values'][name]
     except KeyError:
         result = 0
@@ -70,23 +72,23 @@ def get_value(name):
     return result
 
 
-# return change over time for the requested metric
 def get_delta(name):
+    """Return change over time for the requested metric"""
 
-    global delta_metrics
+    global DELTA_METRICS
 
     # get current metrics
     curr_metrics = get_metrics()
 
     # get delta
     try:
-        name = name[len(name_prefix):] # remove prefix from name
-        delta = (curr_metrics['values'][name] - delta_metrics[name]['value'])/(curr_metrics['time'] - delta_metrics[name]['time'])
+        name = name[len(NAME_PREFIX):] # remove prefix from name
+        delta = (curr_metrics['values'][name] - DELTA_METRICS[name]['value'])/(curr_metrics['time'] - DELTA_METRICS[name]['time'])
     except KeyError:
         delta = 0
 
     # update last metrics
-    delta_metrics[name] = {
+    DELTA_METRICS[name] = {
         'value' : get_metrics()['values'][name],
         'time'  : get_metrics()['time']
     }
@@ -94,21 +96,43 @@ def get_delta(name):
     return delta
 
 
-# initialize metric descriptors
-def metric_init(lparams):
+def get_globalLock_ratio(name):
+    """Return the global lock ratio"""
 
-    global params
+    try:
+        result = get_delta(NAME_PREFIX + 'globalLock_lockTime') / get_delta(NAME_PREFIX + 'globalLock_totalTime') * 100
+    except ZeroDivisionError:
+        result = 0
+
+    return result
+
+
+def indexCounters_btree_missRatio(name):
+    """Return the btree miss ratio"""
+
+    try:
+        result = get_delta(NAME_PREFIX + 'indexCounters_btree_misses') / get_delta(NAME_PREFIX + 'indexCounters_btree_accesses') * 100
+    except ZeroDivisionError:
+        result = 0
+
+    return result
+
+
+def metric_init(lparams):
+    """Initialize metric descriptors"""
+
+    global PARAMS
 
     # set parameters
     for key in lparams:
-        params[key] = lparams[key]
+        PARAMS[key] = lparams[key]
 
     # define descriptors
     time_max = 60
     groups = 'mongodb'
     descriptors = [
         {
-            'name': name_prefix + 'opcounters_insert',
+            'name': NAME_PREFIX + 'opcounters_insert',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -119,7 +143,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'opcounters_query',
+            'name': NAME_PREFIX + 'opcounters_query',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -130,7 +154,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'opcounters_update',
+            'name': NAME_PREFIX + 'opcounters_update',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -141,7 +165,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'opcounters_delete',
+            'name': NAME_PREFIX + 'opcounters_delete',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -152,7 +176,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'opcounters_getmore',
+            'name': NAME_PREFIX + 'opcounters_getmore',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -163,7 +187,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'opcounters_command',
+            'name': NAME_PREFIX + 'opcounters_command',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -174,7 +198,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'backgroundFlushing_flushes',
+            'name': NAME_PREFIX + 'backgroundFlushing_flushes',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -185,7 +209,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'mem_mapped',
+            'name': NAME_PREFIX + 'mem_mapped',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -196,7 +220,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'mem_virtual',
+            'name': NAME_PREFIX + 'mem_virtual',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -207,7 +231,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'mem_resident',
+            'name': NAME_PREFIX + 'mem_resident',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -218,7 +242,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'extra_info_page_faults',
+            'name': NAME_PREFIX + 'extra_info_page_faults',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -229,8 +253,8 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'globalLock_ratio',
-            'call_back': get_value,
+            'name': NAME_PREFIX + 'globalLock_ratio',
+            'call_back': get_globalLock_ratio,
             'time_max': time_max,
             'value_type': 'float',
             'units': '%',
@@ -240,8 +264,8 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'indexCounters_btree_missRatio',
-            'call_back': get_value,
+            'name': NAME_PREFIX + 'indexCounters_btree_missRatio',
+            'call_back': indexCounters_btree_missRatio,
             'time_max': time_max,
             'value_type': 'float',
             'units': '%',
@@ -251,7 +275,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'globalLock_currentQueue_total',
+            'name': NAME_PREFIX + 'globalLock_currentQueue_total',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -262,7 +286,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'globalLock_currentQueue_readers',
+            'name': NAME_PREFIX + 'globalLock_currentQueue_readers',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -273,7 +297,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'globalLock_currentQueue_writers',
+            'name': NAME_PREFIX + 'globalLock_currentQueue_writers',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -284,7 +308,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'connections_current',
+            'name': NAME_PREFIX + 'connections_current',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -299,8 +323,9 @@ def metric_init(lparams):
     return descriptors
 
 
-# cleanup
 def metric_cleanup():
+    """Cleanup"""
+
     pass
 
 
