@@ -1,23 +1,24 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 
 import os
 
 
-name_prefix = 'disk_free_'
-params = {
+NAME_PREFIX = 'disk_free_'
+PARAMS = {
     'mounts' : '/proc/mounts'
 }
 
 
-# return a value for the requested metric
 def metric_handler(name):
+    """Return a value for the requested metric"""
 
     # parse path from name
-    if name == name_prefix + 'rootfs':
+    if name == NAME_PREFIX + 'rootfs':
         path = '/'
     else:
-        path = '/' + name.replace(name_prefix, '').replace('_', '/')
+        path = '/' + name.replace(NAME_PREFIX, '').replace('_', '/')
 
     # get fs stats
     try:
@@ -28,18 +29,18 @@ def metric_handler(name):
     return (disk.f_bavail * disk.f_frsize) / 1024000000
 
 
-# initialize metric descriptors
 def metric_init(lparams):
+    """Initialize metric descriptors"""
 
-    global params
+    global PARAMS
 
     # set parameters
     for key in lparams:
-        params[key] = lparams[key]
+        PARAMS[key] = lparams[key]
 
     # read mounts file
     try:
-        f = open(params['mounts'])
+        f = open(PARAMS['mounts'])
     except IOError:
         return 0
 
@@ -56,7 +57,7 @@ def metric_init(lparams):
                 path_key = mount_info[1][1:].replace('/', '_')
 
             descriptors.append({
-                'name': name_prefix + path_key,
+                'name': NAME_PREFIX + path_key,
                 'call_back': metric_handler,
                 'time_max': 60,
                 'value_type': 'uint',
@@ -70,8 +71,9 @@ def metric_init(lparams):
     return descriptors
 
 
-# cleanup
 def metric_cleanup():
+    """Cleanup"""
+
     pass
 
 
