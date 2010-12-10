@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 
 import os
@@ -6,46 +7,46 @@ import sys
 import time
 
 
-name_prefix = 'tokyo_tyrant_'
-params = {
+NAME_PREFIX = 'tokyo_tyrant_'
+PARAMS = {
     'stats_command' : 'tcrmgr inform -st localhost'
 }
-metrics = {
+METRICS = {
     'time'   : 0,
     'values' : {}
 }
-delta_metrics = {}
-metrics_cache_max = 1
+DELTA_METRICS = {}
+METRICS_CACHE_MAX = 1
 
 
-# return all metrics
 def get_metrics():
+    """Return all metrics"""
 
-    global metrics
+    global METRICS
 
-    if (time.time() - metrics['time']) > metrics_cache_max:
+    if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
         # get raw metric data
-        io = os.popen(params['stats_command'])
+        io = os.popen(PARAMS['stats_command'])
 
         # convert to list
         metrics_list = io.readlines()
 
-        metrics['time'] = time.time()
+        METRICS['time'] = time.time()
         for line in metrics_list:
             (name, value) = line.strip().split()
-            metrics['values'][name] = value
+            METRICS['values'][name] = value
 
-    return metrics
+    return METRICS
 
 
-# return a value for the requested metric
 def get_value(name):
+    """Return a value for the requested metric"""
 
     metrics = get_metrics()
 
     try:
-        name = name[len(name_prefix):] # remove prefix from name
+        name = name[len(NAME_PREFIX):] # remove prefix from name
         result = metrics['values'][name]
     except KeyError:
         result = 0
@@ -53,23 +54,23 @@ def get_value(name):
     return result
 
 
-# return change over time for the requested metric
 def get_delta(name):
+    """Return change over time for the requested metric"""
 
-    global delta_metrics
+    global DELTA_METRICS
 
     # get current metrics
     curr_metrics = get_metrics()
 
     # get delta
     try:
-        name = name[len(name_prefix):] # remove prefix from name
-        delta = (float(curr_metrics['values'][name]) - float(delta_metrics[name]['value']))/(curr_metrics['time'] - delta_metrics[name]['time'])
+        name = name[len(NAME_PREFIX):] # remove prefix from name
+        delta = (float(curr_metrics['values'][name]) - float(DELTA_METRICS[name]['value']))/(curr_metrics['time'] - DELTA_METRICS[name]['time'])
     except KeyError:
         delta = 0
 
     # update last metrics
-    delta_metrics[name] = {
+    DELTA_METRICS[name] = {
         'value' : get_metrics()['values'][name],
         'time'  : get_metrics()['time']
     }
@@ -77,21 +78,21 @@ def get_delta(name):
     return delta
 
 
-# initialize metric descriptors
 def metric_init(lparams):
+    """Initialize metric descriptors"""
 
-    global params
+    global PARAMS
 
     # set parameters
     for key in lparams:
-        params[key] = lparams[key]
+        PARAMS[key] = lparams[key]
 
     # define descriptors
     time_max = 60
     groups = 'tokyo tyrant'
     descriptors = [
         {
-            'name': name_prefix + 'rnum',
+            'name': NAME_PREFIX + 'rnum',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
@@ -102,7 +103,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'size',
+            'name': NAME_PREFIX + 'size',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'double',
@@ -113,7 +114,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'delay',
+            'name': NAME_PREFIX + 'delay',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'float',
@@ -124,7 +125,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_put',
+            'name': NAME_PREFIX + 'cnt_put',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -135,7 +136,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_out',
+            'name': NAME_PREFIX + 'cnt_out',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -146,7 +147,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_get',
+            'name': NAME_PREFIX + 'cnt_get',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -157,7 +158,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_put_miss',
+            'name': NAME_PREFIX + 'cnt_put_miss',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -168,7 +169,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_out_miss',
+            'name': NAME_PREFIX + 'cnt_out_miss',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -179,7 +180,7 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': name_prefix + 'cnt_get_miss',
+            'name': NAME_PREFIX + 'cnt_get_miss',
             'call_back': get_delta,
             'time_max': time_max,
             'value_type': 'float',
@@ -194,8 +195,9 @@ def metric_init(lparams):
     return descriptors
 
 
-# cleanup
 def metric_cleanup():
+    """Cleanup"""
+
     pass
 
 
