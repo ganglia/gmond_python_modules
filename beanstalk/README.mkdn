@@ -16,7 +16,7 @@ This module connects to a [beanstalkd](http://kr.github.com/beanstalkd/) instanc
  * job-timeouts
  * cmd-bury
  
- In addition is grabs the following metrics about individual tubes:
+ In addition it grabs the following metrics about individual tubes:
  
  * total-jobs
  * current-watching
