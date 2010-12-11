@@ -15,7 +15,17 @@ This module connects to a [beanstalkd](http://kr.github.com/beanstalkd/) instanc
  * current-waiting
  * job-timeouts
  * cmd-bury
+ 
+ In addition is grabs the following metrics about individual tubes:
+ 
+ * total-jobs
+ * current-watching
+ * current-jobs-buried
+ * current-jobs-ready
+ * current-waiting
+ 
+ It should be fairly easy to add a custom metric
 
 ## AUTHOR
 
-Stephen Holiday <stephen.holiday@gmail.com>
+[Stephen Holiday](http://stephenholiday.com) <stephen.holiday@gmail.com>
