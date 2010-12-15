@@ -17,6 +17,9 @@ modules {
     param apache_bin {
       value = '/usr/sbin/httpd'
     }
+    param apache_user {
+      value = 'apache'
+    }
     param get_extended {
       value = True
     }

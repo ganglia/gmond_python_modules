@@ -132,7 +132,7 @@ def update_stats():
 	# only measure the children, not the parent Apache process
 	try:
 		logging.debug(' updating avg_worker_size')
-		p = subprocess.Popen("ps -u apache -o rss,args | awk '/" + APACHE_BIN + "/ {sum+=$1; ++n} END {printf(\"%d\", sum/n)}'", shell=True, stdout=subprocess.PIPE)
+		p = subprocess.Popen("ps -u" + APACHE_USER + " -o rss,args | awk '/" + APACHE_BIN + "/ {sum+=$1; ++n} END {printf(\"%d\", sum/n)}'", shell=True, stdout=subprocess.PIPE)
 		out, err = p.communicate()
 		logging.debug('  result: ' + out)
 
@@ -272,13 +272,14 @@ def get_server_stat(name):
 def metric_init(params):
 	global descriptors
 
-	global STATUS_URL, APACHE_CONF, APACHE_CTL, APACHE_BIN
+	global STATUS_URL, APACHE_CONF, APACHE_CTL, APACHE_BIN, APACHE_USER
 	global REPORT_EXTENDED, REPORT_PREFORK
 
 	STATUS_URL	= params.get('status_url')
 	APACHE_CONF	= params.get('apache_conf')
 	APACHE_CTL	= params.get('apache_ctl').replace('/','\/')
 	APACHE_BIN	= params.get('apache_bin').replace('/','\/')
+        APACHE_USER     = params.get('apache_user')
 	REPORT_EXTENDED = str(params.get('get_extended', True)) == 'True'
 	REPORT_PREFORK	 = str(params.get('get_prefork', True)) == 'True'
 
@@ -414,6 +415,7 @@ if __name__ == '__main__':
 	parser.add_option('-a', '--apache-conf', dest='apache_conf', default='/etc/httpd/conf/httpd.conf', help='path to httpd.conf')
 	parser.add_option('-t', '--apache-ctl', dest='apache_ctl', default='/usr/sbin/apachectl', help='path to apachectl')
 	parser.add_option('-d', '--apache-bin', dest='apache_bin', default='/usr/sbin/httpd', help='path to httpd')
+	parser.add_option('-u', '--apache-user', dest='apache_user', default='apache', help='username that runs httpd')        
 	parser.add_option('-e', '--extended', dest='get_extended', action='store_true', default=False)
 	parser.add_option('-p', '--prefork', dest='get_prefork', action='store_true', default=False)
 	parser.add_option('-b', '--gmetric-bin', dest='gmetric_bin', default='/usr/bin/gmetric', help='path to gmetric binary')
@@ -428,6 +430,7 @@ if __name__ == '__main__':
 		'apache_conf': options.apache_conf,
 		'apache_ctl': options.apache_ctl,
 		'apache_bin': options.apache_bin,
+                'apache_user': options.apache_user,
 		'get_extended': options.get_extended,
 		'get_prefork': options.get_prefork
 	})
