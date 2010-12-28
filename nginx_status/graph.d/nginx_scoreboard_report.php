@@ -1,4 +1,8 @@
 <?php
+/*
+ * Graphs take from the mysql-cacti-templates project:
+ * http://code.google.com/p/mysql-cacti-templates/wiki/NginxTemplates
+ */
 
 /* Pass in by reference! */
 function graph_nginx_scoreboard_report ( &$rrdtool_graph ) {

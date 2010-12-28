@@ -1,10 +1,5 @@
 ###  This script reports nginx status stub metrics to ganglia.
-###
-###  Inspired by Jamie Isaacs' httpd module and graphs from 
-###  the mysql-cacti-templates project
-###
 
-###  Copyright OneScreen. 2010
 ###  License to use, modify, and distribute under the GPL
 ###  http://www.gnu.org/licenses/gpl.txt
 import logging
@@ -17,7 +12,7 @@ import time
 import traceback
 import urllib2
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 logging.debug('starting up')
 
 _Worker_Thread = None
@@ -30,15 +25,7 @@ class UpdateNginxThread(threading.Thread):
         self.running = False
         self.shuttingdown = False
         self.refresh_rate = int(params['refresh_rate'])
-        self.metrics = {
-            'nginx_server_version':0,
-            'nginx_active_connections':0,
-            'nginx_accepts':0,
-            'nginx_handled':0,
-            'nginx_requests':0,
-            'nginx_reading':0,
-            'nginx_writing':0,
-            'nginx_waiting':0}
+        self.metrics = {}
         self.status_url = params['status_url']
         self.nginx_bin = params['nginx_bin']
 
@@ -214,14 +201,7 @@ def metric_init(params):
     for name, desc in descriptions.iteritems():
         d = desc.copy()
         d['name'] = str(name)
-        d.setdefault('time_max', METRIC_DEFAULTS['time_max'])
-        d.setdefault('units', METRIC_DEFAULTS['units'])
-        d.setdefault('groups', METRIC_DEFAULTS['groups'])
-        d.setdefault('slope', METRIC_DEFAULTS['slope'])
-        d.setdefault('value_type', METRIC_DEFAULTS['value_type'])
-        d.setdefault('format', METRIC_DEFAULTS['format'])
-        d.setdefault('description', METRIC_DEFAULTS['description'])
-        d.setdefault('call_back', METRIC_DEFAULTS['call_back'])
+        [ d.setdefault(key, METRIC_DEFAULTS[key]) for key in METRIC_DEFAULTS.iterkeys() ]
         descriptors.append(d)
 
     return descriptors

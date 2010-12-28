@@ -1,7 +1,11 @@
 <?php
+/*
+ * Graphs take from the mysql-cacti-templates project:
+ * http://code.google.com/p/mysql-cacti-templates/wiki/NginxTemplates
+ */
 
 /* Pass in by reference! */
-function graph_nginx_accepted_ratio_report ( &$rrdtool_graph ) {
+function graph_nginx_accepts_ratio_report ( &$rrdtool_graph ) {
 
     global $context,
            $hostname,
@@ -14,7 +18,7 @@ function graph_nginx_accepted_ratio_report ( &$rrdtool_graph ) {
        $hostname = strip_domainname($hostname);
     }
 
-    $title = 'Nginx Accept Ratio';
+    $title = 'Nginx Accepts Ratio';
     if ($context != 'host') {
        $rrdtool_graph['title'] = $title;
     } else {
