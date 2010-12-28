@@ -1,0 +1,75 @@
+#
+
+modules {
+  module {
+    name = 'nginx_status'
+    language = 'python'
+
+    param status_url {
+      value = 'http://localhost/nginx_status'
+    }
+    param nginx_bin {
+      value = '/usr/sbin/nginx'
+    }
+    param refresh_rate {
+      value = '15'
+    }
+  }
+}
+
+collection_group {
+  collect_once = yes
+  time_threshold = 20
+
+  metric {
+    name = 'nginx_server_version'
+    title = "Nginx Version"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+
+  metric {
+    name = "nginx_active_connections"
+    title = "Total Active Connections"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_accepts"
+    title = "Total Connections Accepted"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_handled"
+    title = "Total Connections Handled"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_requests"
+    title = "Total Requests"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_reading"
+    title = "Connections Reading"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_writing"
+    title = "Connections Writing"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "nginx_waiting"
+    title = "Connections Waiting"
+    value_threshold = 1.0
+  }
+}

@@ -1,0 +1,81 @@
+#
+
+modules {
+  module {
+    name = 'php_fpm'
+    language = 'python'
+
+    param host {
+        value = 'localhost'
+    }
+
+    param port {
+        value = '9000'
+    }
+
+    param status_path {
+      value = '/status'
+    }
+
+    param php_fpm_bin {
+      value = '/usr/sbin/php5-fpm'
+    }
+
+    param refresh_rate {
+      value = '15'
+    }
+
+    param prefix {
+      value = 'php_fpm_'
+    }
+  }
+}
+
+collection_group {
+  collect_once = yes
+  time_threshold = 20
+
+  metric {
+    name = 'php_fpm_server_version'
+    title = "PHP-FPM Version"
+  }
+
+  metric {
+    name = 'php_fpm_pool_name'
+    title = "PHP-FPM Pool Name"
+  }
+
+  metric {
+    name = 'php_fpm_process_manager'
+    title = "PHP-FPM Process Manager"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+
+  metric {
+    name = 'php_fpm_accepted_connections'
+    title = "PHP-FPM Total Accepted Connections"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'php_fpm_active_processes'
+    title = "PHP-FPM Active Processes"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'php_fpm_idle_processes'
+    title = "PHP-FPM Idle Processes"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'php_fpm_total_processes'
+    title = "PHP-FPM Total Processes"
+    value_threshold = 1.0
+  }
+}
