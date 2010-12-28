@@ -32,43 +32,43 @@ collection_group {
   time_threshold = 20
 
   metric {
-    name = 'nginx_active_connections'
+    name = "nginx_active_connections"
     title = "Total Active Connections"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_accepts'
-    title = "Total Requests Accepted"
+    name = "nginx_accepts"
+    title = "Total Connections Accepted"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_handled'
-    title = "Total Requests Handled"
+    name = "nginx_handled"
+    title = "Total Connections Handled"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_requests'
-    title = "Total Requests Fulfilled"
+    name = "nginx_requests"
+    title = "Total Requests"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_reading'
+    name = "nginx_reading"
     title = "Connections Reading"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_writing'
+    name = "nginx_writing"
     title = "Connections Writing"
     value_threshold = 1.0
   }
 
   metric {
-    name = 'nginx_waiting'
+    name = "nginx_waiting"
     title = "Connections Waiting"
     value_threshold = 1.0
   }
