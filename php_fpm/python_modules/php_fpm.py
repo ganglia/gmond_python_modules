@@ -259,15 +259,15 @@ class UpdatePhpFpmThread(threading.Thread):
                             logging.warning('skipped metric: %s = %s' % (k, v))
 
                 except:
-                    logging.warning('error refreshing stats for port ' + str(port))
+                    logging.warning('error refreshing metrics for port ' + str(port))
                     logging.warning(traceback.print_exc(file=sys.stdout))
                     return False
 
                 if not self.metrics:
-                    logging.warning('error refreshing stats for port ' + str(port))
+                    logging.warning('error refreshing metrics for port ' + str(port))
                     return False
 
-                logging.debug('success refreshing stats for port ' + str(port))
+                logging.debug('success refreshing metrics for port ' + str(port))
                 logging.debug('metrics(' + str(port) + '): ' + str(self.metrics))
         finally:
             self._metrics_lock.release()
@@ -293,13 +293,13 @@ class UpdatePhpFpmThread(threading.Thread):
 
                 self.settings[key] = line
         except:
-            logging.warning('error refreshing stats (server_version)')
+            logging.warning('error refreshing settings')
             return False
         finally:
             self._settings_lock.release()
 
-        logging.debug('success refreshing server stats')
-        logging.debug('server_settings: ' + str(self.settings))
+        logging.debug('success refreshing server settings')
+        logging.debug('settings: ' + str(self.settings))
 
         return True
 
