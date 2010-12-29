@@ -107,7 +107,7 @@ def get_globalLock_ratio(name):
     return result
 
 
-def indexCounters_btree_missRatio(name):
+def indexCounters_btree_miss_ratio(name):
     """Return the btree miss ratio"""
 
     try:
@@ -264,8 +264,8 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': NAME_PREFIX + 'indexCounters_btree_missRatio',
-            'call_back': indexCounters_btree_missRatio,
+            'name': NAME_PREFIX + 'indexCounters_btree_miss_ratio',
+            'call_back': indexCounters_btree_miss_ratio,
             'time_max': time_max,
             'value_type': 'float',
             'units': '%',
