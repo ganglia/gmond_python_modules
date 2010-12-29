@@ -16,7 +16,6 @@ logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(leve
 logging.debug('starting up')
 
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
 
 class UpdateNginxThread(threading.Thread):
 
@@ -26,8 +25,11 @@ class UpdateNginxThread(threading.Thread):
         self.shuttingdown = False
         self.refresh_rate = int(params['refresh_rate'])
         self.metrics = {}
+        self.settings = {}
         self.status_url = params['status_url']
         self.nginx_bin = params['nginx_bin']
+        self._metrics_lock = threading.Lock()
+        self._settings_lock = threading.Lock()
 
     def shutdown(self):
         self.shuttingdown = True
@@ -41,14 +43,13 @@ class UpdateNginxThread(threading.Thread):
         self.running = True
 
         while not self.shuttingdown:
-            _Lock.acquire()
-            self.refresh_metrics()
-            _Lock.release()
             time.sleep(self.refresh_rate)
+            self.refresh_metrics()
 
         self.running = False
 
-    def get_nginx_status_stub_response(self, url):
+    @staticmethod
+    def _get_nginx_status_stub_response(url):
         c = urllib2.urlopen(url)
         data = c.read()
         c.close()
@@ -78,67 +79,100 @@ class UpdateNginxThread(threading.Thread):
         logging.debug('refresh metrics')
 
         try:
-            self.metrics = {}
             logging.debug(' opening URL: ' + str(self.status_url))
 
-            data = self.get_nginx_status_stub_response(self.status_url)
+            data = UpdateNginxThread._get_nginx_status_stub_response(self.status_url)
+        except:
+            logging.warning('error refreshing metrics')
+            logging.warning(traceback.print_exc(file=sys.stdout))
+
+        try:
+            self._metrics_lock.acquire()
+            self.metrics = {}
 
             for k, v in data.items():
                 self.metrics[k] = v
         except:
-            logging.warning('error refreshing stats')
+            logging.warning('error refreshing metrics')
             logging.warning(traceback.print_exc(file=sys.stdout))
             return False
+        finally:
+            self._metrics_lock.release()
 
         if not self.metrics:
-            logging.warning('error refreshing stats')
+            logging.warning('error refreshing metrics')
             return False
 
-        logging.debug('success refreshing stats')
+        logging.debug('success refreshing metrics')
         logging.debug('metrics: ' + str(self.metrics))
 
         return True
 
-    def refresh_server_settings(self):
-        logging.debug(' refreshing nginx_server_version')
+    def refresh_settings(self):
+        logging.debug(' refreshing server settings')
 
         try:
             p = subprocess.Popen(executable=self.nginx_bin, args=[self.nginx_bin, '-v'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = p.communicate()
+        except:
+            logging.warning('error refreshing settings')
+            return False
 
+        try:
+            self._settings_lock.acquire()
+            self.settings = {}
             for line in err.split('\n'):
-                if 'nginx version:' in line:
-                    key = 'nginx_server_version'
+                if line.startswith('nginx version:'):
+                    key = "nginx_server_version"
                 else:
                     continue
 
-                line = line.split(': ')
                 logging.debug('  line: ' + str(line))
 
-                if len(line) == 2:
-                    self.metrics[key] = line[1]
-        except:
-            logging.warning('error refreshing stats (server_version)')
-            return False
+                line = line.split(': ')
 
-        logging.debug('success refreshing server stats')
-        logging.debug('server_settings: ' + str(self.metrics))
+                if len(line) > 1:
+                    self.settings[key] = line[1]
+        except:
+            logging.warning('error refreshing settings')
+            return False
+        finally:
+            self._settings_lock.release()
+
+        logging.debug('success refreshing server settings')
+        logging.debug('settings: ' + str(self.settings))
 
         return True
 
     def metric_of(self, name):
-        logging.debug('getting stat: ' + name)
-        global _Lock
+        logging.debug('getting metric: ' + name)
 
-        if name in self.metrics:
-            try:
-                _Lock.acquire()
-                return self.metrics[name]
-            except:
-                logging.warning('failed to fetch ' + name)
-                return 0
-            finally:
-                _Lock.release()
+        try:
+            if name in self.metrics:
+                try:
+                    self._metrics_lock.acquire()
+                    logging.debug('metric: %s = %s' % (name, self.metrics[name]))
+                    return self.metrics[name]
+                finally:
+                    self._metrics_lock.release()
+        except:
+            logging.warning('failed to fetch ' + name)
+            return 0
+
+    def setting_of(self, name):
+        logging.debug('getting setting: ' + name)
+
+        try:
+            if name in self.settings:
+                try:
+                    self._settings_lock.acquire()
+                    logging.debug('setting: %s = %s' % (name, self.settings[name]))
+                    return self.settings[name]
+                finally:
+                    self._settings_lock.release()
+        except:
+            logging.warning('failed to fetch ' + name)
+            return 0
 
 def metric_init(params):
     logging.debug('init: ' + str(params))
@@ -161,6 +195,7 @@ def metric_init(params):
             'units': '',
             'format': '%s',
             'slope': 'zero',
+            'call_back': setting_of,
             'description': 'Nginx version number'},
 
         nginx_active_connections={
@@ -192,9 +227,9 @@ def metric_init(params):
         raise Exception('Worker thread already exists')
 
     _Worker_Thread = UpdateNginxThread(params)
-    _Worker_Thread.start()
     _Worker_Thread.refresh_metrics()
-    _Worker_Thread.refresh_server_settings()
+    _Worker_Thread.refresh_settings()
+    _Worker_Thread.start()
 
     descriptors = []
 
@@ -209,6 +244,10 @@ def metric_init(params):
 def metric_of(name):
     global _Worker_Thread
     return _Worker_Thread.metric_of(name)
+
+def setting_of(name):
+    global _Worker_Thread
+    return _Worker_Thread.setting_of(name)
 
 def metric_cleanup():
     global _Worker_Thread
