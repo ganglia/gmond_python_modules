@@ -1,4 +1,11 @@
 ###  This script reports php_fpm status metrics to ganglia.
+###
+###  This module can monitor multiple php-fpm pools by
+###  passing in multiple ports separated by commas into
+###  the ports parameter. If multiple ports are provided,
+###  The port will automatically be appended onto the prefix
+###  of the metric.
+###
 
 ###  License to use, modify, and distribute under the GPL
 ###  http://www.gnu.org/licenses/gpl.txt
