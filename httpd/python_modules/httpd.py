@@ -279,7 +279,7 @@ def metric_init(params):
 	APACHE_CONF	= params.get('apache_conf')
 	APACHE_CTL	= params.get('apache_ctl').replace('/','\/')
 	APACHE_BIN	= params.get('apache_bin').replace('/','\/')
-        APACHE_USER     = params.get('apache_user')
+	APACHE_USER	= params.get('apache_user')
 	REPORT_EXTENDED = str(params.get('get_extended', True)) == 'True'
 	REPORT_PREFORK	 = str(params.get('get_prefork', True)) == 'True'
 
@@ -430,7 +430,7 @@ if __name__ == '__main__':
 		'apache_conf': options.apache_conf,
 		'apache_ctl': options.apache_ctl,
 		'apache_bin': options.apache_bin,
-                'apache_user': options.apache_user,
+		'apache_user': options.apache_user,
 		'get_extended': options.get_extended,
 		'get_prefork': options.get_prefork
 	})
