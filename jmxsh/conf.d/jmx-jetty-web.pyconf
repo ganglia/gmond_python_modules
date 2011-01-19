@@ -14,6 +14,10 @@ modules {
     param name {
       value = 'jetty-web'
     }
+    # Classifies these metrics in this group in the web GUI
+    param metric_group {
+      value = 'jmx'
+    }
 
 	# org.mortbay
     param sessions {

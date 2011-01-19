@@ -1,0 +1,73 @@
+# This configuration file collects basic Java VM metrics through JMX
+
+modules {
+  module {
+    name = 'jmxsh'
+    language = 'python'
+
+    param host {
+      value = 'localhost'
+    }
+    param port {
+      value = '1099'
+    }
+    
+    param name {
+      value = 'tomcat'
+    }
+    
+    # Classifies these metrics in this group in the web GUI
+    param metric_group {
+      value = 'tomcat'
+    }
+
+    # java.lang
+    param daemon_threads { # composite data
+      value = 'java.lang:type=Threading DaemonThreadCount'
+    }
+    param thread_count {
+      value = 'java.lang:type=Threading ThreadCount'
+    }
+    param peak_thread_count {
+      value = 'java.lang:type=Threading PeakThreadCount'
+    }
+    param total_started_thread_count {
+      value = 'java.lang:type=Threading TotalStartedThreadCount'
+    }
+    param heap {
+      value = 'java.lang:type=Memory HeapMemoryUsage'
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 50
+
+  # Make sure metrics starts with jmx_
+  metric {
+    name = 'jmx_tomcat_daemon_threads'
+  }
+  metric {
+    name = 'jmx_tomcat_thread_count'
+  }
+  metric {
+    name = 'jmx_tomcat_peak_thread_count'
+  }
+  metric {
+    name = 'jmx_tomcat_total_started_thread_count'
+  }
+  metric {
+    name = 'jmx_tomcat_heap_max'
+  }
+  metric {
+    name = 'jmx_tomcat_heap_committed'
+  }
+  metric {
+    name = 'jmx_tomcat_heap_init'
+  }
+  metric {
+    name = 'jmx_tomcat_heap_used'
+  }
+}
+

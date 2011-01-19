@@ -51,6 +51,7 @@ COMP = {}
 HOST = 'localhost'
 PORT = '8887'
 NAME = PORT
+METRIC_GROUP = 'jmx'
 
 MAX_UPDATE_TIME = 15
 JMXSH = '/usr/share/java/jmxsh.jar'
@@ -203,7 +204,7 @@ def get_stat(name):
 
 def metric_init(params):
 	global descriptors
-	global METRICS,HOST,PORT,NAME
+	global METRICS,HOST,PORT,NAME,METRIC_GROUP
 
 	logging.debug('init: ' + str(params))
 
@@ -211,6 +212,7 @@ def metric_init(params):
 		HOST = params.pop('host')
 		PORT = params.pop('port')
 		NAME = params.pop('name')
+		METRIC_GROUP = params.pop('metric_group')
 		
 	except:
 		logging.warning('Incorrect parameters')
@@ -251,7 +253,7 @@ def metric_init(params):
 				'format': '%u',
 				'slope': 'both',
 				'description': label,
-				'groups': 'jmx'
+				'groups': METRIC_GROUP
 			}
 
 			# Apply metric customizations from descriptions
