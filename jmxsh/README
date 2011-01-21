@@ -28,3 +28,18 @@ Also try running gmond with debug e.g.
 # gmond -d 5
 
 make sure output is clean
+
+Enabling JMX
+============
+
+To enable the JMX interface in your servlet container (tomcat, jetty-web, et al.) add the 
+following options to the JAVA_OPTS environment variable defined in the rc startup script:
+
+-Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.port=8887  \ 
+  -Dcom.sun.management.jmxremote.ssl=false  -Dcom.sun.management.jmxremote.authenticate=false
+
+For instance, here's what JAVA_OPTS looks like in our /etc/init.d/tomcat-55 file:
+
+export JAVA_OPTS='-server -Xmx256M -XX:MaxPermSize=256m -Dsun.net.inetaddr.ttl=300 \ 
+-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8887 \
+-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false'
