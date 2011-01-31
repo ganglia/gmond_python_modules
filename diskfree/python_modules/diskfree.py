@@ -26,7 +26,8 @@ def metric_handler(name):
     except OSError:
         return 0
 
-    return (disk.f_bavail * disk.f_frsize) / 1024000000
+    # We want metric to be in Gigabytes
+    return (disk.f_bavail * disk.f_frsize) / 1073741824.0
 
 
 def metric_init(lparams):
