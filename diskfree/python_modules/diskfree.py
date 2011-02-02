@@ -26,7 +26,11 @@ def metric_handler(name):
     except OSError:
         return 0
 
-    return (disk.f_bavail * disk.f_frsize) / 1024000000
+    # We want metric to be in Gigabytes
+    return (disk.f_bavail * disk.f_frsize) / 1073741824.0
+
+    # TODO: Remaining percentage
+    # print ( 100.0 * disk.f_bavail)  / disk.f_blocks
 
 
 def metric_init(lparams):
@@ -60,7 +64,7 @@ def metric_init(lparams):
                 'name': NAME_PREFIX + path_key,
                 'call_back': metric_handler,
                 'time_max': 60,
-                'value_type': 'uint',
+                'value_type': 'float',
                 'units': 'GB',
                 'slope': 'both',
                 'format': '%u',

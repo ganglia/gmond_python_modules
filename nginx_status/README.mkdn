@@ -1,0 +1,30 @@
+nginx_status
+===============
+
+python module for ganglia 3.1.
+
+"nginx_status" send metrics on nginx's [status stub module](http://wiki.nginx.org/HttpStubStatusModule).
+
+## Metrics
+ * nginx_server_version
+ * nginx_active_connections
+ * nginx_accepts
+ * nginx_handled
+ * nginx_requests
+ * nginx_reading
+ * nginx_writing
+ * nginx_waiting
+
+## Params
+ * status_url (The url to query for nginx status. Default: 'http://localhost/nginx_status')
+ * nginx_bin (The full path to the nginx binary. Default '/usr/sbin/nginx')
+ * refresh_rate (The time in seconds between polling nginx. Default: 15)
+
+## NOTES
+ * This has only been tested on python 2.6.5 on Ubuntu 10.04.
+ * Ensure that the status stub module is setup correctly when using this module.
+
+## AUTHOR
+
+Patrick Ting <pcting@gmail.com>
+
