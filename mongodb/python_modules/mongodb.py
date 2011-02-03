@@ -1,23 +1,38 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+################################################################################
+# MongoDB gmond module for Ganglia
+# Copyright (c) 2011 Michael T. Conigliaro <mike [at] conigliaro [dot] org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+################################################################################
 
 import json
 import os
 import re
-import sys
 import time
 
 
 NAME_PREFIX = 'mongodb_'
 PARAMS = {
-    'stats_command' : 'mongo --quiet --eval "printjson(db.serverStatus())"'
+    'stats_command' : 'ssh mongodb04.example.com mongo --quiet --eval "printjson\(db.serverStatus\(\)\)"'
 }
 METRICS = {
-    'time'   : 0,
-    'values' : {}
+    'time' : 0,
+    'data' : {}
 }
-DELTA_METRICS = {}
+LAST_METRICS = dict(METRICS)
 METRICS_CACHE_MAX = 1
 
 
@@ -36,7 +51,7 @@ def flatten(d, pre = '', sep = '_'):
 def get_metrics():
     """Return all metrics"""
 
-    global METRICS
+    global METRICS, LAST_METRICS
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
@@ -48,25 +63,30 @@ def get_metrics():
         metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str) # remove functions
 
         # convert to flattened dict
-        fresh_metrics = flatten(json.loads(metrics_str))
+        try:
+            metrics = flatten(json.loads(metrics_str))
+        except ValueError:
+            metrics = {}
 
         # update cache
-        METRICS['time'] = time.time()
-        for name,value in fresh_metrics.items():
-            METRICS['values'][name] = value
+        LAST_METRICS = dict(METRICS)
+        METRICS = {
+            'time': time.time(),
+            'data': metrics
+        }
 
-    return METRICS
+    return [METRICS, LAST_METRICS]
 
 
 def get_value(name):
     """Return a value for the requested metric"""
 
-    metrics = get_metrics()
+    metrics = get_metrics()[0]
 
+    name = name[len(NAME_PREFIX):] # remove prefix from name
     try:
-        name = name[len(NAME_PREFIX):] # remove prefix from name
-        result = metrics['values'][name]
-    except KeyError:
+        result = metrics['data'][name]
+    except StandardError:
         result = 0
 
     return result
@@ -75,23 +95,17 @@ def get_value(name):
 def get_delta(name):
     """Return change over time for the requested metric"""
 
-    global DELTA_METRICS
-
-    # get current metrics
-    curr_metrics = get_metrics()
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
 
     # get delta
+    name = name[len(NAME_PREFIX):] # remove prefix from name
     try:
-        name = name[len(NAME_PREFIX):] # remove prefix from name
-        delta = (curr_metrics['values'][name] - DELTA_METRICS[name]['value'])/(curr_metrics['time'] - DELTA_METRICS[name]['time'])
-    except KeyError:
+        delta = (curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
+        if delta < 0:
+            delta = 0
+    except StandardError:
         delta = 0
-
-    # update last metrics
-    DELTA_METRICS[name] = {
-        'value' : get_metrics()['values'][name],
-        'time'  : get_metrics()['time']
-    }
 
     return delta
 
@@ -138,7 +152,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Inserts',
             'groups': groups
         },
@@ -149,7 +163,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Queries',
             'groups': groups
         },
@@ -160,7 +174,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Updates',
             'groups': groups
         },
@@ -171,7 +185,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Deletes',
             'groups': groups
         },
@@ -182,7 +196,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Get mores',
             'groups': groups
         },
@@ -193,7 +207,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Commands',
             'groups': groups
         },
@@ -204,7 +218,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Flushes',
             'groups': groups
         },
@@ -248,7 +262,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': 'Ops/Sec',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Page Faults',
             'groups': groups
         },
@@ -259,7 +273,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': '%',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'Global Write Lock Ratio',
             'groups': groups
         },
@@ -270,7 +284,7 @@ def metric_init(lparams):
             'value_type': 'float',
             'units': '%',
             'slope': 'both',
-            'format': '%.0f',
+            'format': '%f',
             'description': 'BTree Page Miss Ratio',
             'groups': groups
         },
@@ -331,9 +345,9 @@ def metric_cleanup():
 
 # the following code is for debugging and testing
 if __name__ == '__main__':
-    descriptors = metric_init({'stats_command': 'ssh mongodb.example.com mongo --quiet --eval "printjson\(db.serverStatus\(\)\)"'})
+    descriptors = metric_init(PARAMS)
     while True:
         for d in descriptors:
-            print '%s = %s' % (d['name'], d['call_back'](d['name']))
-        print "\n"
-        time.sleep(10)
+            print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
+        print ''
+        time.sleep(1)

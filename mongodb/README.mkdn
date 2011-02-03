@@ -26,4 +26,4 @@ This module parses output from the db.serverStatus() command and creates
 
 ## AUTHOR
 
-Author: Michael Conigliaro &lt;mike [at] conigliaro [dot] org&gt;
+Author: Michael T. Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

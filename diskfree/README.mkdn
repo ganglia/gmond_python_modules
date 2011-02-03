@@ -5,7 +5,10 @@ Python module for ganglia 3.1.
 
 This module reads a list of mountpoints from the "mounts" parameter (probably
 /proc/mounts) and creates a "disk_free_*" metric for each mountpoint it finds.
+The "value_type" paramater determines whether the value is returned in
+absolute units (GB) or as a percentage (i.e. value_type = "absolute" or
+"percent")
 
 ## AUTHOR
 
-Author: Michael Conigliaro &lt;mike [at] conigliaro [dot] org&gt;
+Author: Michael T. Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ################################################################################
-# Tokyo Tyrant gmond module for Ganglia
+# Varnish gmond module for Ganglia
 # Copyright (c) 2011 Michael T. Conigliaro <mike [at] conigliaro [dot] org>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -22,9 +22,9 @@ import os
 import time
 
 
-NAME_PREFIX = 'tokyo_tyrant_'
+NAME_PREFIX = 'varnish_'
 PARAMS = {
-    'stats_command' : 'ssh legacy02.example.com /srv/tokyo/bin/tcrmgr inform -st localhost'
+    'stats_command' : 'ssh varnish01.example.com varnishstat -1'
 }
 METRICS = {
     'time' : 0,
@@ -47,11 +47,8 @@ def get_metrics():
         # convert to dict
         metrics = {}
         for line in io.readlines():
-            values = line.split()
-            try:
-                metrics[values[0]] = float(values[1])
-            except ValueError:
-                metrics[values[0]] = values[1]
+            values = line.split()[:2]
+            metrics[values[0]] = int(values[1])
 
         # update cache
         LAST_METRICS = dict(METRICS)
@@ -95,6 +92,17 @@ def get_delta(name):
     return delta
 
 
+def get_cache_hit_ratio(name):
+    """Return cache hit ratio"""
+
+    try:
+        result = get_delta(NAME_PREFIX + 'cache_hit') / get_delta(NAME_PREFIX + 'client_req') * 100
+    except ZeroDivisionError:
+        result = 0
+
+    return result
+
+
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
@@ -106,105 +114,72 @@ def metric_init(lparams):
 
     # define descriptors
     time_max = 60
-    groups = 'tokyo tyrant'
+    groups = 'varnish'
     descriptors = [
         {
-            'name': NAME_PREFIX + 'rnum',
+            'name': NAME_PREFIX + 'client_req',
+            'call_back': get_delta,
+            'time_max': time_max,
+            'value_type': 'float',
+            'units': 'Ops/Sec',
+            'slope': 'both',
+            'format': '%f',
+            'description': 'Client Requests',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'backend_req',
+            'call_back': get_delta,
+            'time_max': time_max,
+            'value_type': 'float',
+            'units': 'Ops/Sec',
+            'slope': 'both',
+            'format': '%f',
+            'description': 'Backend Requests',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'cache_hit_ratio',
+            'call_back': get_cache_hit_ratio,
+            'time_max': time_max,
+            'value_type': 'float',
+            'units': '%',
+            'slope': 'both',
+            'format': '%f',
+            'description': 'Cache Hit Ratio',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'n_object',
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
-            'units': 'Records',
+            'units': 'Objects',
             'slope': 'both',
             'format': '%u',
-            'description': 'Record Number',
+            'description': 'Objects in Cache',
             'groups': groups
         },
         {
-            'name': NAME_PREFIX + 'size',
+            'name': NAME_PREFIX + 'sm_balloc',
             'call_back': get_value,
             'time_max': time_max,
-            'value_type': 'double',
+            'value_type': 'uint',
             'units': 'Bytes',
             'slope': 'both',
-            'format': '%f',
-            'description': 'File Size',
+            'format': '%u',
+            'description': 'Allocated Storage',
             'groups': groups
         },
         {
-            'name': NAME_PREFIX + 'delay',
+            'name': NAME_PREFIX + 'n_wrk',
             'call_back': get_value,
             'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Secs',
+            'value_type': 'uint',
+            'units': 'Threads',
             'slope': 'both',
-            'format': '%f',
-            'description': 'Replication Delay',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_put',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Put Operations',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_out',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Out Operations',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_get',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Get Operations',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_put_miss',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Put Operations Missed',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_out_miss',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Out Operations Missed',
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'cnt_get_miss',
-            'call_back': get_delta,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Ops/Sec',
-            'slope': 'both',
-            'format': '%f',
-            'description': 'Get Operations Missed',
+            'format': '%u',
+            'description': 'Worker Threads',
             'groups': groups
         }
     ]

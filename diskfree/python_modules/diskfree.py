@@ -1,17 +1,34 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+################################################################################
+# Disk Free gmond module for Ganglia
+# Copyright (c) 2011 Michael T. Conigliaro <mike [at] conigliaro [dot] org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+################################################################################
 
 import os
 
 
 NAME_PREFIX = 'disk_free_'
 PARAMS = {
-    'mounts' : '/proc/mounts'
+    'mounts'    : '/proc/mounts',
+    'unit_type' : 'absolute' # 'absolute' or 'percent'
 }
 
 
-def metric_handler(name):
+def get_value(name):
     """Return a value for the requested metric"""
 
     # parse path from name
@@ -23,14 +40,18 @@ def metric_handler(name):
     # get fs stats
     try:
         disk = os.statvfs(path)
+        if PARAMS['unit_type'] == 'percent':
+            result = (float(disk.f_bavail) / float(disk.f_blocks)) * 100
+        else:
+            result = (disk.f_bavail * disk.f_frsize) / float(2**30) # GB
+
     except OSError:
-        return 0
+        result = 0
 
-    # We want metric to be in Gigabytes
-    return (disk.f_bavail * disk.f_frsize) / 1073741824.0
+    except ZeroDivisionError:
+        result = 0
 
-    # TODO: Remaining percentage
-    # print ( 100.0 * disk.f_bavail)  / disk.f_blocks
+    return result
 
 
 def metric_init(lparams):
@@ -46,7 +67,7 @@ def metric_init(lparams):
     try:
         f = open(PARAMS['mounts'])
     except IOError:
-        return 0
+        f = []
 
     # parse mounts and create descriptors
     descriptors = []
@@ -62,12 +83,12 @@ def metric_init(lparams):
 
             descriptors.append({
                 'name': NAME_PREFIX + path_key,
-                'call_back': metric_handler,
+                'call_back': get_value,
                 'time_max': 60,
                 'value_type': 'float',
-                'units': 'GB',
+                'units': '%' if PARAMS['unit_type'] == 'percent' else 'GB',
                 'slope': 'both',
-                'format': '%u',
+                'format': '%f',
                 'description': "Disk space available on %s" % mount_info[1],
                 'groups': 'disk'
             })
@@ -83,6 +104,6 @@ def metric_cleanup():
 
 # the following code is for debugging and testing
 if __name__ == '__main__':
-    descriptors = metric_init({'mounts': '/proc/mounts'})
+    descriptors = metric_init(PARAMS)
     for d in descriptors:
-        print '%s = %s' % (d['name'], d['call_back'](d['name']))
+        print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
