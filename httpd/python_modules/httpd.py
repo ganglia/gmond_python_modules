@@ -411,7 +411,7 @@ if __name__ == '__main__':
 
 	logging.debug('running from cmd line')
 	parser = OptionParser()
-	parser.add_option('-u', '--URL', dest='status_url', default='http://localhost/server-status?auto', help='URL for Apache status page')
+	parser.add_option('-U', '--URL', dest='status_url', default='http://localhost/server-status?auto', help='URL for Apache status page')
 	parser.add_option('-a', '--apache-conf', dest='apache_conf', default='/etc/httpd/conf/httpd.conf', help='path to httpd.conf')
 	parser.add_option('-t', '--apache-ctl', dest='apache_ctl', default='/usr/sbin/apachectl', help='path to apachectl')
 	parser.add_option('-d', '--apache-bin', dest='apache_bin', default='/usr/sbin/httpd', help='path to httpd')
