@@ -81,12 +81,17 @@ def metric_init(lparams):
             else:
                 path_key = mount_info[1][1:].replace('/', '_')
 
+            if PARAMS['unit_type'] == 'percent':
+              units = "%"  
+            else:
+              units = 'GB'
+
             descriptors.append({
                 'name': NAME_PREFIX + path_key,
                 'call_back': get_value,
                 'time_max': 60,
                 'value_type': 'float',
-                'units': '%' if PARAMS['unit_type'] == 'percent' else 'GB',
+                'units': units,
                 'slope': 'both',
                 'format': '%f',
                 'description': "Disk space available on %s" % mount_info[1],
