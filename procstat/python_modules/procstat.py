@@ -87,10 +87,10 @@
 ###        process and then find all processes with the same process
 ###        group ID (pgid). "ps" is only used for regex searching on
 ###        the initial lookup for the parent pid (ppid). Now all
-###        subsuquent calls use /proc/[pid]/stat for CPU jiffies, and
+###        subsequent calls use /proc/[pid]/stat for CPU jiffies, and
 ###        /proc/[pid]/statm for memory rss.
 ###      * Added testing switch "-t" to help troubleshoot a regex
-###      * Added display switches "-s" and "-m" to format the outup
+###      * Added display switches "-s" and "-m" to format the output
 ###        of /proc/[pid]/stat and /proc/[pid]/statm
 ###
 
