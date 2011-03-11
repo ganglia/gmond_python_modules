@@ -496,8 +496,13 @@ if __name__ == '__main__':
 			print ' %s: %s %s [%s]' % (d['name'], d['format'] % v, d['units'], d['description'])
 
 		if options.gmetric:
+			if d['value_type'] == 'uint':
+				value_type = 'uint32'
+			else:
+				value_type = d['value_type']
+
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
-				(options.gmetric_bin, options.gmond_conf, v, d['units'], d['value_type'], d['name'], d['slope'])
+				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 			os.system(cmd)
 
 
