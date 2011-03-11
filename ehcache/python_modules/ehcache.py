@@ -219,6 +219,6 @@ if __name__ == '__main__':
 
 		if options.gmetric:
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
-				(options.gmetric_bin, option.gmond_conf, v, d['units'], d['value_type'], d['name'], d['slope'])
+				(options.gmetric_bin, options.gmond_conf, v, d['units'], d['value_type'], d['name'], d['slope'])
 			os.system(cmd)
 
