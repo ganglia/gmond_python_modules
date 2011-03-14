@@ -283,6 +283,8 @@ def update_stats():
 			(ppid, pgid) = get_pgid(proc)
 		except Exception, e:
 			logging.warning(' failed getting pgid: ' + str(e))
+			stats[proc]['cpu'] = 0.0
+			stats[proc]['mem'] = 0
 			continue
 
 		# save for later
