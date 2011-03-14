@@ -38,6 +38,8 @@ import traceback, sys, re
 import tempfile
 import logging
 
+descriptors = []
+
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 #logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log2')
 logging.debug('starting up')
@@ -240,7 +242,6 @@ def metric_init(params):
 		}
 
 	time_max = 60
-	descriptors = []
 	for label in descriptions:
 		if stats.has_key(label):
 

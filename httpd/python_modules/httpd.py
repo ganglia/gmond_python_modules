@@ -42,6 +42,8 @@ import traceback
 import sys, re
 import logging
 
+descriptors = []
+
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 logging.debug('starting up')
 
@@ -361,7 +363,6 @@ def metric_init(params):
 	update_stats()
 	update_server_stats()
 
-	descriptors = []
 	for label in descriptions:
 		if httpd_stats.has_key(label):
 			d = {

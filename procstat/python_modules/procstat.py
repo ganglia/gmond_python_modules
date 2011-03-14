@@ -105,6 +105,8 @@ import os.path
 import glob
 import logging
 
+descriptors = []
+
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 logging.debug('starting up')
 
@@ -372,7 +374,6 @@ def metric_init(params):
 	)
 
 	time_max = 60
-	descriptors = []
 	for label in descriptions:
 		for proc in PROCESSES:
 			if stats[proc].has_key(label):

@@ -41,6 +41,8 @@ import subprocess
 import traceback
 import logging
 
+descriptors = []
+
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 logging.debug('starting up')
 
@@ -280,7 +282,6 @@ def metric_init(params):
 
 	update_stats()
 
-	descriptors = []
 	for label in descriptions:
 		for dev in PARTITIONS: 
 			if stats[dev].has_key(label):

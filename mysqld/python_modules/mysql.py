@@ -45,6 +45,9 @@ import MySQLdb
 from DBUtil import parse_innodb_status
 
 import logging
+
+descriptors = []
+
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
 logging.debug('starting up')
 
@@ -990,7 +993,6 @@ def metric_init(params):
 			},
 		)
 
-	descriptors = []
 	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
 
 	time.sleep(MAX_UPDATE_TIME)
