@@ -142,7 +142,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		conn.close()
 	except MySQLdb.OperationalError, (errno, errmsg):
 		logging.error('error updating stats')
-		logging.error(errormsg)
+		logging.error(errmsg)
 		return False
 
 	# process variables
