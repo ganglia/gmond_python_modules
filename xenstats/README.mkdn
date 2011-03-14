@@ -1,0 +1,21 @@
+xenstats
+===============
+
+Python module for ganglia 3.1.
+
+This module parses output from the xenserver command and creates "xen_*"
+metrics:
+
+ * xen_vms - VMs Running
+ * xen_mem - Xen Memory availability
+ * xen_cpu - Number of CPUs
+ * xen_mem_use - Memory usage
+
+## DEPENDS
+ Python Libvirt
+ libvirtd Daemon
+
+## AUTHOR
+
+Author: Marcos M. Amorim &lt;marcosmamorim@gmail.com&gt;
+
