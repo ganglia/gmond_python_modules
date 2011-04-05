@@ -31,7 +31,7 @@ This module can monitor multiple disk block devices including specific partition
 
 ## Example Graphs
 	### Data Transferred
-	<img src="examples/data_transferred.png" />
+	![Data Transferred](examples/data_transferred.png)
 
 ## AUTHOR
 
