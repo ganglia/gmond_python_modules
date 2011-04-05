@@ -29,6 +29,10 @@ This module can monitor multiple disk block devices including specific partition
 	Example value: "sda1 sda2".
 	Example value: "sda sdb sdc".
 
+## Example Graphs
+	### Data Transferred
+	<img src="examples/data_transferred.png" />
+
 ## AUTHOR
 
 Jamie Isaacs <pdt256@gmail.com>
