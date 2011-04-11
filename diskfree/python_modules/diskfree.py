@@ -18,29 +18,31 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ################################################################################
 
+import re
 import os
 
 
 NAME_PREFIX = 'disk_free_'
 PARAMS = {
-    'mounts'    : '/proc/mounts',
-    'unit_type' : 'absolute' # 'absolute' or 'percent'
+    'mounts' : '/proc/mounts'
 }
 
 
 def get_value(name):
     """Return a value for the requested metric"""
 
-    # parse path from name
-    if name == NAME_PREFIX + 'rootfs':
+    # parse unit type and path from name
+    name_parser = re.match("^%s([a-z]+)_(\w+)$" % NAME_PREFIX, name)
+    unit_type = name_parser.group(1)
+    if name_parser.group(2) == 'rootfs':
         path = '/'
     else:
-        path = '/' + name.replace(NAME_PREFIX, '').replace('_', '/')
+        path = '/' + name_parser.group(2).replace('_', '/')
 
     # get fs stats
     try:
         disk = os.statvfs(path)
-        if PARAMS['unit_type'] == 'percent':
+        if unit_type == 'percent':
             result = (float(disk.f_bavail) / float(disk.f_blocks)) * 100
         else:
             result = (disk.f_bavail * disk.f_frsize) / float(2**30) # GB
@@ -81,22 +83,19 @@ def metric_init(lparams):
             else:
                 path_key = mount_info[1][1:].replace('/', '_')
 
-            if PARAMS['unit_type'] == 'percent':
-              units = "%"  
-            else:
-              units = 'GB'
-
-            descriptors.append({
-                'name': NAME_PREFIX + path_key,
-                'call_back': get_value,
-                'time_max': 60,
-                'value_type': 'float',
-                'units': units,
-                'slope': 'both',
-                'format': '%f',
-                'description': "Disk space available on %s" % mount_info[1],
-                'groups': 'disk'
-            })
+            for unit_type in ['absolute', 'percent']:
+                units = '%' if unit_type == 'percent' else 'GB'
+                descriptors.append({
+                    'name': NAME_PREFIX + unit_type + '_' + path_key,
+                    'call_back': get_value,
+                    'time_max': 60,
+                    'value_type': 'float',
+                    'units': units,
+                    'slope': 'both',
+                    'format': '%f',
+                    'description': "Disk space available (%s) on %s" % (units, mount_info[1]),
+                    'groups': 'disk'
+                })
 
     return descriptors
 
