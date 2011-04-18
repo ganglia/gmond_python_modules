@@ -1,39 +1,49 @@
 #!/usr/bin/env python
-################################################################################
+# -*- coding: utf-8 -*-
+#
 # MongoDB gmond module for Ganglia
-# Copyright (c) 2011 Michael T. Conigliaro <mike [at] conigliaro [dot] org>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
+# Copyright (C) 2011 by Michael T. Conigliaro <mike [at] conigliaro [dot] org>.
+# All rights reserved.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-################################################################################
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
 
 import json
 import os
 import re
+import socket
+import string
 import time
 
 
 NAME_PREFIX = 'mongodb_'
 PARAMS = {
-    'stats_command' : 'ssh mongodb04.example.com mongo --quiet --eval "printjson\(db.serverStatus\(\)\)"'
+    'server_status' : 'ssh mongodb.example.com mongo --port 27018 --quiet --eval "printjson\(db.serverStatus\(\)\)"',
+    'rs_status'     : 'ssh mongodb.example.com mongo --port 27018 --quiet --eval "printjson\(rs.status\(\)\)"'
 }
 METRICS = {
     'time' : 0,
     'data' : {}
 }
 LAST_METRICS = dict(METRICS)
-METRICS_CACHE_MAX = 1
+METRICS_CACHE_TTL = 15
 
 
 def flatten(d, pre = '', sep = '_'):
@@ -53,20 +63,26 @@ def get_metrics():
 
     global METRICS, LAST_METRICS
 
-    if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
+    if (time.time() - METRICS['time']) > METRICS_CACHE_TTL:
 
-        # get raw metric data
-        io = os.popen(PARAMS['stats_command'])
+        metrics = {}
+        for status_type in PARAMS.keys():
 
-        # clean up
-        metrics_str = ''.join(io.readlines()).strip() # convert to string
-        metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str) # remove functions
+            # get raw metric data
+            io = os.popen(PARAMS[status_type])
 
-        # convert to flattened dict
-        try:
-            metrics = flatten(json.loads(metrics_str))
-        except ValueError:
-            metrics = {}
+            # clean up
+            metrics_str = ''.join(io.readlines()).strip() # convert to string
+            metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str) # remove functions
+
+            # convert to flattened dict
+            try:
+                if status_type == 'server_status':
+                    metrics.update(flatten(json.loads(metrics_str)))
+                else:
+                    metrics.update(flatten(json.loads(metrics_str), pre='%s_' % status_type))
+            except ValueError:
+                metrics = {}
 
         # update cache
         LAST_METRICS = dict(METRICS)
@@ -81,8 +97,10 @@ def get_metrics():
 def get_value(name):
     """Return a value for the requested metric"""
 
+     # get metrics
     metrics = get_metrics()[0]
 
+    # get value
     name = name[len(NAME_PREFIX):] # remove prefix from name
     try:
         result = metrics['data'][name]
@@ -101,11 +119,12 @@ def get_delta(name):
     # get delta
     name = name[len(NAME_PREFIX):] # remove prefix from name
     try:
-        delta = (curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
+        delta = float(curr_metrics['data'][name] - last_metrics['data'][name]) / \
+                float(curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
-            delta = 0
+            delta = float(0)
     except StandardError:
-        delta = 0
+        delta = float(0)
 
     return delta
 
@@ -114,20 +133,60 @@ def get_globalLock_ratio(name):
     """Return the global lock ratio"""
 
     try:
-        result = get_delta(NAME_PREFIX + 'globalLock_lockTime') / get_delta(NAME_PREFIX + 'globalLock_totalTime') * 100
+        result = get_delta(NAME_PREFIX + 'globalLock_lockTime') / \
+                 get_delta(NAME_PREFIX + 'globalLock_totalTime') * 100
     except ZeroDivisionError:
         result = 0
 
     return result
 
 
-def indexCounters_btree_miss_ratio(name):
+def get_indexCounters_btree_miss_ratio(name):
     """Return the btree miss ratio"""
 
     try:
-        result = get_delta(NAME_PREFIX + 'indexCounters_btree_misses') / get_delta(NAME_PREFIX + 'indexCounters_btree_accesses') * 100
+        result = get_delta(NAME_PREFIX + 'indexCounters_btree_misses') / \
+                 get_delta(NAME_PREFIX + 'indexCounters_btree_accesses') * 100
     except ZeroDivisionError:
         result = 0
+
+    return result
+
+
+def get_connections_current_ratio(name):
+    """Return the percentage of connections used"""
+
+    try:
+        result = float(get_value(NAME_PREFIX + 'connections_current')) / \
+                 float(get_value(NAME_PREFIX + 'connections_available')) * 100
+    except ZeroDivisionError:
+        result = 0
+
+    return result
+
+def get_slave_delay(name):
+    """Return the replica set slave delay"""
+
+    # get metrics
+    metrics = get_metrics()[0]
+
+    # no point checking my optime if i'm not relicating
+    if metrics['data']['rs_status_myState'] != 2:
+        result = 0
+
+    # compare my optime with the master's
+    else:
+        master = {}
+        slave = {}
+        try:
+            for member in metrics['data']['rs_status_members']:
+                if member['state'] == 1:
+                    master = member
+                if member['name'].split(':')[0] == socket.getfqdn():
+                    slave = member
+            result = (slave['optime']['t'] - master['optime']['t']) / 1000
+        except KeyError:
+            result = 0
 
     return result
 
@@ -279,7 +338,7 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'indexCounters_btree_miss_ratio',
-            'call_back': indexCounters_btree_miss_ratio,
+            'call_back': get_indexCounters_btree_miss_ratio,
             'time_max': time_max,
             'value_type': 'float',
             'units': '%',
@@ -331,6 +390,28 @@ def metric_init(lparams):
             'format': '%u',
             'description': 'Open Connections',
             'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'connections_current_ratio',
+            'call_back': get_connections_current_ratio,
+            'time_max': time_max,
+            'value_type': 'float',
+            'units': '%',
+            'slope': 'both',
+            'format': '%f',
+            'description': 'Percentage of Connections Used',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'slave_delay',
+            'call_back': get_slave_delay,
+            'time_max': time_max,
+            'value_type': 'uint',
+            'units': 'Seconds',
+            'slope': 'both',
+            'format': '%u',
+            'description': 'Relica Set Slave Delay',
+            'groups': groups
         }
     ]
 
@@ -350,4 +431,4 @@ if __name__ == '__main__':
         for d in descriptors:
             print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
         print ''
-        time.sleep(1)
+        time.sleep(METRICS_CACHE_TTL)

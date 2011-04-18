@@ -3,8 +3,8 @@ mongodb
 
 Python module for ganglia 3.1.
 
-This module parses output from the db.serverStatus() command and creates
-"mongodb_*" metrics (i.e. all the metrics from the mongostat command):
+This module parses output from the db.serverStatus() and rs.status() commands
+and creates "mongodb_*" metrics:
 
  * Inserts per second
  * Queries per second
@@ -23,6 +23,8 @@ This module parses output from the db.serverStatus() command and creates
  * Readers Waiting for Lock
  * Writers Waiting for Lock
  * Open Connections
+ * Open Connections (as a percentage of total available)
+ * Replica Set Slave Delay
 
 ## AUTHOR
 
