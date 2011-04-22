@@ -105,18 +105,36 @@ def metric_init(params):
         #  For each name in the group ...
         for name in configtable[i]['names'].keys():
             #  ... set up dictionary ...
+            if 'format' in configtable[i]['names'][name]:
+		format_str = configtable[i]['names'][name]['format']
+            else:
+		format_str = configtable[i]['format']
+            if 'units' in configtable[i]['names'][name]:
+		unit_str = configtable[i]['names'][name]['units']
+            else:
+		unit_str = configtable[i]['units']
+            if 'value_type' in configtable[i]['names'][name]:
+		value_type_str = configtable[i]['names'][name]['value_type']
+            else:
+		value_type_str = configtable[i]['value_type']
+            if 'file' in configtable[i]['names'][name]:
+		file_str = configtable[i]['names'][name]['file']
+            else:
+		file_str = configtable[i]['file']
+		
+
             descriptors.append({
                 'name': configtable[i]['prefix'] + name,
                 'call_back': call_back,
                 'time_max': 90,
-                'format': configtable[i]['names'][name]['format'] if 'format' in configtable[i]['names'][name] else configtable[i]['format'],
-                'units': configtable[i]['names'][name]['units'] if 'units' in configtable[i]['names'][name] else configtable[i]['units'],
-                'value_type': configtable[i]['names'][name]['value_type'] if 'value_type' in configtable[i]['names'][name] else configtable[i]['value_type'],
+                'format': format_str,
+                'units': unit_str,
+                'value_type': value_type_str,
                 'slope': 'both',
                 'description': configtable[i]['names'][name]['description'],
                 'groups': configtable[i]['group'],
                 #  The following are module-private data stored in a public variable
-                'file': configtable[i]['names'][name]['file'] if 'file' in configtable[i]['names'][name] else configtable[i]['file'],
+                'file': file_str,
                 're': configtable[i]['names'][name]['re']
             })
             #  And get current value cached as previous value, for future comparisons.
