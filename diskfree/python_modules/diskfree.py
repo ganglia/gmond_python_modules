@@ -91,7 +91,10 @@ def metric_init(lparams):
                 path_key = mount_info[1][1:].replace('/', '_')
 
             for unit_type in ['absolute', 'percent']:
-                units = '%' if unit_type == 'percent' else 'GB'
+                if unit_type == 'percent': 
+			units = '%'
+		else:
+			units = 'GB'
                 descriptors.append({
                     'name': NAME_PREFIX + unit_type + '_' + path_key,
                     'call_back': get_value,
