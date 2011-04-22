@@ -1,0 +1,37 @@
+diskstat
+===============
+
+python module for ganglia 3.1.
+
+"diskstat" report disk stat metrics to ganglia.
+
+This module can monitor multiple disk block devices including specific partitions instead of the entire device.
+
+## Metrics
+  * diskstat_XXX_io_time
+  * diskstat_XXX_read_kbytes_per_sec
+  * diskstat_XXX_read_time
+  * diskstat_XXX_reads
+  * diskstat_XXX_reads_merged
+  * diskstat_XXX_weighted_io_time
+  * diskstat_XXX_write_kbytes_per_sec
+  * diskstat_XXX_write_time
+  * diskstat_XXX_writes
+  * diskstat_XXX_writes_merged
+
+## Params
+  * devices (The disk block device(s) to monitor. Example: "sda1 sda2")
+
+## NOTES
+	This module has the option of explicitly setting which devices
+	to check using the "devices" option in your configuration. You
+	can monitor specific partitions instead of the entire device.
+	Example value: "sda1 sda2".
+	Example value: "sda sdb sdc".
+
+## Example Graphs
+  * Available in the examples directory.
+
+## AUTHOR
+
+Jamie Isaacs <pdt256@gmail.com>
