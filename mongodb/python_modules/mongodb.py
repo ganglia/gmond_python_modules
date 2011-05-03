@@ -35,15 +35,15 @@ import time
 
 NAME_PREFIX = 'mongodb_'
 PARAMS = {
-    'server_status' : 'ssh mongodb.example.com mongo --port 27018 --quiet --eval "printjson\(db.serverStatus\(\)\)"',
-    'rs_status'     : 'ssh mongodb.example.com mongo --port 27018 --quiet --eval "printjson\(rs.status\(\)\)"'
+    'server_status' : '~/mongodb-osx-x86_64-1.8.1/bin/mongo --host mongodb04.example.com --port 27018 --quiet --eval "printjson(db.serverStatus())"',
+    'rs_status'     : '~/mongodb-osx-x86_64-1.8.1/bin/mongo --host mongodb04.example.com --port 27018 --quiet --eval "printjson(rs.status())"'
 }
 METRICS = {
     'time' : 0,
     'data' : {}
 }
 LAST_METRICS = dict(METRICS)
-METRICS_CACHE_TTL = 15
+METRICS_CACHE_TTL = 3
 
 
 def flatten(d, pre = '', sep = '_'):
@@ -110,31 +110,41 @@ def get_value(name):
     return result
 
 
-def get_delta(name):
+def get_rate(name):
     """Return change over time for the requested metric"""
 
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
 
-    # get delta
+    # get rate
     name = name[len(NAME_PREFIX):] # remove prefix from name
-    try:
-        delta = float(curr_metrics['data'][name] - last_metrics['data'][name]) / \
-                float(curr_metrics['time'] - last_metrics['time'])
-        if delta < 0:
-            delta = float(0)
-    except StandardError:
-        delta = float(0)
 
-    return delta
+    try:
+        rate = float(curr_metrics['data'][name] - last_metrics['data'][name]) / \
+               float(curr_metrics['time'] - last_metrics['time'])
+        if rate < 0:
+            rate = float(0)
+    except StandardError:
+        rate = float(0)
+
+    return rate
+
+
+def get_opcounter_rate(name):
+    """Return change over time for an opcounter metric"""
+
+    master_rate = get_rate(name)
+    repl_rate = get_rate(name.replace('opcounters_', 'opcountersRepl_'))
+
+    return master_rate + repl_rate
 
 
 def get_globalLock_ratio(name):
     """Return the global lock ratio"""
 
     try:
-        result = get_delta(NAME_PREFIX + 'globalLock_lockTime') / \
-                 get_delta(NAME_PREFIX + 'globalLock_totalTime') * 100
+        result = get_rate(NAME_PREFIX + 'globalLock_lockTime') / \
+                 get_rate(NAME_PREFIX + 'globalLock_totalTime') * 100
     except ZeroDivisionError:
         result = 0
 
@@ -145,8 +155,8 @@ def get_indexCounters_btree_miss_ratio(name):
     """Return the btree miss ratio"""
 
     try:
-        result = get_delta(NAME_PREFIX + 'indexCounters_btree_misses') / \
-                 get_delta(NAME_PREFIX + 'indexCounters_btree_accesses') * 100
+        result = get_rate(NAME_PREFIX + 'indexCounters_btree_misses') / \
+                 get_rate(NAME_PREFIX + 'indexCounters_btree_accesses') * 100
     except ZeroDivisionError:
         result = 0
 
@@ -164,14 +174,15 @@ def get_connections_current_ratio(name):
 
     return result
 
+
 def get_slave_delay(name):
     """Return the replica set slave delay"""
 
     # get metrics
     metrics = get_metrics()[0]
 
-    # no point checking my optime if i'm not relicating
-    if metrics['data']['rs_status_myState'] != 2:
+    # no point checking my optime if i'm not replicating
+    if 'rs_status_myState' not in metrics['data'] or metrics['data']['rs_status_myState'] != 2:
         result = 0
 
     # compare my optime with the master's
@@ -191,6 +202,13 @@ def get_slave_delay(name):
     return result
 
 
+def get_asserts_total_rate(name):
+    """Return the total number of asserts per second"""
+
+    return float(reduce(lambda memo,obj: memo + get_rate(NAME_PREFIX + obj),
+                       ['regular', 'warning', 'msg', 'user', 'rollovers'], 0))
+
+
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
@@ -206,10 +224,10 @@ def metric_init(lparams):
     descriptors = [
         {
             'name': NAME_PREFIX + 'opcounters_insert',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Inserts/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Inserts',
@@ -217,10 +235,10 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'opcounters_query',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Queries/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Queries',
@@ -228,10 +246,10 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'opcounters_update',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Updates/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Updates',
@@ -239,10 +257,10 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'opcounters_delete',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Deletes/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Deletes',
@@ -250,21 +268,21 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'opcounters_getmore',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Getmores/Sec',
             'slope': 'both',
             'format': '%f',
-            'description': 'Get mores',
+            'description': 'Getmores',
             'groups': groups
         },
         {
             'name': NAME_PREFIX + 'opcounters_command',
-            'call_back': get_delta,
+            'call_back': get_opcounter_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Commands/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Commands',
@@ -272,10 +290,10 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'backgroundFlushing_flushes',
-            'call_back': get_delta,
+            'call_back': get_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Flushes/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Flushes',
@@ -316,10 +334,10 @@ def metric_init(lparams):
         },
         {
             'name': NAME_PREFIX + 'extra_info_page_faults',
-            'call_back': get_delta,
+            'call_back': get_rate,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Faults/Sec',
             'slope': 'both',
             'format': '%f',
             'description': 'Page Faults',
@@ -352,7 +370,7 @@ def metric_init(lparams):
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
-            'units': 'Ops',
+            'units': 'Operations',
             'slope': 'both',
             'format': '%u',
             'description': 'Total Operations Waiting for Lock',
@@ -363,7 +381,7 @@ def metric_init(lparams):
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
-            'units': 'Ops',
+            'units': 'Operations',
             'slope': 'both',
             'format': '%u',
             'description': 'Readers Waiting for Lock',
@@ -374,10 +392,43 @@ def metric_init(lparams):
             'call_back': get_value,
             'time_max': time_max,
             'value_type': 'uint',
-            'units': 'Ops',
+            'units': 'Operations',
             'slope': 'both',
             'format': '%u',
             'description': 'Writers Waiting for Lock',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'globalLock_activeClients_total',
+            'call_back': get_value,
+            'time_max': time_max,
+            'value_type': 'uint',
+            'units': 'Clients',
+            'slope': 'both',
+            'format': '%u',
+            'description': 'Total Active Clients',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'globalLock_activeClients_readers',
+            'call_back': get_value,
+            'time_max': time_max,
+            'value_type': 'uint',
+            'units': 'Clients',
+            'slope': 'both',
+            'format': '%u',
+            'description': 'Active Readers',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'globalLock_activeClients_writers',
+            'call_back': get_value,
+            'time_max': time_max,
+            'value_type': 'uint',
+            'units': 'Clients',
+            'slope': 'both',
+            'format': '%u',
+            'description': 'Active Writers',
             'groups': groups
         },
         {
@@ -410,7 +461,18 @@ def metric_init(lparams):
             'units': 'Seconds',
             'slope': 'both',
             'format': '%u',
-            'description': 'Relica Set Slave Delay',
+            'description': 'Replica Set Slave Delay',
+            'groups': groups
+        },
+        {
+            'name': NAME_PREFIX + 'asserts_total',
+            'call_back': get_asserts_total_rate,
+            'time_max': time_max,
+            'value_type': 'float',
+            'units': 'Asserts/Sec',
+            'slope': 'both',
+            'format': '%f',
+            'description': 'Asserts',
             'groups': groups
         }
     ]
