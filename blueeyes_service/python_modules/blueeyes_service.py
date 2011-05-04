@@ -1,22 +1,30 @@
 #!/usr/bin/env python
-################################################################################
+# -*- coding: utf-8 -*-
+#
 # BlueEyes gmond module for Ganglia
-# Copyright (c) 2011 Michael T. Conigliaro <mike [at] conigliaro [dot] org>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
+# Copyright (C) 2011 by Michael T. Conigliaro <mike [at] conigliaro [dot] org>.
+# All rights reserved.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-################################################################################
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+
 
 import json
 import os
@@ -25,17 +33,18 @@ import time
 
 
 PARAMS = {
-    'service_name'    : 'example',
-    'service_version' : 'v1',
-    'stats_command'   : 'curl --silent http://appserver01.example.com:30060/blueeyes/services/example/v1/health'
+    'service_name'    : 'stats',
+    'service_version' : 'v1'
 }
+PARAMS['stats_command'] = 'curl --silent http://appserver11.example.com:30040/blueeyes/services/%s/%s/health' % \
+                          (PARAMS['service_name'], PARAMS['service_version'])
 NAME_PREFIX = 'blueeyes_service_%s_%s_' % (PARAMS['service_name'], PARAMS['service_version'])
 METRICS = {
     'time' : 0,
     'data' : {}
 }
 LAST_METRICS = dict(METRICS)
-METRICS_CACHE_MAX = 1
+METRICS_CACHE_TTL = 1
 
 
 def flatten(obj, pre = '', sep = '_'):
@@ -59,7 +68,7 @@ def get_metrics():
 
     global METRICS, LAST_METRICS
 
-    if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
+    if (time.time() - METRICS['time']) > METRICS_CACHE_TTL:
 
         # get raw metric data
         io = os.popen(PARAMS['stats_command'])
@@ -98,13 +107,7 @@ def get_value(name):
     return result
 
 
-def get_time_value(name):
-    """BlueEyes returns time values in ns, so convert to seconds"""
-
-    return get_value(name)/1000000
-
-
-def get_delta(name):
+def get_rate(name):
     """Return change over time for the requested metric"""
 
     # get metrics
@@ -122,6 +125,20 @@ def get_delta(name):
     return delta
 
 
+def get_requests(name):
+    """Return requests per second"""
+
+    return reduce(lambda memo,obj: memo + get_rate('%srequests_%s_count' % (NAME_PREFIX, obj)),
+                 ['DELETE', 'GET', 'POST', 'PUT'], 0)
+
+
+def get_errors(name):
+    """Return errors per second"""
+
+    return reduce(lambda memo,obj: memo + get_rate('%srequests_%s_errors_errorCount' % (NAME_PREFIX, obj)),
+                 ['DELETE', 'GET', 'POST', 'PUT'], 0)
+
+
 def metric_init(lparams):
     """Initialize metric descriptors"""
 
@@ -135,74 +152,30 @@ def metric_init(lparams):
     # define descriptors
     time_max = 60
     groups = 'blueeyes service %s %s' % (PARAMS['service_name'], PARAMS['service_version'])
-    descriptors = []
-    for request in ['DELETE', 'GET', 'POST', 'PUT']:
-        descriptors.extend([{
-            'name': NAME_PREFIX + 'requests_' + request + '_count',
-            'call_back': get_delta,
+    descriptors = [
+        {
+            'name': NAME_PREFIX + 'requests',
+            'call_back': get_requests,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Ops/Sec',
+            'units': 'Requests/Sec',
             'slope': 'both',
             'format': '%f',
-            'description': '%s Requests' % request,
+            'description': 'Requests',
             'groups': groups
         },
         {
-            'name': NAME_PREFIX + 'requests_' + request + '_errors_errorCount',
-            'call_back': get_value,
-            'time_max': time_max,
-            'value_type': 'int',
-            'units': 'Errors',
-            'slope': 'both',
-            'format': '%d',
-            'description': '%s Errors' % request,
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'requests_' + request + '_timing_minimumTime',
-            'call_back': get_time_value,
+            'name': NAME_PREFIX + 'errors',
+            'call_back': get_errors,
             'time_max': time_max,
             'value_type': 'float',
-            'units': 'Seconds',
+            'units': 'Errors/Sec',
             'slope': 'both',
             'format': '%f',
-            'description': '%s Request Minimum Time' % request,
+            'description': 'Errors',
             'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'requests_' + request + '_timing_maximumTime',
-            'call_back': get_time_value,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Seconds',
-            'slope': 'both',
-            'format': '%f',
-            'description': '%s Request Maximum Time' % request,
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'requests_' + request + '_timing_averageTime',
-            'call_back': get_time_value,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Seconds',
-            'slope': 'both',
-            'format': '%f',
-            'description': '%s Request Average Time' % request,
-            'groups': groups
-        },
-        {
-            'name': NAME_PREFIX + 'requests_' + request + '_timing_standardDeviation',
-            'call_back': get_time_value,
-            'time_max': time_max,
-            'value_type': 'float',
-            'units': 'Seconds',
-            'slope': 'both',
-            'format': '%f',
-            'description': '%s Request Standard Deviation' % request,
-            'groups': groups
-        }])
+        }
+    ]
 
     return descriptors
 
@@ -220,4 +193,4 @@ if __name__ == '__main__':
         for d in descriptors:
             print (('%s = %s') % (d['name'], d['format'])) % (d['call_back'](d['name']))
         print ''
-        time.sleep(1)
+        time.sleep(METRICS_CACHE_TTL)

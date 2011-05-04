@@ -7,11 +7,7 @@ This module parses health statistics from a BlueEyes service and creates
 "blueeyes_*" metrics:
 
  * DELETE/GET/POST/PUT requests per second
- * DELETE/GET/POST/PUT error count
- * DELETE/GET/POST/PUT minimum time
- * DELETE/GET/POST/PUT maximum time
- * DELETE/GET/POST/PUT average time
- * DELETE/GET/POST/PUT time standard deviation
+ * DELETE/GET/POST/PUT errors per second
 
 ## AUTHOR
 
