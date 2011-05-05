@@ -205,7 +205,7 @@ def get_slave_delay(name):
 def get_asserts_total_rate(name):
     """Return the total number of asserts per second"""
 
-    return float(reduce(lambda memo,obj: memo + get_rate(NAME_PREFIX + obj),
+    return float(reduce(lambda memo,obj: memo + get_rate('%sasserts_%s' % (NAME_PREFIX, obj)),
                        ['regular', 'warning', 'msg', 'user', 'rollovers'], 0))
 
 
