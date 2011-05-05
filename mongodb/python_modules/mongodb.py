@@ -195,7 +195,7 @@ def get_slave_delay(name):
                     master = member
                 if member['name'].split(':')[0] == socket.getfqdn():
                     slave = member
-            result = (slave['optime']['t'] - master['optime']['t']) / 1000
+            result = max(0, master['optime']['t'] - slave['optime']['t']) / 1000
         except KeyError:
             result = 0
 
