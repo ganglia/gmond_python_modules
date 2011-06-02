@@ -12,7 +12,7 @@ def metric_handler(name):
     if 15 < time.time() - metric_handler.timestamp:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((metric_handler.host, metric_handler.port))
-        s.send("INFO\n")
+        s.send("INFO\r\n")
         info = s.recv(4096)
         if "$" != info[0]:
             return 0
