@@ -1,0 +1,127 @@
+modules {
+  module {
+    name = "nvidia"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 50
+
+  metric {
+    name_match = "([\\S]+)_graphics_speed"
+    name = "\\1_graphics_speed"
+    title = "\\1 Graphics Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_sm_speed"
+    name = "\\1_sm_speed"
+    title = "\\1 SM Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_mem_speed"
+    name = "\\1_mem_speed"
+    title = "\\1 Memory Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_temp"
+    name = "\\1_temp"
+    title = "\\1 Temperature"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_util"
+    name = "\\1_util"
+    title= "\\1 GPU Utilization"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_mem_util"
+    name = "\\1_mem_util"
+    title= "\\1 Memory Utilization"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_mem_used"
+    name = "\\1_mem_used"
+    title= "\\1 Memory Used"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_fan"
+    name = "\\1_fan"
+    title= "\\1 Fan Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_power_usage"
+    name = "\\1_power_usage"
+    title= "\\1 Power Usage"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_power_state"
+    name = "\\1_power_state"
+    title= "\\1 Power State"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_ecc_mode"
+    name = "\\1_ecc_mode"
+    title= "\\1 ECC Mode"
+    value_threshold = 1.0
+  }
+}
+
+collection_group {
+  collect_once = yes
+  time_threshold = 1200
+
+  metric {
+    name = "gpu_num"
+    title = "GPU Count"
+  }
+
+  metric {
+    name = "gpu_driver"
+    title = "GPU Driver Version"
+  }
+
+  metric {
+    name_match = "([\\S]+)_type"
+    name = "\\1_type"
+    title = "\\1 Type"
+  }
+
+  metric {
+    name_match = "([\\S]+)_uuid"
+    name = "\\1_uuid"
+    title = "\\1 UUID"
+  }
+
+  metric {
+    name_match = "([\\S]+)_pci_id"
+    name = "\\1_pci_id"
+    title = "\\1 PCI ID"
+  }
+
+  metric {
+    name_match = "([\\S]+)_mem_total"
+    name = "\\1_mem_total"
+    title = "\\1 Memory Total"
+  }
+}
