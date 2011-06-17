@@ -5,8 +5,9 @@ Installation instructions:
 * First install the Python Bindings for the NVIDIA Management Library:
   http://pypi.python.org/pypi/nvidia-ml-py/
   You can do a site install or place it in {libdir}/ganglia/python_modules
-* Copy nvidia.py to {libdir}/ganglia/python_modules
-* Copy nvidia.pyconf to /etc/ganglia/conf.d
+* Copy python_modules/nvidia.py to {libdir}/ganglia/python_modules
+* Copy conf.d/nvidia.pyconf to /etc/ganglia/conf.d
+* Copy graph.d/* to {ganglia_webroot}/graph.d/
 * Patch Ganglia Web (3.1.x) to see custom graphs (ganglia_web.patch)
 * A demo of what the GPU graphs look like is available here:
   http://ac.ncsa.uiuc.edu/ganglia/?m=load_one&r=hour&s=descending&c=AC&h=ac22&sh=1&hc=4&z=small
