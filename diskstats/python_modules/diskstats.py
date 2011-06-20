@@ -39,7 +39,7 @@ class UpdateMetricThread(threading.Thread):
         if "refresh_rate" in params:
             self.refresh_rate = int(params["refresh_rate"])
         self.metric       = {}
-        self.re_disk      = r"^sd[a-z]$"
+        self.re_disk      = r"(^sd[a-z]$|^cciss/c[0-9]d[a-z0-9]$)"
         self.re_procs     = r"^procs_"
 
     def shutdown(self):
