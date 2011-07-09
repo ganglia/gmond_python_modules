@@ -13,7 +13,7 @@ old_values = { }
 #  What we want ganglia to monitor, where to find it, how to extract it, ...
 configtable = [
     {
-        'group': 'NFS client',
+        'group': 'nfs_client',
         'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)' ],
         'prefix': 'nfs_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
@@ -46,7 +46,7 @@ configtable = [
         }
     },
     {
-        'group': 'NFS server',
+        'group': 'nfs_server',
         'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)' ],
         'prefix': 'nfsd_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
