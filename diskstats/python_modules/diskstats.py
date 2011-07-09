@@ -15,10 +15,14 @@ Debug = False
 
 Diskstats_Pos = {
     'ds_ios_read'  : 3,
-    'ds_KB_read' : 5,
+    'ds_KB_read'   : 5,
+    'ds_ms_read'   : 6,
     'ds_ios_write' : 7,
-    'ds_KB_write': 9,
+    'ds_KB_write'  : 9,
+    'ds_ms_write'  : 10,
     'ds_in_flight' :11,
+    'ds_ms_total'  :12,
+    'ds_ms_avg'    :13,
     }
 
 def dprint(f, *v):
@@ -35,7 +39,7 @@ class UpdateMetricThread(threading.Thread):
         if "refresh_rate" in params:
             self.refresh_rate = int(params["refresh_rate"])
         self.metric       = {}
-        self.re_disk      = r"^sd[a-z]$"
+        self.re_disk      = r"(^sd[a-z]$|^cciss/c[0-9]d[a-z0-9]$)"
         self.re_procs     = r"^procs_"
 
     def shutdown(self):
@@ -145,10 +149,33 @@ def metric_init(params):
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "ds_ms_read",
+                "units"      : "ms",
+                "description": "time spent reading",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "ds_ms_write",
+                "units"      : "ms",
+                "description": "time spent writing",
+                }))
+
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : "ds_in_flight",
                 "units"      : "req",
                 "description": "number of I/Os currently in progress",
                 "slope"      : "both",
+                }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "ds_ms_total",
+                "units"      : "ms",
+                "description": "time spent on io",
+                }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "ds_ms_avg",
+                "units"      : "ms",
+                "description": "average time spent per io",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {

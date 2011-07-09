@@ -1,0 +1,145 @@
+Index: host_view.php
+===================================================================
+--- host_view.php	(revision 2612)
++++ host_view.php	(working copy)
+@@ -17,8 +17,8 @@
+       $tpl->assign("node_msg", "This host is down."); 
+ 
+ $cluster_url=rawurlencode($clustername);
+-$tpl->assign("cluster_url", $cluster_url);
+-$tpl->assign("graphargs", "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]");
++$tpl->assignGlobal("cluster_url", $cluster_url);
++$tpl->assignGlobal("graphargs", "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]");
+ 
+ # For the node view link.
+ $tpl->assign("node_view","./?p=2&amp;c=$cluster_url&amp;h=$hostname");
+@@ -37,6 +37,33 @@
+ 
+ foreach ($metrics as $name => $v)
+    {
++       if ($name == "gpu0_mem_used") {
++          $tpl->newBlock('gpu0_mem');
++       }
++       if ($name == "gpu1_mem_used") {
++          $tpl->newBlock('gpu1_mem');
++       }
++       if ($name == "gpu2_mem_used") {
++          $tpl->newBlock('gpu2_mem');
++       }
++       if ($name == "gpu3_mem_used") {
++          $tpl->newBlock('gpu3_mem');
++       }
++       if ($name == "gpu0_util") {
++          $tpl->newBlock('gpu_util');
++       }
++       if ($name == "gpu0_mem_util") {
++          $tpl->newBlock('gpu_mem_util');
++       }
++       if ($name == "gpu0_core_speed") {
++          $tpl->newBlock('gpu_core_speed');
++       }
++       if ($name == "gpu0_sm_speed") {
++          $tpl->newBlock('gpu_sm_speed');
++       }
++       if ($name == "gpu0_mem_speed") {
++          $tpl->newBlock('gpu_mem_speed');
++       }
+        if ($v['TYPE'] == "string" or $v['TYPE']=="timestamp" or
+            (isset($always_timestamp[$name]) and $always_timestamp[$name]))
+           {
+@@ -144,7 +171,7 @@
+ if ( is_array($g_metrics) && is_array($g_metrics_group) )
+    {
+       ksort($g_metrics_group);
+-
++      $host_metrics = 0;
+       foreach ( $g_metrics_group as $group => $metric_array )
+          {
+             if ( $group == "" ) {
+@@ -153,6 +180,7 @@
+             $tpl->newBlock("vol_group_info");
+             $tpl->assign("group", $group);
+             $c = count($metric_array);
++            $host_metrics += $c;
+             $tpl->assign("group_metric_count", $c);
+             $i = 0;
+             ksort($g_metrics);
+@@ -169,7 +197,8 @@
+                   }
+                }
+          }
+-
++      $tpl->gotoBlock("_ROOT");
++      $tpl->assign("host_metric_count", $host_metrics);
+    }
+ 
+ $tpl->printToScreen();
+Index: templates/default/host_view.tpl
+===================================================================
+--- templates/default/host_view.tpl	(revision 2612)
++++ templates/default/host_view.tpl	(working copy)
+@@ -80,6 +80,55 @@
+ <IMG BORDER=0 ALT="{cluster_url} PACKETS"
+    SRC="./graph.php?g=packet_report&z=medium&c={cluster_url}&{graphargs}">
+ </A>
++<!-- START BLOCK : gpu0_mem -->
++<IMG BORDER=0 ALT="{cluster_url} GPU0_MEM"
++   SRC="./graph.php?g=gpu0_mem_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu0_mem -->
++<!-- START BLOCK : gpu1_mem -->
++<IMG BORDER=0 ALT="{cluster_url} GPU1_MEM"
++   SRC="./graph.php?g=gpu1_mem_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu1_mem -->
++<!-- START BLOCK : gpu2_mem -->
++<IMG BORDER=0 ALT="{cluster_url} GPU2_MEM"
++   SRC="./graph.php?g=gpu2_mem_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu2_mem -->
++<!-- START BLOCK : gpu3_mem -->
++<IMG BORDER=0 ALT="{cluster_url} GPU3_MEM"
++   SRC="./graph.php?g=gpu3_mem_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu3_mem -->
++<!-- START BLOCK : gpu_core_speed -->
++<IMG BORDER=0 ALT="{cluster_url} GPU_CORE_SPEED"
++   SRC="./graph.php?g=gpu_core_speed_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu_core_speed -->
++<!-- START BLOCK : gpu_sm_speed -->
++<IMG BORDER=0 ALT="{cluster_url} GPU_SM_SPEED"
++   SRC="./graph.php?g=gpu_sm_speed_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu_sm_speed -->
++<!-- START BLOCK : gpu_mem_speed -->
++<IMG BORDER=0 ALT="{cluster_url} GPU_MEM_SPEED"
++   SRC="./graph.php?g=gpu_mem_speed_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu_mem_speed -->
++<!-- START BLOCK : gpu_util -->
++<IMG BORDER=0 ALT="{cluster_url} GPU_UTIL"
++   SRC="./graph.php?g=gpu_util_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu_util -->
++<!-- START BLOCK : gpu_mem_util -->
++<IMG BORDER=0 ALT="{cluster_url} GPU_MEM_UTIL"
++   SRC="./graph.php?g=gpu_mem_util_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
++<!-- END BLOCK : gpu_mem_util -->
++<A HREF="./graph.php?g=gpu_temp_report&z=large&c={cluster_url}&{graphargs}">
++<IMG BORDER=0 ALT="{cluster_url} GPU_TEMP"
++   SRC="./graph.php?g=gpu_temp_report&z=medium&c={cluster_url}&{graphargs}">
++</A>
+ 
+ </TD>
+ </TR>
+@@ -89,7 +138,7 @@
+ <TABLE BORDER="0" WIDTH="100%">
+ <TR>
+   <TD CLASS=title>
+-  {host} <strong>graphs</strong>
++  {host} <strong>graphs</strong> ({host_metric_count})
+   last <strong>{range}</strong>
+   sorted <strong>{sort}</strong>
+ <!-- START BLOCK : columns_dropdown -->

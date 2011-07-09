@@ -1,0 +1,36 @@
+NVIDIA GPU monitoring plugin for gmond
+======================================
+
+Installation instructions:
+* First install the Python Bindings for the NVIDIA Management Library:
+  http://pypi.python.org/pypi/nvidia-ml-py/
+  You can do a site install or place it in {libdir}/ganglia/python_modules
+* Copy python_modules/nvidia.py to {libdir}/ganglia/python_modules
+* Copy conf.d/nvidia.pyconf to /etc/ganglia/conf.d
+* Copy graph.d/* to {ganglia_webroot}/graph.d/
+* Patch Ganglia Web (3.1.x) to see custom graphs (ganglia_web.patch)
+* A demo of what the GPU graphs look like is available here:
+  http://ac.ncsa.uiuc.edu/ganglia/?m=load_one&r=hour&s=descending&c=AC&h=ac22&sh=1&hc=4&z=small
+
+By default all metrics that the management library could detect for your GPU
+are collected.  For more information on what metrics are supported on what
+models, please refer to NVML documentation.
+
+The following metrics have been implemented:
+* gpu_num
+* gpu_driver
+* gpu_type
+* gpu_uuid
+* gpu_pci_id
+* gpu_mem_total
+* gpu_graphics_speed
+* gpu_sm_speed
+* gpu_mem_speed
+* gpu_temp
+* gpu_util
+* gpu_mem_util
+* gpu_mem_used
+* gpu_fan
+* gpu_power_usage
+* gpu_power_state
+* gpu_ecc_mode
