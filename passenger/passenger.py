@@ -45,13 +45,15 @@ class UpdateMetricThread(threading.Thread):
         if "status" in params:
             self.status = params["status"]
         if "memory_stats" in params:
-            self.memory_stats = int(params["memory_stats"])
+            self.memory_stats = params["memory_stats"]
         self.mp      = params["metrix_prefix"]
         self.status_regex   = {
-          'max_pool_size':        r"^max\s+= (\d)",
-          'processes_active':     r"^active\s+= (\d)",
-          'processes_inactive':   r"^inactive\s+= (\d)",
-          'global_queue_depth':   r"^Waiting on global queue: (\d)"
+          'max_pool_size':        r"^max\s+= (\d+)",
+          'open_processes':       r"^count\s+= (\d+)",
+          'processes_active':     r"^active\s+= (\d+)",
+          'processes_inactive':   r"^inactive\s+= (\d+)",
+          'global_queue_depth':   r"^Waiting on global queue: (\d+)",
+          'memory_usage':         r"^### Total private dirty RSS:\s+(\d+)"
         }
 
     def shutdown(self):
@@ -73,8 +75,9 @@ class UpdateMetricThread(threading.Thread):
 
     def update_metric(self):
         status_output = timeout_command(self.status, self.timeout)
+        status_output += timeout_command(self.memory_stats, self.timeout)[-1:] # to get last line of memory output
         dprint("%s", status_output)
-        for line in status_output: 
+        for line in status_output:
           for (name,regex) in self.status_regex.iteritems():
             result = re.search(regex,line)
             if result:
@@ -133,6 +136,12 @@ def metric_init(params):
                 "description": "Max processes in Passenger pool",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_open_processes",
+                "units"      : "processes",
+                "slope"      : "both",
+                "description": "Number of currently open passenger processes",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_processes_active",
                 "units"      : "processes",
                 "slope"      : "both",
@@ -149,6 +158,12 @@ def metric_init(params):
                 "units"      : "requests",
                 "slope"      : "both",
                 "description": "Requests waiting on a free process",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_memory_usage",
+                "units"      : "MB",
+                "slope"      : "both",
+                "description": "Passenger Memory usage",
                 }))
 
     return descriptors
