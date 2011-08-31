@@ -66,6 +66,8 @@ class UpdateApacheStatusThread(threading.Thread):
         req = urllib2.Request(url = self.url)
         # initialize
         self.status = dict( [(k, 0) for k in Scoreboard.keys()] )
+        self.status["busy_workers"] = 0
+        self.status["idle_workers"] = 0
 
         if self.virtual_host:
             req.add_header('Host', self.virtual_host)
@@ -96,6 +98,13 @@ class UpdateApacheStatusThread(threading.Thread):
                         self.status["ap_hits"] = hits
                     # store for next time
                     last_total_accesses = new_value
+
+                elif l.find("BusyWorkers:") == 0:
+                    scline = l.split(": ", 1)[1].rstrip()
+                    self.status["busy_workers"] = int(scline)
+                elif l.find("IdleWorkers:") == 0:
+                    scline = l.split(": ", 1)[1].rstrip()
+                    self.status["idle_workers"] = int(scline)
 
         except urllib2.URLError:
             traceback.print_exc()
@@ -170,6 +179,21 @@ def metric_init(params):
         descriptors.append(create_desc({
                     "name"        : k,
                     "description" : v["desc"],
+                    }))
+        descriptors.append(create_desc({
+                    "name"       : "busy_workers",
+                    "value_type" : "uint",
+                    "units"      : "threads",
+                    "format"     : "%u",
+                    "description": "Busy threads",
+                    }))
+
+        descriptors.append(create_desc({
+                    "name"       : "idle_workers",
+                    "value_type" : "uint",
+                    "units"      : "threads",
+                    "format"     : "%u",
+                    "description": "Idle threads",
                     }))
 
     return descriptors
