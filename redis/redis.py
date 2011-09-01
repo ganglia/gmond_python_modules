@@ -12,6 +12,7 @@ def metric_handler(name):
     if 15 < time.time() - metric_handler.timestamp:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((metric_handler.host, metric_handler.port))
+        s.settimeout(5) # set socket timeout as to not block gmond
         s.send("INFO\r\n")
         info = s.recv(4096)
         if "$" != info[0]:
@@ -63,10 +64,10 @@ def metric_init(params={}):
             "name": name,
             "call_back": metric_handler,
             "time_max": 90,
-            "value_type": "int",
+            "value_type": "double",
             "units": "",
             "slope": "both",
-            "format": "%d",
+            "format": "%f",
             "description": "http://code.google.com/p/redis/wiki/InfoCommand",
             "groups": "redis",
         }
@@ -76,3 +77,10 @@ def metric_init(params={}):
 
 def metric_cleanup():
     pass
+
+# For testing
+if __name__ == "__main__":
+    desc = metric_init({"host": "127.0.0.1"})
+    for d in desc:
+        v = d['call_back'](d['name'])
+        print 'value for %s is %f' % (d['name'], v)
