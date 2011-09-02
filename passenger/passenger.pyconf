@@ -5,9 +5,9 @@ modules {
     param status {
         value = "sudo /usr/bin/passenger-status"
     }
-    # param memory_stats {
-    #     value = "sudo /usr/bin/passenger-memory-stats"
-    # }
+    param memory_stats {
+        value = "sudo /usr/bin/passenger-memory-stats"
+    }
   }
 }
 
@@ -51,6 +51,11 @@ collection_group {
     value_threshold = 0
   }
   metric {
+    name  = "passenger_open_processes"
+    title = "Passenger Open Processes"
+    value_threshold = 0
+  }
+  metric {
     name  = "passenger_global_queue_depth"
     title = "Passenger Global Queue Depth"
     value_threshold = 0
@@ -63,6 +68,11 @@ collection_group {
   metric {
     name  = "passenger_processes_inactive"
     title = "Passenger Inactive Processes"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_memory_usage"
+    title = "Passenger Memory Usage"
     value_threshold = 0
   }
 }
