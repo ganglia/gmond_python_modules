@@ -1,0 +1,17 @@
+modules {
+  module {
+    name     = "compute-metrics"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every  = 60
+  time_threshold = 90
+
+  metric {
+    name  = "c_instance_count"
+    title = "Instance Count"
+    value_threshold = 0
+  }
+}
