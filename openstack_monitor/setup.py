@@ -17,7 +17,7 @@ def allfiles(path):
 
 
 setup(
-    name = "openstack_nova_stats",
+    name = "ganglia-openstack-monitor",
     version = "0.0.1a1",
     description = "Ganglia python plugin for Openstack Nova monitoring",
     long_description = read('README'),
