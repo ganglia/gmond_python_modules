@@ -16,7 +16,6 @@ def allfiles(path):
     return all_files
 
 
-print allfiles(os.path.join(os.path.dirname(__file__), 'configs'))
 setup(
     name = "openstack_nova_stats",
     version = "0.0.1a1",
