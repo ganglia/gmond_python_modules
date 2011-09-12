@@ -1,0 +1,41 @@
+Ganglia Python Modules for Nova
+-------------------------------
+
+These plugins are for use with the Ganglia monitoring system. For more details:
+
+  http://ganglia.sourceforge.net/
+
+They allow various components of Nova to be monitored using simple python
+modules.
+
+You will need to enable ganglia's modpython.  On Ubuntu, this is easy:
+
+  mkdir /etc/ganglia/conf.d
+  cp conf.d/modpython.conf /etc/ganglia/conf.d
+  service ganglia-monitoring restart
+
+On most systems, these can easily be configured by copying the desired
+components from conf.d and python_modules to the same location in /etc/ganglia.
+
+For instance, to install compute-metrics:
+
+  mkdir /etc/ganglia/conf.d
+  mkdir /etc/ganglia/python_modules
+  cp conf.d/compute-metrics.pyconf /etc/ganglia/conf.d
+  cp python_modules/compute-metrics.py /etc/ganglia/python_modules
+  service ganglia-monitoring restart
+
+To use custom graphics, copy graph.d contents in your system-specific
+graph.d directory:
+
+on Ubuntu:
+
+  cp graph.d/nova_services_report.php /usr/share/ganglia-webfrontend/graph.d/
+
+on RHEL 6.1:
+
+ cp graph.d/nova_services_report.php /usr/share/ganglia/graph.d/
+
+and enable it in conf.php:
+
+ $optional_graphs = array('nova_services');

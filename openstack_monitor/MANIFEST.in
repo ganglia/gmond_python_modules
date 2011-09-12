@@ -1,0 +1,5 @@
+include graph.d/*
+include conf.d/*
+include python_modules/*
+include setup.cfg
+include README
