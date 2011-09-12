@@ -25,4 +25,17 @@ For instance, to install compute-metrics:
   cp python_modules/compute-metrics.py /etc/ganglia/python_modules
   service ganglia-monitoring restart
 
+To use custom graphics, copy graph.d contents in your system-specific
+graph.d directory:
 
+on Ubuntu:
+
+  cp graph.d/nova_services_report.php /usr/share/ganglia-webfrontend/graph.d/
+
+on RHEL 6.1:
+
+ cp graph.d/nova_services_report.php /usr/share/ganglia/graph.d/
+
+and enable it in conf.php:
+
+ $optional_graphs = array('nova_services');
