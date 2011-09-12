@@ -39,7 +39,7 @@ __worker__ = None
 __lock__ = threading.Lock()
 
 FLAGS = flags.FLAGS
-args = []
+args = ['compute-metrics']
 utils.default_flagfile(args=args)
 print args
 flags.FLAGS(args)
