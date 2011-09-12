@@ -1,0 +1,44 @@
+modules {
+  module {
+    name     = "compute-metrics"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every  = 60
+  time_threshold = 90
+
+  metric {
+    name  = "nova_compute_instance_count"
+    title = "Openstack Instance Count"
+    value_threshold = 0
+  }
+
+  metric {
+    name = "openstack_version"
+    title = "Openstack Version"
+  }
+
+  metric {
+    name = "nova_compute_is_running"
+    title = "Openstack Nova compute is running"
+  }
+
+  metric {
+    name = "nova_compute_driver"
+    title = "Openstack Nova compute driver"
+  }
+
+  metric {
+    name  = "nova_running_services"
+    title = "Openstack Nova running services"
+    value_threshold = 0
+  }
+
+  metric {
+    name  = "nova_registered_services"
+    title = "Openstacl Nova Registered services"
+    value_threshold = 0
+  }
+}
