@@ -134,6 +134,9 @@ def metric_init(params):
     print '[apache_status] Received the following parameters'
     print params
 
+    if "metric_group" not in params:
+        params["metric_group"] = "apache"
+
     Desc_Skel = {
         'name'        : 'XXX',
         'call_back'   : process_status_of,
@@ -143,7 +146,7 @@ def metric_init(params):
         'slope'       : 'both',
         'format'      : '%d',
         'description' : 'XXX',
-        'groups'      : 'apache',
+        'groups'      : params["metric_group"],
         }
 
     if "refresh_rate" not in params:
