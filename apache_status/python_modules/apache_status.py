@@ -147,9 +147,9 @@ def metric_init(params):
         }
 
     if "refresh_rate" not in params:
-        params["refresh_rate"] = 10
+        params["refresh_rate"] = 15
     if "url" not in params:
-        params["url"] = "http://localhost/server-status?auto"
+        params["url"] = "http://localhost:8001/server-status?auto"
 
     _Worker_Thread = UpdateApacheStatusThread(params)
     _Worker_Thread.start()
@@ -174,26 +174,26 @@ def metric_init(params):
                 "description": "hits",
                 }))
 
+    descriptors.append(create_desc({
+                "name"       : "ap_busy_workers",
+                "value_type" : "uint",
+                "units"      : "threads",
+                "format"     : "%u",
+                "description": "Busy threads",
+                }))
+
+    descriptors.append(create_desc({
+                "name"       : "ap_idle_workers",
+                "value_type" : "uint",
+                "units"      : "threads",
+                "format"     : "%u",
+                "description": "Idle threads",
+                }))
 
     for k,v in Scoreboard.iteritems():
         descriptors.append(create_desc({
                     "name"        : k,
                     "description" : v["desc"],
-                    }))
-        descriptors.append(create_desc({
-                    "name"       : "ap_busy_workers",
-                    "value_type" : "uint",
-                    "units"      : "threads",
-                    "format"     : "%u",
-                    "description": "Busy threads",
-                    }))
-
-        descriptors.append(create_desc({
-                    "name"       : "ap_idle_workers",
-                    "value_type" : "uint",
-                    "units"      : "threads",
-                    "format"     : "%u",
-                    "description": "Idle threads",
                     }))
 
     return descriptors
@@ -205,7 +205,7 @@ def metric_cleanup():
 if __name__ == '__main__':
     try:
         params = {
-            'url'         : 'http://localhost/server-status?auto',
+            'url'         : 'http://localhost:8001/server-status?auto',
             #'virtual_host': 'health',
             }
         metric_init(params)
@@ -216,7 +216,7 @@ if __name__ == '__main__':
                     print 'value for %s is %.3f' % (d['name'], v)
                 else:
                     print 'value for %s is %u'   % (d['name'], v)
-            time.sleep(5)
+            time.sleep(15)
     except KeyboardInterrupt:
         time.sleep(0.2)
         os._exit(1)
