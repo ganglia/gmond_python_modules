@@ -9,6 +9,8 @@ import traceback
 
 # global to store state for "total accesses"
 last_total_accesses = 0
+last_update = 0
+last_uptime = 0
 
 descriptors = list()
 Desc_Skel   = {}
@@ -80,24 +82,26 @@ class UpdateApacheStatusThread(threading.Thread):
                     scline = l.split(": ", 1)[1].rstrip()
                     for sck in scline:
                         self.status[ Scoreboard_bykey[sck] ] += 1
-                elif l.find("ReqPerSec:") == 0:
-                    scline = l.split(": ", 1)[1].rstrip()
-                    self.status["ap_rps"] = float(scline)
                 elif l.find("Total Accesses:") == 0:
-                    global last_total_accesses
+                    global last_total_accesses, last_update
                     new_value = int(l.split(": ", 1)[1].rstrip())
+                    now = time.time()
                     if (last_total_accesses == 0):
                         # if we don't have a value from last time, record a 0,
                         # otherwise we'll cause an enormous spike in the graph
                         # by recording the total value of the counter
-                        self.status["ap_hits"] = 0
+                        self.status["ap_requests"] = 0
+                        self.status["ap_rps"] = 0
                     else:
                         # subtract counter's old value from the new value and
                         # write it
                         hits = new_value - last_total_accesses
-                        self.status["ap_hits"] = hits
+                        self.status["ap_requests"] = hits
+                        # Calculate the average requests per second
+                        self.status["ap_rps"] = float(hits) / ( now - last_update )
                     # store for next time
                     last_total_accesses = new_value
+                    last_update = now
 
                 elif l.find("BusyWorkers:") == 0:
                     scline = l.split(": ", 1)[1].rstrip()
@@ -105,6 +109,20 @@ class UpdateApacheStatusThread(threading.Thread):
                 elif l.find("IdleWorkers:") == 0:
                     scline = l.split(": ", 1)[1].rstrip()
                     self.status["ap_idle_workers"] = int(scline)
+                elif l.find("Uptime:") == 0:
+                    global last_uptime
+                    scline = l.split(": ", 1)[1].rstrip()
+                    uptime = int(scline)
+                    # Check whether uptime is less than what it used to be. If it is Apache
+                    # was restarted so we should set ap_requests and ap_rps to 0. Otherwise
+                    # we'll get a huge spike
+                    if ( last_uptime == 0 or uptime < last_uptime):
+                        print "Zero out ap_requests since Apache has been restarted"
+                        self.status["ap_requests"] = 0
+                        self.status["ap_rps"] = 0
+                    last_uptime = uptime
+                    self.status["ap_uptime"] = uptime
+
 
         except urllib2.URLError:
             traceback.print_exc()
@@ -170,7 +188,7 @@ def metric_init(params):
                 }))
 
     descriptors.append(create_desc({
-                "name"       : "ap_hits",
+                "name"       : "ap_requests",
                 "value_type" : "uint",
                 "units"      : "hits",
                 "format"     : "%u",
@@ -192,6 +210,15 @@ def metric_init(params):
                 "format"     : "%u",
                 "description": "Idle threads",
                 }))
+
+    descriptors.append(create_desc({
+                "name"       : "ap_uptime",
+                "value_type" : "uint",
+                "units"      : "seconds",
+                "format"     : "%u",
+                "description": "Uptime",
+                }))
+
 
     for k,v in Scoreboard.iteritems():
         descriptors.append(create_desc({
@@ -216,10 +243,9 @@ if __name__ == '__main__':
             for d in descriptors:
                 v = d['call_back'](d['name'])
                 if d['name'] == "ap_rps":
-                    print 'value for %s is %.3f' % (d['name'], v)
+                    print 'value for %s is %.4f' % (d['name'], v)
                 else:
                     print 'value for %s is %u'   % (d['name'], v)
             time.sleep(15)
     except KeyboardInterrupt:
-        time.sleep(0.2)
         os._exit(1)
