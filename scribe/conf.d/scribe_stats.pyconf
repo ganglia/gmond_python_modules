@@ -1,0 +1,18 @@
+modules {
+  module {
+    name = "scribe_stats"
+    language = "python"
+  }
+}
+
+collection_group {
+
+  collect_every = 20
+  time_threshold = 90
+
+  metric {
+    name = "scribe_overall_messages_per_second"
+    title = "avg messages/second"
+    value_threshold = 0
+  }
+}
