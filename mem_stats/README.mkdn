@@ -4,7 +4,11 @@ mem_stats
 Python module for ganglia 3.1.
 
 This module allows you to collect memory metrics that have been left out of stock
-Ganglia gmond. For example I have it 
+Ganglia gmond. For example I have it memory dirty and memory writeback. These
+are values that are collected from 
+
+/proc/meminfo
+
 
 Install
 ===============
