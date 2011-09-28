@@ -1,0 +1,23 @@
+#
+
+modules {
+  module {
+    name = "elasticsearch"
+    language = "python"
+
+    param metric_group {
+      value = "elasticsearch"
+    }
+
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 60
+
+  metric {
+    name_match = "es_(.+)"
+  }
+}
+
