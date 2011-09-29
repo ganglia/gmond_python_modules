@@ -141,6 +141,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'ms',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Java GC Time (ms)',
     }))
 
@@ -149,6 +150,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'sockets',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (open)',
     }))
 
@@ -165,6 +167,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (attempt_fails)',
     }))
 
@@ -173,6 +176,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (in_errs)',
     }))
 
@@ -181,6 +185,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (out_rsts)',
     }))
 
@@ -239,6 +244,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'ms',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Merges Time (ms)',
     }))
 
