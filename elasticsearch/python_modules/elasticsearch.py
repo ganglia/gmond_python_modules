@@ -28,7 +28,7 @@ keyToPath['es_threads'] = "nodes.*.jvm.threads.count"
 keyToPath['es_gc_time'] = "nodes.*.jvm.gc.collection_time_in_millis"
 keyToPath['es_tcp_active_opens'] = "nodes.*.network.tcp.active_opens"
 keyToPath['es_tcp_curr_estab'] = "nodes.*.network.tcp.curr_estab"
-keyToPath['es_tcp_attempt_fails']= "nodes.*.network.tcp.active_opens"
+keyToPath['es_tcp_attempt_fails']= "nodes.*.network.tcp.attempt_fails"
 keyToPath['es_tcp_in_errs'] = "nodes.*.network.tcp.in_errs"
 keyToPath['es_tcp_out_rsts'] = "nodes.*.network.tcp.out_rsts"
 keyToPath['es_transport_open'] = "nodes.*.transport.server_open"
@@ -39,6 +39,12 @@ keyToPath['es_merges_current'] = "nodes.*.indices.merges.current"
 keyToPath['es_merges_total'] = "nodes.*.indices.merges.total"
 keyToPath['es_merges_time'] = "nodes.*.indices.merges.total_time_in_millis"
 keyToPath['es_num_docs'] = "nodes.*.indices.docs.num_docs"
+keyToPath['es_open_file_descriptors'] = "nodes.*.process.open_file_descriptors"
+keyToPath['es_cache_field_eviction'] = "nodes.*.indices.cache.field_evictions"
+keyToPath['es_cache_field_size'] = "nodes.*.indices.cache.field_size_in_bytes"
+keyToPath['es_cache_filter_count'] = "nodes.*.indices.cache.filter_count"
+keyToPath['es_cache_filter_evictions'] = "nodes.*.indices.cache.filter_evictions"
+keyToPath['es_cache_filter_size'] = "nodes.*.indices.cache.filter_size_in_bytes"
 
 def getStat(name):
     global last_update, result, url
@@ -54,8 +60,18 @@ def getStat(name):
     JsonPathName=keyToPath[name]
     tmp = jsonpath.jsonpath(result, JsonPathName )
 
+    # Check to make sure we have a valid result
+    # JsonPath returns False if no match found
+    if not tmp:
+        return None
+
     # Convert List to String
-    val = " ".join(["%s" % el for el in tmp])
+    try:
+        val = " ".join(["%s" % el for el in tmp])
+    except TypeError:
+        val = None
+        return val
+        pass
 
     # Check for integer only result
     if val.isdigit():
@@ -99,17 +115,17 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_heap_committed',
          'value_type' : 'float',
-         'units'      : 'KBytes',
+         'units'      : 'Bytes',
          'format'     : '%.0f',
-         'description': 'Java Heap Committed (KBytes)',
+         'description': 'Java Heap Committed (Bytes)',
     }))
 
     descriptors.append(create_desc({
          'name'       : 'es_heap_used',
          'value_type' : 'float',
-         'units'      : 'KBytes',
+         'units'      : 'Bytes',
          'format'     : '%.0f',
-         'description': 'Java Heap Used (KBytes)',
+         'description': 'Java Heap Used (Bytes)',
     }))
 
     descriptors.append(create_desc({
@@ -125,6 +141,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'ms',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Java GC Time (ms)',
     }))
 
@@ -133,6 +150,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'sockets',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (open)',
     }))
 
@@ -149,6 +167,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (attempt_fails)',
     }))
 
@@ -157,6 +176,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (in_errs)',
     }))
 
@@ -165,6 +185,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'TCP (out_rsts)',
     }))
 
@@ -187,9 +208,9 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_indices_size',
          'value_type' : 'float',
-         'units'      : 'KBytes',
+         'units'      : 'Bytes',
          'format'     : '%.0f',
-         'description': 'Index Size (KBytes)',
+         'description': 'Index Size (Bytes)',
     }))
 
     descriptors.append(create_desc({
@@ -197,6 +218,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Java GC Count',
     }))
 
@@ -213,6 +235,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'units',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Merges (total)',
     }))
 
@@ -221,6 +244,7 @@ def metric_init(params):
          'value_type' : 'uint',
          'units'      : 'ms',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Merges Time (ms)',
     }))
 
@@ -230,6 +254,56 @@ def metric_init(params):
          'units'      : 'units',
          'format'     : '%.0f',
          'description': 'Number of Documents',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_open_file_descriptors',
+         'value_type' : 'uint',
+         'units'      : 'files',
+         'format'     : '%d',
+         'description': 'Open File Descriptors',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_cache_field_eviction',
+         'value_type' : 'uint',
+         'units'      : 'units',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Field Cache Evictions',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_cache_field_size',
+         'value_type' : 'float',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'description': 'Field Cache Size',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_cache_filter_count',
+         'value_type' : 'uint',
+         'units'      : 'units',
+         'format'     : '%d',
+         'description': 'Filter Cache Count',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_cache_filter_evictions',
+         'value_type' : 'uint',
+         'units'      : 'units',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Filter Cache Evictions',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_cache_filter_size',
+         'value_type' : 'float',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'description': 'Filter Cache Size',
     }))
 
     return descriptors
