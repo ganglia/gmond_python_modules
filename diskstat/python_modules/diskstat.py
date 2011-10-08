@@ -155,6 +155,7 @@ def update_stats():
 		get_diff(dev, 'write_time', int(vals[10]))
 
 		get_diff(dev, 'io_time', int(vals[12]))
+		get_percent_time(dev, 'percent_io_time', int(stats[dev]['io_time']))
 		get_diff(dev, 'weighted_io_time', int(vals[13]))
 
 
@@ -185,6 +186,17 @@ def get_delta(dev, key, val, convert=1):
 		stats[dev][key] = 0
 
 	last_val[dev][key] = int(val)
+
+def get_percent_time(dev, key, val):
+	logging.debug(' get_percent_time for ' + dev +  '_' + key)
+	global stats, last_val
+
+	interval = (cur_time - last_update) * 1000
+
+	if interval > 0:
+		stats[dev][key] = round(((val / interval) * 100),2)
+	else:
+		stats[dev][key] = 0
 
 def get_diff(dev, key, val):
 	logging.debug(' get_diff for ' + dev + '_' + key)
@@ -274,6 +286,12 @@ def metric_init(params):
 		io_time = {
 			'units': 'ms',
 			'description': 'The time in milliseconds spent in I/O operations'},
+
+		percent_io_time = {
+			'units': 'percent',
+			'value_type': 'float',
+			'format': '%f',
+			'description': 'The percent of disk time spent on I/O operations'},
 
 		weighted_io_time = {
 			'units': 'ms',
