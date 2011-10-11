@@ -43,7 +43,8 @@ def metric_init(params):
     
 #    INTERFACES = params.get('interfaces')
     watch_interfaces = params.get('interfaces')
-    get_interfaces(watch_interfaces)
+    excluded_interfaces = params.get('excluded_interfaces')
+    get_interfaces(watch_interfaces,excluded_interfaces)
 
 #    print INTERFACES
     time_max = 60
@@ -106,7 +107,7 @@ def metric_init(params):
 
     return descriptors
 
-def get_interfaces(watch_interfaces):
+def get_interfaces(watch_interfaces, excluded_interfaces):
 	global INTERFACES
         
         # check if particular interfaces have been specifieid. Watch only those
@@ -114,6 +115,9 @@ def get_interfaces(watch_interfaces):
             INTERFACES = watch_interfaces.split(" ")
             
         else:
+
+	    if excluded_interfaces != "":
+		excluded_if_list = excluded_interfaces.split(" ")
         
             f = open(net_stats_file, "r")
             for line in f:
@@ -121,7 +125,8 @@ def get_interfaces(watch_interfaces):
                 if re.search(":", line):
                     a = line.split(":")
                     dev_name = a[0].lstrip()
-                    INTERFACES.append(dev_name)
+		    if dev_name not in excluded_if_list:
+                        INTERFACES.append(dev_name)
 
 	return 0
 
@@ -184,7 +189,8 @@ def get_delta(name):
 if __name__ == '__main__':
     try:
         params = {
-            "interfaces": "eth0 eth1",
+            "interfaces": "",
+            "excluded_interfaces": "dummy",
             "debug"        : True,
             }
         metric_init(params)

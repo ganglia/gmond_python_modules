@@ -11,6 +11,13 @@ modules {
       value = ""
     }
 
+    # Alternatively leave the interfaces list at value = "" then exclude
+    # specific interfaces e.g. dummy, lo etc. 
+    param excluded_interfaces {
+      value = "dummy0 eth0_rename tunl0 gre0"
+    }
+
+
   }
 }
 
