@@ -184,8 +184,7 @@ def get_delta(name):
 if __name__ == '__main__':
     try:
         params = {
-            "interfaces": "",
-	    "exclude_interfaces": "",
+            "interfaces": "eth0 eth1",
             "debug"        : True,
             }
         metric_init(params)
