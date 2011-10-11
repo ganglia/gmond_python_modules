@@ -1,0 +1,30 @@
+modules {
+  module {
+    name = "multi_interface"
+    language = "python"
+
+    # Leaving the interfaces value empty will result in all interfaces being
+    # used ie. anything you can see in /proc/net/dev. If you only want to
+    # monitor specific ones change value to space delimited list of
+    # network interfaces e.g. value = "eth0 eth1 bond0"
+    param interfaces {
+      value = ""
+    }
+
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 45
+
+  metric {
+      name_match = "rx_(.+)"
+      value_threshold = 1.0
+  }
+  metric {
+      name_match = "tx_(.+)"
+      value_threshold = 1.0
+  }
+
+}
