@@ -4,16 +4,21 @@ import time
 
 PARAMS = {}
 
-NAME_PREFIX = 'tcpext_'
-
 METRICS = {
     'time' : 0,
     'data' : {}
 }
+
+
+tcpext_file = "/proc/net/netstat"
+snmp_file = "/proc/net/snmp"
+
 LAST_METRICS = dict(METRICS)
 METRICS_CACHE_MAX = 5
 
-tcpext_stats_pos = {
+stats_pos = {} 
+
+stats_pos['tcpext'] = {
   'syncookiessent' : 1,
   'syncookiesrecv' : 2,
   'syncookiesfailed' : 3,
@@ -93,18 +98,76 @@ tcpext_stats_pos = {
   'tcpdeferacceptdrop' : 77
     }
 
+stats_pos['ip'] = {
+   'inreceives': 3,
+   'inhdrerrors': 4,
+   'inaddrerrors': 5,
+   'forwdatagrams': 6,
+   'inunknownprotos': 7,
+   'indiscards': 8,
+   'indelivers': 9,
+   'outrequests': 10,
+   'outdiscards': 11,
+   'outnoroutes': 12,
+   'reasmtimeout': 13,
+   'reasmreqds': 14,
+   'reasmoks': 15,
+   'reasmfails': 16,
+   'fragoks': 17,
+   'fragfails': 18,
+   'fragcreates': 19    
+}
 
-###############################################################################
-# Explanation of metrics in /proc/meminfo can be found here
-#
-# http://www.redhat.com/advice/tips/meminfo.html
-# and
-# http://unixfoo.blogspot.com/2008/02/know-about-procmeminfo.html
-# and
-# http://www.centos.org/docs/5/html/5.2/Deployment_Guide/s2-proc-meminfo.html
-###############################################################################
-tcpext_file = "/proc/net/netstat"
+stats_pos['tcp'] = {
+   'activeopens': 5,
+   'passiveopens': 6,
+   'attemptfails': 7,
+   'estabresets': 8,
+   'currestab': 9,
+   'insegs': 10,
+   'outsegs': 11,
+   'retranssegs': 12,
+   'inerrs': 13,
+   'outrsts': 14
+}
 
+stats_pos['udp'] = {
+   'indatagrams':   1,
+   'noports':   2,
+   'inerrors':   3,
+   'outdatagrams':   4,
+   'rcvbuferrors':   5,
+   'sndbuferrors':   6,
+}
+
+stats_pos['icmp'] = {
+    'inmsgs':   1,
+   'inerrors':   2,
+   'indestunreachs':   3,
+   'intimeexcds':   4,
+   'inparmprobs':   5,
+   'insrcquenchs':   6,
+   'inredirects':   7,
+   'inechos':   8,
+   'inechoreps':   9,
+   'intimestamps':   10,
+   'intimestampreps':   11,
+   'inaddrmasks':   12,
+   'inaddrmaskreps':   13,
+   'outmsgs':   14,
+   'outerrors':   15,
+   'outdestunreachs':   16,
+   'outtimeexcds':   17,
+   'outparmprobs':   18,
+   'outsrcquenchs':   19,
+   'outredirects':   20,
+   'outechos':   21,
+   'outechoreps':   22,
+   'outtimestamps':   23,
+   'outtimestampreps':   24,
+   'outaddrmasks':   25,
+   'outaddrmaskreps':   26
+}
 
 def get_metrics():
     """Return all metrics"""
@@ -123,17 +186,40 @@ def get_metrics():
         metrics = {}
         for line in file:
 	    if re.match("TcpExt: [0-9]", line):
-		print line
                 metrics = re.split("\s+", line)
+
+	file.close
 
         # update cache
         LAST_METRICS = dict(METRICS)
         METRICS = {
             'time': time.time(),
-            'data': metrics
+            'tcpext': metrics
         }
 
+
+	######################################################################
+	# Let's get stats from /proc/net/snmp
+	######################################################################
+	try:
+	    file = open(snmp_file, 'r')
+    
+	except IOError:
+	    return 0
+
+        for line in file:
+	    if re.match("Udp: [0-9]", line):
+                METRICS['udp'] = re.split("\s+", line)
+	    if re.match("Ip: [0-9]", line):
+                METRICS['ip'] = re.split("\s+", line)
+	    if re.match("Tcp: [0-9]", line):
+                METRICS['tcp'] = re.split("\s+", line)
+
+
+    	file.close
+
     return [METRICS, LAST_METRICS]
+
 
 def get_value(name):
     """Return a value for the requested metric"""
@@ -156,11 +242,12 @@ def get_delta(name):
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
-    index = tcpext_stats_pos[name]
+    parts = name.split("_")
+    group = parts[0]
+    index = stats_pos[group][parts[1]]
 
     try:
-      delta = (float(curr_metrics['data'][index]) - float(last_metrics['data'][index])) /(curr_metrics['time'] - last_metrics['time'])
+      delta = (float(curr_metrics[group][index]) - float(last_metrics[group][index])) /(curr_metrics['time'] - last_metrics['time'])
       if delta < 0:
 	print name + " is less 0"
 	delta = 0
@@ -168,6 +255,25 @@ def get_delta(name):
       delta = 0.0      
 
     return delta
+
+
+def get_tcploss_vs_packets(name):
+
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+
+    index_pkts = stats_pos["tcpext"]["tcphphits"]
+    index_loss = stats_pos["tcpext"]["tcploss"]
+
+    try:
+      pct = 100 * (float(curr_metrics['data'][index_loss]) - float(last_metrics['data'][index_loss])) / (float(curr_metrics['data'][index_pkts]) - float(last_metrics['data'][index_pkts]))
+      if pct < 0:
+	print name + " is less 0"
+	pct = 0
+    except KeyError:
+      pct = 0.0      
+
+    return pct
 
 
 def create_desc(skel, prop):
@@ -186,18 +292,27 @@ def metric_init(params):
         'call_back'   : get_delta,
         'time_max'    : 60,
         'value_type'  : 'float',
-        'format'      : '%.4f',
+        'format'      : '%.5f',
         'units'       : 'count/s',
         'slope'       : 'both', # zero|positive|negative|both
         'description' : 'XXX',
-        'groups'      : 'tcp_extended',
+        'groups'      : 'XXX',
         }
 
-    for item in tcpext_stats_pos:
-        descriptors.append(create_desc(Desc_Skel, {
-                "name"       : NAME_PREFIX + item,
-                "description": item,
-                }))
+    for group in stats_pos:
+	for item in stats_pos[group]:
+	    descriptors.append(create_desc(Desc_Skel, {
+		    "name"       : group + "_" + item,
+		    "description": item,
+		    'groups'	 : group
+		    }))
+
+#    descriptors.append(create_desc(Desc_Skel, {
+#	"name"       : NAME_PREFIX + "tcploss_percentage",
+#	"call_back"  : get_tcploss_vs_packets,
+#	"description": "TCP percentage loss, tcploss / tcphphits",
+#	"units"      : "pct"
+#	}))
 
     return descriptors
 
