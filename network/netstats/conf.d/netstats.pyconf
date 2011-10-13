@@ -13,5 +13,21 @@ collection_group {
       name_match = "tcpext_(.+)"
       value_threshold = 1.0
   }
+  metric {
+      name_match = "tcp_(.+)"
+      value_threshold = 1.0
+  }
+  metric {
+      name_match = "udp_(.+)"
+      value_threshold = 1.0
+  }
+  metric {
+      name_match = "ip_(.+)"
+      value_threshold = 1.0
+  }
+  metric {
+      name_match = "icmp_(.+)"
+      value_threshold = 1.0
+  }
 
 }
