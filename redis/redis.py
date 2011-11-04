@@ -13,6 +13,10 @@ def metric_handler(name):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((metric_handler.host, metric_handler.port))
         s.settimeout(5) # set socket timeout as to not block gmond
+        # if the password is set from parameters
+        if metric_handler.password != None:
+        	s.send("AUTH {0}\r\n".format(metric_handler.password))
+        	s.recv(4096) # TODO check if auth is valid
         s.send("INFO\r\n")
         info = s.recv(4096)
         if "$" != info[0]:
@@ -35,6 +39,7 @@ def metric_handler(name):
 def metric_init(params={}):
     metric_handler.host = params.get("host", "127.0.0.1")
     metric_handler.port = int(params.get("port", 6379))
+    metric_handler.password = params.get("password", None)
     metric_handler.timestamp = 0
     metrics = {
         "connected_clients": {"units": "clients"},
