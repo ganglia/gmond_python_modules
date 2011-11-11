@@ -89,6 +89,27 @@ def get_delta(name):
     return delta
 
 
+# Calculate VM efficiency
+# Works similar like sar -B 1
+# Calculated as pgsteal / pgscan, this is a metric of the efficiency of page reclaim. If  it  is  near  100%  then
+# almost  every  page coming off the tail of the inactive list is being reaped. If it gets too low (e.g. less than 30%)  
+# then the virtual memory is having some difficulty.  This field is displayed as zero if no pages  have  been
+# scanned during the interval of time
+def get_vmeff(name):  
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+    try:
+      delta = 100 * (float(curr_metrics['data']['pgsteal_normal']) - float(last_metrics['data']['pgsteal_normal'])) /(float(curr_metrics['data']['pgscan_kswapd_normal']) - float(last_metrics['data']['pgscan_kswapd_normal']))
+      if delta < 0:
+        print name + " is less 0"
+        delta = 0
+    except KeyError:
+      delta = 0.0      
+
+    return delta
+  
+  
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
@@ -668,6 +689,13 @@ def metric_init(params):
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_success",
                 "description": "compact_success",
+                }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : NAME_PREFIX + "vmeff",
+                "description": "VM efficiency",
+                'call_back'   : get_vmeff,
+                'units'       : 'pct',
                 }))
 
     return descriptors
