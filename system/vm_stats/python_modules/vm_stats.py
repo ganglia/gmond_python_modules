@@ -663,31 +663,43 @@ def metric_init(params):
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_blocks_moved",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_blocks_moved",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_pages_moved",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_pages_moved",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_pagemigrate_failed",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_pagemigrate_failed",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_stall",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_stall",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_fail",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_fail",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + "compact_success",
+                "call_back"  : get_delta,
+                "units"      : "ops/s",
                 "description": "compact_success",
                 }))
 
