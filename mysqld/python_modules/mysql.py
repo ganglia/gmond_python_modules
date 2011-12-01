@@ -30,6 +30,9 @@ THE SOFTWARE.
 ###       * Added system variables: max_connections and query_cache_size
 ###       * Modified some innodb status variables to become deltas
 ###
+###    v1.0.3 - 2011-12-02
+###       * Support custom UNIX sockets
+###
 ###  Requires:
 ###       * yum install MySQL-python
 ###       * DBUtil.py
@@ -344,6 +347,8 @@ def metric_init(params):
 		port = params.get('port', 3306),
 		connect_timeout = params.get('timeout', 30),
 	)
+	if params.get('unix_socket', '') != '':
+            mysql_conn_opts['unix_socket'] = params.get('unix_socket')
 
 	master_stats_descriptions = {}
 	innodb_stats_descriptions = {}
@@ -1038,6 +1043,7 @@ if __name__ == '__main__':
 	parser.add_option("-u", "--user", dest="user", help="user to connect as", default="")
 	parser.add_option("-p", "--password", dest="passwd", help="password", default="")
 	parser.add_option("-P", "--port", dest="port", help="port", default=3306, type="int")
+	parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
 	parser.add_option("--no-innodb", dest="get_innodb", action="store_false", default=True)
 	parser.add_option("--no-master", dest="get_master", action="store_false", default=True)
 	parser.add_option("--no-slave", dest="get_slave", action="store_false", default=True)
@@ -1056,6 +1062,7 @@ if __name__ == '__main__':
 		'get_innodb': options.get_innodb,
 		'get_master': options.get_master,
 		'get_slave': options.get_slave,
+		'unix_socket': options.unix_socket,
 	})
 
 	for d in descriptors:
