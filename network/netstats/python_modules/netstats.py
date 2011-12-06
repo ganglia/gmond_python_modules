@@ -257,21 +257,41 @@ def get_delta(name):
     return delta
 
 
-def get_tcploss_vs_packets(name):
+def get_tcploss_percentage(name):
 
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
 
-    index_pkts = stats_pos["tcpext"]["tcphphits"]
+    index_outsegs = stats_pos["tcp"]["outsegs"]
+    index_insegs = stats_pos["tcp"]["insegs"]
     index_loss = stats_pos["tcpext"]["tcploss"]
 
     try:
-      pct = 100 * (float(curr_metrics['data'][index_loss]) - float(last_metrics['data'][index_loss])) / (float(curr_metrics['data'][index_pkts]) - float(last_metrics['data'][index_pkts]))
+      pct = 100 * (float(curr_metrics['tcpext'][index_loss]) - float(last_metrics['tcpext'][index_loss])) / (float(curr_metrics['tcp'][index_outsegs]) +  float(curr_metrics['tcp'][index_insegs]) - float(last_metrics['tcp'][index_insegs]) - float(last_metrics['tcp'][index_outsegs]))
       if pct < 0:
 	print name + " is less 0"
 	pct = 0
     except KeyError:
-      pct = 0.0      
+      pct = 0.0
+
+    return pct
+
+def get_retrans_percentage(name):
+
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+
+    index_outsegs = stats_pos["tcp"]["outsegs"]
+    index_insegs = stats_pos["tcp"]["insegs"]
+    index_retrans = stats_pos["tcp"]["retranssegs"]
+
+    try:
+      pct = 100 * (float(curr_metrics['tcp'][index_retrans]) - float(last_metrics['tcp'][index_retrans])) / (float(curr_metrics['tcp'][index_outsegs]) +  float(curr_metrics['tcp'][index_insegs]) - float(last_metrics['tcp'][index_insegs]) - float(last_metrics['tcp'][index_outsegs]))
+      if pct < 0:
+	print name + " is less 0"
+	pct = 0
+    except KeyError:
+      pct = 0.0
 
     return pct
 
@@ -307,12 +327,19 @@ def metric_init(params):
 		    'groups'	 : group
 		    }))
 
-#    descriptors.append(create_desc(Desc_Skel, {
-#	"name"       : NAME_PREFIX + "tcploss_percentage",
-#	"call_back"  : get_tcploss_vs_packets,
-#	"description": "TCP percentage loss, tcploss / tcphphits",
-#	"units"      : "pct"
-#	}))
+    descriptors.append(create_desc(Desc_Skel, {
+	"name"       : "tcpext_" + "tcploss_percentage",
+	"call_back"  : get_tcploss_percentage,
+	"description": "TCP percentage loss, tcploss / insegs + outsegs",
+	"units"      : "pct"
+	}))
+
+    descriptors.append(create_desc(Desc_Skel, {
+	"name"       : "tcp_" + "retrans_percentage",
+	"call_back"  : get_retrans_percentage,
+	"description": "TCP retrans percentage, retranssegs / insegs + outsegs",
+	"units"      : "pct"
+	}))
 
     return descriptors
 
