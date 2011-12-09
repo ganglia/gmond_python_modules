@@ -41,11 +41,10 @@ THE SOFTWARE.
 ###  License to use, modify, and distribute under the GPL
 ###  http://www.gnu.org/licenses/gpl.txt
 
-import sys
 import time
 import MySQLdb
 
-from DBUtil import parse_innodb_status
+from DBUtil import parse_innodb_status, defaultdict
 
 import logging
 
@@ -67,15 +66,16 @@ REPORT_SLAVE  = True
 MAX_UPDATE_TIME = 15
 
 def update_stats(get_innodb=True, get_master=True, get_slave=True):
+	"""
+
+	"""
 	logging.debug('updating stats')
 	global last_update
 	global mysql_stats, mysql_stats_last
 
 	cur_time = time.time()
-	previous_time = last_update
-
 	time_delta = cur_time - last_update
-	if (time_delta <= 0):
+	if time_delta <= 0:
 		#we went backward in time.
 		logging.debug(" system clock set backwards, probably ntp")
 
@@ -120,6 +120,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		get_innodb = get_innodb and variables['have_innodb'].lower() == 'yes'
 		get_master = get_master and variables['log_bin'].lower() == 'on'
 
+		innodb_status = defaultdict(int)
 		if get_innodb:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
@@ -127,16 +128,17 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 			cursor.close()
 			logging.debug('innodb_status: ' + str(innodb_status))
 
+		master_logs = tuple
 		if get_master:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW MASTER LOGS")
 			master_logs = cursor.fetchall()
 			cursor.close()
 
+		slave_status = {}
 		if get_slave:
 			cursor = conn.cursor(MySQLdb.cursors.DictCursor)
 			cursor.execute("SHOW SLAVE STATUS")
-			slave_status = {}
 			res = cursor.fetchone()
 			if res:
 				for (k,v) in res.items():
@@ -242,7 +244,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 			mysql_stats[key] = global_status[key]
 		else:
 			# Calculate deltas for counters
-			if (time_delta <= 0):
+			if time_delta <= 0:
 				#systemclock was set backwards, nog updating values.. to smooth over the graphs
 				pass
 			elif key in mysql_stats_last:
@@ -271,7 +273,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 
 			if istat in innodb_delta:
 				# Calculate deltas for counters
-				if (time_delta <= 0):
+				if time_delta <= 0:
 					#systemclock was set backwards, nog updating values.. to smooth over the graphs
 					pass
 				elif key in mysql_stats_last:
