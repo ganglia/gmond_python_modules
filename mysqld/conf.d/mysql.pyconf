@@ -31,6 +31,9 @@ modules {
     param get_slave {
       value = False
     }
+    param delta_per_second {
+      value = True
+    }
   }
 }
 

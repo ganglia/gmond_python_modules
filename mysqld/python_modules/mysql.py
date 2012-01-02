@@ -41,11 +41,10 @@ THE SOFTWARE.
 ###  License to use, modify, and distribute under the GPL
 ###  http://www.gnu.org/licenses/gpl.txt
 
-import sys
 import time
 import MySQLdb
 
-from DBUtil import parse_innodb_status
+from DBUtil import parse_innodb_status, defaultdict
 
 import logging
 
@@ -58,6 +57,7 @@ last_update = 0
 mysql_conn_opts = {}
 mysql_stats = {}
 mysql_stats_last = {}
+delta_per_second = False
 
 REPORT_INNODB = True
 REPORT_MASTER = True
@@ -66,11 +66,18 @@ REPORT_SLAVE  = True
 MAX_UPDATE_TIME = 15
 
 def update_stats(get_innodb=True, get_master=True, get_slave=True):
+	"""
+
+	"""
 	logging.debug('updating stats')
 	global last_update
 	global mysql_stats, mysql_stats_last
 
 	cur_time = time.time()
+	time_delta = cur_time - last_update
+	if time_delta <= 0:
+		#we went backward in time.
+		logging.debug(" system clock set backwards, probably ntp")
 
 	if cur_time - last_update < MAX_UPDATE_TIME:
 		logging.debug(' wait ' + str(int(MAX_UPDATE_TIME - (cur_time - last_update))) + ' seconds')
@@ -113,6 +120,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		get_innodb = get_innodb and variables['have_innodb'].lower() == 'yes'
 		get_master = get_master and variables['log_bin'].lower() == 'on'
 
+		innodb_status = defaultdict(int)
 		if get_innodb:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
@@ -120,16 +128,17 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 			cursor.close()
 			logging.debug('innodb_status: ' + str(innodb_status))
 
+		master_logs = tuple
 		if get_master:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW MASTER LOGS")
 			master_logs = cursor.fetchall()
 			cursor.close()
 
+		slave_status = {}
 		if get_slave:
 			cursor = conn.cursor(MySQLdb.cursors.DictCursor)
 			cursor.execute("SHOW SLAVE STATUS")
-			slave_status = {}
 			res = cursor.fetchone()
 			if res:
 				for (k,v) in res.items():
@@ -221,10 +230,10 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		'open_tables',
 		'qcache_free_blocks',
 		'qcache_free_memory',
+		'qcache_total_blocks',
 		'slave_open_temp_tables',
 		'threads_cached',
 		'threads_connected',
-		'threads_created',
 		'threads_running',
 		'uptime'
 	)
@@ -235,10 +244,16 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 			mysql_stats[key] = global_status[key]
 		else:
 			# Calculate deltas for counters
-			if key in mysql_stats_last:
-				mysql_stats[key] = int(global_status[key]) - int(mysql_stats_last[key])
+			if time_delta <= 0:
+				#systemclock was set backwards, nog updating values.. to smooth over the graphs
+				pass
+			elif key in mysql_stats_last:
+				if delta_per_second:
+					mysql_stats[key] = (int(global_status[key]) - int(mysql_stats_last[key])) / time_delta
+				else:
+					mysql_stats[key] = int(global_status[key]) - int(mysql_stats_last[key])
 			else:
-				mysql_stats[key] = 0
+				mysql_stats[key] = float(0)
 
 			mysql_stats_last[key] = global_status[key]
 
@@ -258,10 +273,16 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 
 			if istat in innodb_delta:
 				# Calculate deltas for counters
-				if key in mysql_stats_last:
-					mysql_stats[key] = int(innodb_status[istat]) - int(mysql_stats_last[key])
+				if time_delta <= 0:
+					#systemclock was set backwards, nog updating values.. to smooth over the graphs
+					pass
+				elif key in mysql_stats_last:
+					if delta_per_second:
+						mysql_stats[key] = (int(innodb_status[istat]) - int(mysql_stats_last[key])) / time_delta
+					else:
+						mysql_stats[key] = int(innodb_status[istat]) - int(mysql_stats_last[key])
 				else:
-					mysql_stats[key] = 0
+					mysql_stats[key] = float(0)
 
 				mysql_stats_last[key] = innodb_status[istat]
 
@@ -329,6 +350,7 @@ def metric_init(params):
 	global descriptors
 	global mysql_conn_opts
 	global mysql_stats
+	global delta_per_second
 
 	global REPORT_INNODB
 	global REPORT_MASTER
@@ -348,7 +370,10 @@ def metric_init(params):
 		connect_timeout = params.get('timeout', 30),
 	)
 	if params.get('unix_socket', '') != '':
-            mysql_conn_opts['unix_socket'] = params.get('unix_socket')
+		mysql_conn_opts['unix_socket'] = params.get('unix_socket')
+
+	if params.get("delta_per_second", '') != '':
+		delta_per_second = True
 
 	master_stats_descriptions = {}
 	innodb_stats_descriptions = {}
@@ -357,101 +382,121 @@ def metric_init(params):
 	misc_stats_descriptions = dict(
 		aborted_clients = {
 			'description': 'The number of connections that were aborted because the client died without closing the connection properly',
+			'value_type': 'float',
 			'units': 'clients',
 		}, 
 
 		aborted_connects = {
 			'description': 'The number of failed attempts to connect to the MySQL server',
+			'value_type': 'float',
 			'units': 'conns',
 		}, 
 
 		binlog_cache_disk_use = {
 			'description': 'The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction',
+			'value_type': 'float',
 			'units': 'txns',
 		}, 
 
 		binlog_cache_use = {
 			'description': ' The number of transactions that used the temporary binary log cache',
+			'value_type': 'float',
 			'units': 'txns',
 		}, 
 
 		bytes_received = {
 			'description': 'The number of bytes received from all clients',
+			'value_type': 'float',
 			'units': 'bytes',
 		}, 
 
 		bytes_sent = {
 			'description': ' The number of bytes sent to all clients',
+			'value_type': 'float',
 			'units': 'bytes',
 		}, 
 
 		com_delete = {
 			'description': 'The number of DELETE statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_delete_multi = {
 			'description': 'The number of multi-table DELETE statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_insert = {
 			'description': 'The number of INSERT statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_insert_select = {
 			'description': 'The number of INSERT ... SELECT statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_load = {
 			'description': 'The number of LOAD statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_replace = {
 			'description': 'The number of REPLACE statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_replace_select = {
 			'description': 'The number of REPLACE ... SELECT statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_select = {
 			'description': 'The number of SELECT statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_update = {
 			'description': 'The number of UPDATE statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		com_update_multi = {
 			'description': 'The number of multi-table UPDATE statements',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		connections = {
 			'description': 'The number of connection attempts (successful or not) to the MySQL server',
+			'value_type': 'float',
 			'units': 'conns',
 		}, 
 
 		created_tmp_disk_tables = {
 			'description': 'The number of temporary tables on disk created automatically by the server while executing statements',
+			'value_type': 'float',
 			'units': 'tables',
 		}, 
 
 		created_tmp_files = {
 			'description': 'The number of temporary files mysqld has created',
+			'value_type': 'float',
 			'units': 'files',
 		}, 
 
 		created_tmp_tables = {
 			'description': 'The number of in-memory temporary tables created automatically by the server while executing statement',
+			'value_type': 'float',
 			'units': 'tables',
 		}, 
 
@@ -459,21 +504,25 @@ def metric_init(params):
 
 		key_read_requests = {
 			'description': 'The number of requests to read a key block from the cache',
+			'value_type': 'float',
 			'units': 'reqs',
 		}, 
 
 		key_reads = {
 			'description': 'The number of physical reads of a key block from disk',
+			'value_type': 'float',
 			'units': 'reads',
 		}, 
 
 		key_write_requests = {
 			'description': 'The number of requests to write a key block to the cache',
+			'value_type': 'float',
 			'units': 'reqs',
 		}, 
 
 		key_writes = {
 			'description': 'The number of physical writes of a key block to disk',
+			'value_type': 'float',
 			'units': 'writes',
 		}, 
 
@@ -498,6 +547,7 @@ def metric_init(params):
 		# If Opened_tables is big, your table_cache value is probably too small. 
 		opened_tables = {
 			'description': 'The number of tables that have been opened',
+			'value_type': 'float',
 			'units': 'tables',
 		}, 
 
@@ -515,26 +565,31 @@ def metric_init(params):
 
 		qcache_hits = {
 			'description': 'The number of query cache hits',
+			'value_type': 'float',
 			'units': 'hits',
 		}, 
 
 		qcache_inserts = {
 			'description': 'The number of queries added to the query cache',
+			'value_type': 'float',
 			'units': 'queries',
 		}, 
 
 		qcache_lowmem_prunes = {
 			'description': 'The number of queries that were deleted from the query cache because of low memory',
+			'value_type': 'float',
 			'units': 'queries',
 		}, 
 
 		qcache_not_cached = {
 			'description': 'The number of non-cached queries (not cacheable, or not cached due to the query_cache_type setting)',
+			'value_type': 'float',
 			'units': 'queries',
 		}, 
 
 		qcache_queries_in_cache = {
 			'description': 'The number of queries registered in the query cache',
+			'value_type': 'float',
 			'units': 'queries',
 		}, 
 
@@ -545,80 +600,95 @@ def metric_init(params):
 
 		questions = {
 			'description': 'The number of statements that clients have sent to the server',
+			'value_type': 'float',
 			'units': 'stmts',
 		}, 
 
 		# If this value is not 0, you should carefully check the indexes of your tables.
 		select_full_join = {
 			'description': 'The number of joins that perform table scans because they do not use indexes',
+			'value_type': 'float',
 			'units': 'joins',
 		}, 
 
 		select_full_range_join = {
 			'description': 'The number of joins that used a range search on a reference table',
+			'value_type': 'float',
 			'units': 'joins',
 		}, 
 
 		select_range = {
 			'description': 'The number of joins that used ranges on the first table',
+			'value_type': 'float',
 			'units': 'joins',
 		}, 
 
 		# If this is not 0, you should carefully check the indexes of your tables.
 		select_range_check = {
 			'description': 'The number of joins without keys that check for key usage after each row',
+			'value_type': 'float',
 			'units': 'joins',
 		}, 
 
 		select_scan = {
 			'description': 'The number of joins that did a full scan of the first table',
+			'value_type': 'float',
 			'units': 'joins',
 		}, 
 
 		slave_open_temp_tables = {
 			'description': 'The number of temporary tables that the slave SQL thread currently has open',
+			'value_type': 'float',
 			'units': 'tables',
 			'slope': 'both',
 		}, 
 
 		slave_retried_transactions = {
 			'description': 'The total number of times since startup that the replication slave SQL thread has retried transactions',
+			'value_type': 'float',
 			'units': 'count',
 		}, 
 
 		slow_launch_threads = {
 			'description': 'The number of threads that have taken more than slow_launch_time seconds to create',
+			'value_type': 'float',
 			'units': 'threads',
 		}, 
 
 		slow_queries = {
 			'description': 'The number of queries that have taken more than long_query_time seconds',
+			'value_type': 'float',
 			'units': 'queries',
 		}, 
 
 		sort_range = {
 			'description': 'The number of sorts that were done using ranges',
+			'value_type': 'float',
 			'units': 'sorts',
 		}, 
 
 		sort_rows = {
 			'description': 'The number of sorted rows',
+			'value_type': 'float',
 			'units': 'rows',
 		}, 
 
 		sort_scan = {
 			'description': 'The number of sorts that were done by scanning the table',
+			'value_type': 'float',
 			'units': 'sorts',
 		}, 
 
 		table_locks_immediate = {
 			'description': 'The number of times that a request for a table lock could be granted immediately',
+			'value_type': 'float',
 			'units': 'count',
 		}, 
 
 		# If this is high and you have performance problems, you should first optimize your queries, and then either split your table or tables or use replication.
 		table_locks_waited = {
 			'description': 'The number of times that a request for a table lock could not be granted immediately and a wait was needed',
+			'value_type': 'float',
 			'units': 'count',
 		}, 
 
@@ -639,6 +709,7 @@ def metric_init(params):
 		# Threads_created is big, you may want to increase the thread_cache_size value. 
 		threads_created = {
 			'description': 'The number of threads created to handle connections',
+			'value_type': 'float',
 			'units': 'threads',
 		}, 
 
@@ -657,6 +728,7 @@ def metric_init(params):
 		version = {
 			'description': "MySQL Version",
 			'value_type': 'string',
+		    'format': '%s',
 		},
 
 		max_connections = {
@@ -757,19 +829,19 @@ def metric_init(params):
 
 			innodb_data_fsyncs = {
 				'description': "The number of fsync() operations",
-				'value_type':'uint',
+				'value_type':'float',
 				'units': 'fsyncs',
 			},
 
 			innodb_data_reads = {
 				'description': "The number of data reads",
-				'value_type':'uint',
+				'value_type':'float',
 				'units': 'reads',
 			},
 
 			innodb_data_writes = {
 				'description': "The number of data writes",
-				'value_type':'uint',
+				'value_type':'float',
 				'units': 'writes',
 			},
 
@@ -825,7 +897,7 @@ def metric_init(params):
 
 			innodb_log_writes = {
 				'description': "The number of physical writes to the log file",
-				'value_type':'uint',
+				'value_type':'float',
 				'units': 'writes',
 			},
 
@@ -1006,6 +1078,10 @@ def metric_init(params):
 	for stats_descriptions in (innodb_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
 		for label in stats_descriptions:
 			if mysql_stats.has_key(label):
+				format = '%u'
+				if stats_descriptions[label].has_key('value_type'):
+					if stats_descriptions[label]['value_type'] == "float":
+						format = '%f'
 
 				d = {
 					'name': 'mysql_' + label,
@@ -1014,7 +1090,7 @@ def metric_init(params):
 					'value_type': "uint",
 					'units': "",
 					'slope': "both",
-					'format': '%u',
+					'format': format,
 					'description': "http://search.mysql.com/search?q=" + label,
 					'groups': 'mysql',
 				}
