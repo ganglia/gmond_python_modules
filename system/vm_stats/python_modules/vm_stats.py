@@ -98,8 +98,14 @@ def get_delta(name):
 def get_vmeff(name):  
     # get metrics
     [curr_metrics, last_metrics] = get_metrics()
+        
     try:
-      delta = 100 * (float(curr_metrics['data']['pgsteal_normal']) - float(last_metrics['data']['pgsteal_normal'])) /(float(curr_metrics['data']['pgscan_kswapd_normal']) - float(last_metrics['data']['pgscan_kswapd_normal']))
+      pgscan_diff = float(curr_metrics['data']['pgscan_kswapd_normal']) - float(last_metrics['data']['pgscan_kswapd_normal'])
+      # To avoid division by 0 errors check whether pgscan is 0
+      if pgscan_diff == 0:
+	return 0.0
+	
+      delta = 100 * (float(curr_metrics['data']['pgsteal_normal']) - float(last_metrics['data']['pgsteal_normal'])) / pgscan_diff
       if delta < 0:
         print name + " is less 0"
         delta = 0
@@ -107,7 +113,6 @@ def get_vmeff(name):
       delta = 0.0      
 
     return delta
-  
   
 
 def create_desc(skel, prop):
