@@ -80,7 +80,7 @@ def get_gmond_format(val):
 	if tp == 'int':
 		return ('uint', '%u')
 	elif tp == 'float':
-		return ('float', '%.1f')
+		return ('float', '%.4f')
 	elif tp == 'string':
 		return ('string', '%u')
 	else:
@@ -249,7 +249,7 @@ def metric_init(params):
 				'name': 'jmx_' + NAME + '_' + label,
 				'call_back': get_stat,
 				'time_max': time_max,
-				'value_type': 'uint',
+				'value_type': 'float',
 				'units': '',
 				'format': '%u',
 				'slope': 'both',
