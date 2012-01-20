@@ -19,4 +19,22 @@ collection_group {
     value_threshold = 1.0
   }
 
+  metric {
+    name = "mem_anonpages"
+    title = "AnonPages"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "mem_mapped"
+    title = "Memory Mapped"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = "mem_hardware_corrupted"
+    title = "Memory HardwareCorrupted"
+    value_threshold = 1.0
+  }
+
 }
