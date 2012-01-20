@@ -43,7 +43,7 @@ import logging
 
 descriptors = []
 
-logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/gmond.log', filemode='w')
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s")
 logging.debug('starting up')
 
 last_update = 0
@@ -51,7 +51,7 @@ cur_time = 0
 stats = {}
 last_val = {}
 
-MAX_UPDATE_TIME = 30
+MAX_UPDATE_TIME = 15
 BYTES_PER_SECTOR = 512
 
 # 5 GB
@@ -103,6 +103,32 @@ def get_partitions():
 	logging.debug('success getting partitions')
 	return 0
 
+
+###########################################################################
+# This is the order of metrics in /proc/diskstats
+# 0 major         Major number
+# 1 minor         Minor number
+# 2 blocks        Blocks
+# 3 name          Name
+# 4 reads         This is the total number of reads completed successfully.
+# 5 merge_read    Reads and writes which are adjacent to each other may be merged for
+#               efficiency.  Thus two 4K reads may become one 8K read before it is
+#               ultimately handed to the disk, and so it will be counted (and queued)
+#               as only one I/O.  This field lets you know how often this was done.
+# 6 s_read        This is the total number of sectors read successfully.
+# 7 ms_read       This is the total number of milliseconds spent by all reads.
+# 8 writes        This is the total number of writes completed successfully.
+# 9 merge_write   Reads and writes which are adjacent to each other may be merged for
+#               efficiency.  Thus two 4K reads may become one 8K read before it is
+#               ultimately handed to the disk, and so it will be counted (and queued)
+#               as only one I/O.  This field lets you know how often this was done.
+# 10 s_write       This is the total number of sectors written successfully.
+# 11 ms_write      This is the total number of milliseconds spent by all writes.
+# 12 ios           The only field that should go to zero. Incremented as requests are
+#               given to appropriate request_queue_t and decremented as they finish.
+# 13 ms_io         This field is increases so long as field 9 is nonzero.
+# 14 ms_weighted   This field is incremented at each I/O start, I/O completion, I/O
+###########################################################################
 def update_stats():
 	logging.debug('updating stats')
 	global last_update, stats, last_val, cur_time
@@ -148,15 +174,15 @@ def update_stats():
 		get_diff(dev, 'reads_merged',  int(vals[4]))
 		get_diff(dev, 'writes_merged', int(vals[8]))
 
-		get_delta(dev, 'read_kbytes_per_sec',  int(vals[5]), float(BYTES_PER_SECTOR) / 1024)
-		get_delta(dev, 'write_kbytes_per_sec', int(vals[9]), float(BYTES_PER_SECTOR) / 1024)
+		get_delta(dev, 'read_bytes_per_sec',  int(vals[5]), float(BYTES_PER_SECTOR) )
+		get_delta(dev, 'write_bytes_per_sec', int(vals[9]), float(BYTES_PER_SECTOR) )
 
-		get_diff(dev, 'read_time',  int(vals[6]))
-		get_diff(dev, 'write_time', int(vals[10]))
+		get_delta(dev, 'read_time',  float(vals[6]), 0.001 )
+		get_delta(dev, 'write_time', float(vals[10]), 0.001 )
 
-		get_diff(dev, 'io_time', int(vals[12]))
-		get_percent_time(dev, 'percent_io_time', int(stats[dev]['io_time']))
-		get_diff(dev, 'weighted_io_time', int(vals[13]))
+		get_delta(dev, 'io_time', float(vals[12]), 0.001)
+		get_percent_time(dev, 'percent_io_time', float(stats[dev]['io_time']))
+		get_delta(dev, 'weighted_io_time', float(vals[13]), 0.001)
 
 
 	logging.debug('success refreshing stats')
@@ -181,7 +207,7 @@ def get_delta(dev, key, val, convert=1):
 			logging.debug('  fixing int32 wrap')
 			val += 4294967296
 
-		stats[dev][key] = int((val - last_val[dev][key]) * float(convert) / float(interval))
+		stats[dev][key] = (val - last_val[dev][key]) * float(convert) / float(interval)
 	else:
 		stats[dev][key] = 0
 
@@ -191,10 +217,10 @@ def get_percent_time(dev, key, val):
 	logging.debug(' get_percent_time for ' + dev +  '_' + key)
 	global stats, last_val
 
-	interval = (cur_time - last_update) * 1000
+	interval = cur_time - last_update
 
 	if interval > 0:
-		stats[dev][key] = round(((val / interval) * 100),2)
+		stats[dev][key] = (val / interval) * 100
 	else:
 		stats[dev][key] = 0
 
@@ -259,13 +285,13 @@ def metric_init(params):
 			'units': 'reads',
 			'description': 'The number of reads merged. Reads which are adjacent to each other may be merged for efficiency. Multiple reads may become one before it is handed to the disk, and it will be counted (and queued) as only one I/O.'},
 
-		read_kbytes_per_sec = {
-			'units': 'Kbytes/sec',
-			'description': 'The number of Kbytes read per second'},
+		read_bytes_per_sec = {
+			'units': 'bytes/sec',
+			'description': 'The number of bytes read per second'},
 
 		read_time = {
-			'units': 'ms',
-			'description': 'The time in milliseconds spent reading'},
+			'units': 's',
+			'description': 'The time in seconds spent reading'},
 
 		writes = {
 			'units': 'writes',
@@ -275,17 +301,17 @@ def metric_init(params):
 			'units': 'writes',
 			'description': 'The number of writes merged. Writes which are adjacent to each other may be merged for efficiency. Multiple writes may become one before it is handed to the disk, and it will be counted (and queued) as only one I/O.'},
 
-		write_kbytes_per_sec = {
-			'units': 'Kbytes/sec',
-			'description': 'The number of Kbytes written per second'},
+		write_bytes_per_sec = {
+			'units': 'bytes/sec',
+			'description': 'The number of bbytes written per second'},
 
 		write_time = {
-			'units': 'ms',
-			'description': 'The time in milliseconds spent writing'},
+			'units': 's',
+			'description': 'The time in seconds spent writing'},
 
 		io_time = {
-			'units': 'ms',
-			'description': 'The time in milliseconds spent in I/O operations'},
+			'units': 's',
+			'description': 'The time in seconds spent in I/O operations'},
 
 		percent_io_time = {
 			'units': 'percent',
@@ -294,8 +320,8 @@ def metric_init(params):
 			'description': 'The percent of disk time spent on I/O operations'},
 
 		weighted_io_time = {
-			'units': 'ms',
-			'description': 'The weighted time in milliseconds spend in I/O operations. This measures each I/O start, I/O completion, I/O merge, or read of these stats by the number of I/O operations in progress times the number of milliseconds spent doing I/O.'}
+			'units': 's',
+			'description': 'The weighted time in seconds spend in I/O operations. This measures each I/O start, I/O completion, I/O merge, or read of these stats by the number of I/O operations in progress times the number of seconds spent doing I/O.'}
 	)
 
 	update_stats()
@@ -308,10 +334,10 @@ def metric_init(params):
 					'name': 'diskstat_' + dev + '_' + label,
 					'call_back': get_stat,
 					'time_max': time_max,
-					'value_type': 'uint',
+					'value_type': 'float',
 					'units': '',
 					'slope': 'both',
-					'format': '%u',
+					'format': '%f',
 					'description': label,
 					'groups': 'diskstat'
 				}
@@ -353,18 +379,23 @@ if __name__ == '__main__':
 		'devices': options.devices,
 	})
 
-	for d in descriptors:
-		v = d['call_back'](d['name'])
-		if not options.quiet:
-			print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
+	while True:
+		for d in descriptors:
+			v = d['call_back'](d['name'])
+			if not options.quiet:
+				print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
+	
+			if options.gmetric:
+				if d['value_type'] == 'uint':
+					value_type = 'uint32'
+				else:
+					value_type = d['value_type']
+	
+				cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
+					(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
+				os.system(cmd)
+				
+		print 'Sleeping 15 seconds'
+		time.sleep(15)
 
-		if options.gmetric:
-			if d['value_type'] == 'uint':
-				value_type = 'uint32'
-			else:
-				value_type = d['value_type']
-
-			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
-				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
-			os.system(cmd)
 
