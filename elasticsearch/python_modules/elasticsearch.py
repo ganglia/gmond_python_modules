@@ -1,19 +1,10 @@
 #! /usr/bin/python
 
 import json
-import os
-import socket
 import time
 import urllib
 
-global url, ip, last_update, keyToPath
-
-def get_ip_address():
-  host = os.uname()[1]
-  ipt = socket.gethostbyname_ex(host)
-  ipt = ipt[2]
-  ip = ipt[0]
-  return(ip)
+global url, last_update, keyToPath
 
 def dig_it_up(obj,path):
     try:
@@ -24,8 +15,7 @@ def dig_it_up(obj,path):
         return False
 
 # Set IP address and JSON Url
-ip=get_ip_address()
-url="http://"+ ip + ":9200/_cluster/nodes/" + ip + "/stats"
+url="http://localhost:9200/_cluster/nodes/_local/stats"
 
 # short name to full path for stats
 keyToPath=dict()
@@ -34,31 +24,102 @@ keyToPath=dict()
 # when JSON is updated
 last_update = time.time()
 
-keyToPath['es_heap_committed'] = "nodes.%s.jvm.mem.heap_committed_in_bytes"
-keyToPath['es_heap_used'] = "nodes.%s.jvm.mem.heap_used_in_bytes"
-keyToPath['es_threads'] = "nodes.%s.jvm.threads.count"
-keyToPath['es_gc_time'] = "nodes.%s.jvm.gc.collection_time_in_millis"
-keyToPath['es_transport_open'] = "nodes.%s.transport.server_open"
-keyToPath['es_http_current_open'] = "nodes.%s.http.current_open"
-keyToPath['es_http_total_open'] = "nodes.%s.http.total_opened"
-keyToPath['es_indices_size'] = "nodes.%s.indices.store.size_in_bytes"
-keyToPath['es_gc_count'] = "nodes.%s.jvm.gc.collection_count"
-keyToPath['es_merges_current'] = "nodes.%s.indices.merges.current"
-keyToPath['es_merges_current_size'] = "nodes.%s.indices.merges.current_size_in_bytes"
-keyToPath['es_merges_total'] = "nodes.%s.indices.merges.total"
-keyToPath['es_merges_total_size'] = "nodes.%s.indices.merges.total_size_in_bytes"
-keyToPath['es_merges_time'] = "nodes.%s.indices.merges.total_time_in_millis"
-keyToPath['es_docs_count'] = "nodes.%s.indices.docs.count"
-keyToPath['es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
+# INDICES METRICS #
+
+## CACHE
 keyToPath['es_cache_field_eviction'] = "nodes.%s.indices.cache.field_evictions"
 keyToPath['es_cache_field_size'] = "nodes.%s.indices.cache.field_size_in_bytes"
 keyToPath['es_cache_filter_count'] = "nodes.%s.indices.cache.filter_count"
 keyToPath['es_cache_filter_evictions'] = "nodes.%s.indices.cache.filter_evictions"
 keyToPath['es_cache_filter_size'] = "nodes.%s.indices.cache.filter_size_in_bytes"
-keyToPath['es_queries_current'] = "nodes.%s.indices.search.query_current"
-keyToPath['es_query_time'] = "nodes.%s.indices.search.query_time_in_millis"
-keyToPath['es_queries_total'] = "nodes.%s.indices.search.query_total"
 
+## DOCS
+keyToPath['es_docs_count'] = "nodes.%s.indices.docs.count"
+keyToPath['es_docs_deleted'] = "nodes.%s.indices.docs.deleted"
+
+## FLUSH
+keyToPath['es_flush_total'] = "nodes.%s.indices.flush.total"
+keyToPath['es_flush_time'] = "nodes.%s.indices.flush.total_time_in_millis"
+
+## GET
+keyToPath['es_get_exists_time'] = "nodes.%s.indices.get.exists_time_in_millis"
+keyToPath['es_get_exists_total'] = "nodes.%s.indices.get.exists_total"
+keyToPath['es_get_time'] = "nodes.%s.indices.get.time_in_millis"
+keyToPath['es_get_total'] = "nodes.%s.indices.get.total"
+keyToPath['es_get_missing_time'] = "nodes.%s.indices.get.missing_time_in_millis"
+keyToPath['es_get_missing_total'] = "nodes.%s.indices.get.missing_total"
+
+## INDEXING
+keyToPath['es_indexing_delete_time'] = "nodes.%s.indices.indexing.delete_time_in_millis"
+keyToPath['es_indexing_delete_total'] = "nodes.%s.indices.indexing.delete_total"
+keyToPath['es_indexing_index_time'] = "nodes.%s.indices.indexing.index_time_in_millis"
+keyToPath['es_indexing_index_total'] = "nodes.%s.indices.indexing.index_total"
+
+## MERGES
+keyToPath['es_merges_current'] = "nodes.%s.indices.merges.current"
+keyToPath['es_merges_current_docs'] = "nodes.%s.indices.merges.current_docs"
+keyToPath['es_merges_current_size'] = "nodes.%s.indices.merges.current_size_in_bytes"
+keyToPath['es_merges_total'] = "nodes.%s.indices.merges.total"
+keyToPath['es_merges_total_docs'] = "nodes.%s.indices.merges.total_docs"
+keyToPath['es_merges_total_size'] = "nodes.%s.indices.merges.total_size_in_bytes"
+keyToPath['es_merges_time'] = "nodes.%s.indices.merges.total_time_in_millis"
+
+## REFRESH
+keyToPath['es_refresh_total'] = "nodes.%s.indices.refresh.total"
+keyToPath['es_refresh_time'] = "nodes.%s.indices.refresh.total_time_in_millis"
+
+## SEARCH
+keyToPath['es_query_current'] = "nodes.%s.indices.search.query_current"
+keyToPath['es_query_total'] = "nodes.%s.indices.search.query_total"
+keyToPath['es_query_time'] = "nodes.%s.indices.search.query_time_in_millis"
+keyToPath['es_fetch_current'] = "nodes.%s.indices.search.fetch_current"
+keyToPath['es_fetch_total'] = "nodes.%s.indices.search.fetch_total"
+keyToPath['es_fetch_time'] = "nodes.%s.indices.search.fetch_time_in_millis"
+
+## STORE
+keyToPath['es_indices_size'] = "nodes.%s.indices.store.size_in_bytes"
+
+# JVM METRICS #
+## MEM
+keyToPath['es_heap_committed'] = "nodes.%s.jvm.mem.heap_committed_in_bytes"
+keyToPath['es_heap_used'] = "nodes.%s.jvm.mem.heap_used_in_bytes"
+keyToPath['es_non_heap_committed'] = "nodes.%s.jvm.mem.non_heap_committed_in_bytes"
+keyToPath['es_non_heap_used'] = "nodes.%s.jvm.mem.non_heap_used_in_bytes"
+
+## THREADS
+keyToPath['es_threads'] = "nodes.%s.jvm.threads.count"
+keyToPath['es_threads_peak'] = "nodes.%s.jvm.threads.peak_count"
+
+## GC
+keyToPath['es_gc_time'] = "nodes.%s.jvm.gc.collection_time_in_millis"
+keyToPath['es_gc_count'] = "nodes.%s.jvm.gc.collection_count"
+
+# TRANSPORT METRICS #
+keyToPath['es_transport_open'] = "nodes.%s.transport.server_open"
+keyToPath['es_transport_rx_count'] = "nodes.%s.transport.rx_count"
+keyToPath['es_transport_rx_size'] = "nodes.%s.transport.rx_size_in_bytes"
+keyToPath['es_transport_tx_count'] = "nodes.%s.transport.tx_count"
+keyToPath['es_transport_tx_size'] = "nodes.%s.transport.tx_size_in_bytes"
+
+# HTTP METRICS #
+keyToPath['es_http_current_open'] = "nodes.%s.http.current_open"
+keyToPath['es_http_total_open'] = "nodes.%s.http.total_opened"
+
+# PROCESS METRICS #
+keyToPath['es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
+
+# NETWORK METRICS #
+## TCP
+keyToPath['es_network_tcp_active_open'] = "nodes.%s.network.tcp.active_opens"
+keyToPath['es_network_tcp_passive_open'] = "nodes.%s.network.tcp.passive_opens"
+keyToPath['es_network_tcp_curr_estab'] = "nodes.%s.network.tcp.curr_estab"
+keyToPath['es_network_tcp_in_segs'] = "nodes.%s.network.tcp.in_segs"
+keyToPath['es_network_tcp_out_segs'] = "nodes.%s.network.tcp.out_segs"
+keyToPath['es_network_tcp_retrans_segs'] = "nodes.%s.network.tcp.retrans_segs"
+keyToPath['es_network_tcp_estab_resets'] = "nodes.%s.network.tcp.estab_resets"
+keyToPath['es_network_tcp_attempt_fails'] = "nodes.%s.network.tcp.attempt_fails"
+keyToPath['es_network_tcp_in_errs'] = "nodes.%s.network.tcp.in_errs"
+keyToPath['es_network_tcp_out_rsts'] = "nodes.%s.network.tcp.out_rsts"
 
 def getStat(name):
     global last_update, result, url
@@ -117,15 +178,29 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_heap_committed',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Java Heap Committed (Bytes)',
     }))
 
     descriptors.append(create_desc({
          'name'       : 'es_heap_used',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Java Heap Used (Bytes)',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_non_heap_committed',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'description': 'Java Non Heap Committed (Bytes)',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_non_heap_used',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'description': 'Java Non Heap Used (Bytes)',
     }))
 
     descriptors.append(create_desc({
@@ -133,6 +208,13 @@ def metric_init(params):
          'units'      : 'threads',
          'format'     : '%d',
          'description': 'Threads (open)',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_threads_peak',
+         'units'      : 'threads',
+         'format'     : '%d',
+         'description': 'Threads Peak (open)',
     }))
 
     descriptors.append(create_desc({
@@ -148,6 +230,38 @@ def metric_init(params):
          'units'      : 'sockets',
          'format'     : '%d',
          'description': 'Transport Open (sockets)',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_transport_rx_count',
+         'units'      : 'rx',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'RX Count',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_transport_rx_size',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'slope'      : 'positive',
+         'description': 'RX (Bytes)',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_transport_tx_count',
+         'units'      : 'tx',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TX Count',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_transport_tx_size',
+         'units'      : 'Bytes',
+         'format'     : '%.0f',
+         'slope'      : 'positive',
+         'description': 'TX (Bytes)',
     }))
 
     descriptors.append(create_desc({
@@ -167,7 +281,7 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_indices_size',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Index Size (Bytes)',
     }))
 
@@ -185,6 +299,12 @@ def metric_init(params):
     }))
     
     descriptors.append(create_desc({
+         'name'       : 'es_merges_current_docs',
+         'format'     : '%d',
+         'description': 'Merges (docs)',
+    }))
+
+    descriptors.append(create_desc({
          'name'       : 'es_merges_total',
          'format'     : '%d',
          'slope'      : 'positive',
@@ -192,16 +312,23 @@ def metric_init(params):
     }))
 
     descriptors.append(create_desc({
+         'name'       : 'es_merges_total_docs',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Merges (total docs)',
+    }))
+
+    descriptors.append(create_desc({
          'name'       : 'es_merges_current_size',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Merges size (current)',
     }))
 
     descriptors.append(create_desc({
          'name'       : 'es_merges_total_size',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'slope'      : 'positive',
          'description': 'Merges size (total)',
     }))
@@ -215,10 +342,33 @@ def metric_init(params):
     }))
 
     descriptors.append(create_desc({
+         'name'       : 'es_refresh_total',
+         'units'      : 'refreshes',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Total Refresh',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_refresh_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Total Refresh Time',
+    }))
+
+    descriptors.append(create_desc({
          'name'       : 'es_docs_count',
          'units'      : 'docs',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Number of Documents',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_docs_deleted',
+         'units'      : 'docs',
+         'format'     : '%.0f',
+         'description': 'Number of Documents Deleted',
     }))
 
     descriptors.append(create_desc({
@@ -226,6 +376,85 @@ def metric_init(params):
          'units'      : 'files',
          'format'     : '%d',
          'description': 'Open File Descriptors',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_active_open',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Active Opens',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_passive_open',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Passive Opens',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_curr_estab',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'description': 'TCP Current Established',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_in_segs',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Inbound Segments',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_out_segs',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Outbound Segments',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_retrans_segs',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Retransmitted Segments',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_estab_resets',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Established Resets',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_attempt_fails',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Attempt Fails',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_in_errs',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Input Errors',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_network_tcp_out_rsts',
+         'units'      : 'tcp',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'TCP Output Errors',
     }))
 
     descriptors.append(create_desc({
@@ -239,7 +468,7 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_cache_field_size',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Field Cache Size',
     }))
 
@@ -259,12 +488,12 @@ def metric_init(params):
     descriptors.append(create_desc({
          'name'       : 'es_cache_filter_size',
          'units'      : 'Bytes',
-         'format'     : '%d',
+         'format'     : '%.0f',
          'description': 'Filter Cache Size',
     }))
 
     descriptors.append(create_desc({
-         'name'       : 'es_queries_current',
+         'name'       : 'es_query_current',
          'units'      : 'Queries',
          'format'     : '%d',
          'description': 'Current Queries',
@@ -279,7 +508,119 @@ def metric_init(params):
     }))
 
     descriptors.append(create_desc({
-         'name'       : 'es_queries_total',
+         'name'       : 'es_fetch_current',
+         'units'      : 'fetches',
+         'format'     : '%d',
+         'description': 'Current Fetches',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_fetch_total',
+         'units'      : 'fetches',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Total Fetches',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_fetch_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Total Fetch Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_flush_total',
+         'units'      : 'flushes',
+         'format'     : '%d',
+         'description': 'Total Flushes',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_flush_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Total Flush Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_get_exists_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Exists Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_get_exists_total',
+         'units'      : 'total',
+         'format'     : '%d',
+         'description': 'Exists Total',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_get_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Get Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_get_total',
+         'units'      : 'total',
+         'format'     : '%d',
+         'description': 'Get Total',
+    }))
+    descriptors.append(create_desc({
+         'name'       : 'es_get_missing_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Missing Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_get_missing_total',
+         'units'      : 'total',
+         'format'     : '%d',
+         'description': 'Missing Total',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_indexing_delete_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Delete Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_indexing_delete_total',
+         'units'      : 'docs',
+         'format'     : '%d',
+         'description': 'Delete Total',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_indexing_index_time',
+         'units'      : 'ms',
+         'format'     : '%d',
+         'slope'      : 'positive',
+         'description': 'Indexing Time',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_indexing_index_total',
+         'units'      : 'docs',
+         'format'     : '%d',
+         'description': 'Indexing Documents Total',
+    }))
+
+    descriptors.append(create_desc({
+         'name'       : 'es_query_total',
          'units'      : 'Queries',
          'format'     : '%d',
          'slope'      : 'positive',
