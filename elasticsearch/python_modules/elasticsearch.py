@@ -108,19 +108,6 @@ keyToPath['es_http_total_open'] = "nodes.%s.http.total_opened"
 # PROCESS METRICS #
 keyToPath['es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
 
-# NETWORK METRICS #
-## TCP
-keyToPath['es_network_tcp_active_open'] = "nodes.%s.network.tcp.active_opens"
-keyToPath['es_network_tcp_passive_open'] = "nodes.%s.network.tcp.passive_opens"
-keyToPath['es_network_tcp_curr_estab'] = "nodes.%s.network.tcp.curr_estab"
-keyToPath['es_network_tcp_in_segs'] = "nodes.%s.network.tcp.in_segs"
-keyToPath['es_network_tcp_out_segs'] = "nodes.%s.network.tcp.out_segs"
-keyToPath['es_network_tcp_retrans_segs'] = "nodes.%s.network.tcp.retrans_segs"
-keyToPath['es_network_tcp_estab_resets'] = "nodes.%s.network.tcp.estab_resets"
-keyToPath['es_network_tcp_attempt_fails'] = "nodes.%s.network.tcp.attempt_fails"
-keyToPath['es_network_tcp_in_errs'] = "nodes.%s.network.tcp.in_errs"
-keyToPath['es_network_tcp_out_rsts'] = "nodes.%s.network.tcp.out_rsts"
-
 def getStat(name):
     global last_update, result, url
 
@@ -376,85 +363,6 @@ def metric_init(params):
          'units'      : 'files',
          'format'     : '%d',
          'description': 'Open File Descriptors',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_active_open',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Active Opens',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_passive_open',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Passive Opens',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_curr_estab',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'description': 'TCP Current Established',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_in_segs',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Inbound Segments',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_out_segs',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Outbound Segments',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_retrans_segs',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Retransmitted Segments',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_estab_resets',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Established Resets',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_attempt_fails',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Attempt Fails',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_in_errs',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Input Errors',
-    }))
-
-    descriptors.append(create_desc({
-         'name'       : 'es_network_tcp_out_rsts',
-         'units'      : 'tcp',
-         'format'     : '%d',
-         'slope'      : 'positive',
-         'description': 'TCP Output Errors',
     }))
 
     descriptors.append(create_desc({
