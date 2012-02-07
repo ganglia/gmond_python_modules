@@ -1,0 +1,26 @@
+mem_stats
+===============
+
+Python module for ganglia 3.1+.
+
+This module allows you to collect buddy info from
+
+/proc/buddyinfo
+
+
+Install
+===============
+
+Copy mem_fragmentation.py from python_modules to your python modules directory e.g.
+
+/usr/lib64/ganglia/python_modules
+
+and mem_fragmentation.pyconf to
+
+/etc/ganglia/conf.d/
+
+Restart Gmond and you are done.
+
+## AUTHOR
+
+Author: Vladimir Vuksan https://github.com/vvuksan
