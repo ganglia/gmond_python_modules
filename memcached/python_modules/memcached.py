@@ -169,25 +169,25 @@ def metric_init(params):
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_cmd_get",
                 "units"      : "commands",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Cumulative number of retrieval reqs",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_cmd_set",
                 "units"      : "commands",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Cumulative number of storage reqs",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_bytes_read",
                 "units"      : "bytes",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Total number of bytes read by this server from network",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_bytes_written",
                 "units"      : "bytes",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Total number of bytes sent by this server to network",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
@@ -217,13 +217,13 @@ def metric_init(params):
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_get_hits",
                 "units"      : "items",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Number of keys that have been requested and found present ",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_get_misses",
                 "units"      : "items",
-                "slope"      : "positive",
+                "slope"      : "both",
                 "description": "Number of items that have been requested and not found",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
