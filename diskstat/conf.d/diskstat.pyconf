@@ -8,6 +8,10 @@ modules {
     param devices {
       value = 'sda'
     }
+
+    #param device-mapper {
+    #  value = 'true'
+    #}
   }
 }
 
