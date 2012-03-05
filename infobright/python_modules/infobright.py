@@ -1,4 +1,4 @@
-"""
+kj"""
 The MIT License
 
 Copyright (c) 2008 Gilad Raphaelli <gilad@raphaelli.com>
@@ -23,28 +23,22 @@ THE SOFTWARE.
 """
 
 ###  Changelog:
-###    v1.0.1 - 2010-07-21
-###       * Initial version
+###    v1.0.0 - 2012-03-05
+###       * Initial version for InfoBright module, derived from mysqld module
 ###
-###    v1.0.2 - 2010-08-04
-###       * Added system variables: max_connections and query_cache_size
-###       * Modified some innodb status variables to become deltas
-###
-###    v1.0.3 - 2011-12-02
-###       * Support custom UNIX sockets
-###
+
 ###  Requires:
 ###       * yum install MySQL-python
-###       * DBUtil.py
+###       * IBUtil.py
 
-###  Copyright Jamie Isaacs. 2010
+###  Copyright Bob Webber, 2012
 ###  License to use, modify, and distribute under the GPL
 ###  http://www.gnu.org/licenses/gpl.txt
 
 import time
 import MySQLdb
 
-from DBUtil import parse_innodb_status, defaultdict
+from IBUtil import parse_infobright_status, defaultdict
 
 import logging
 
@@ -59,13 +53,14 @@ mysql_stats = {}
 mysql_stats_last = {}
 delta_per_second = False
 
-REPORT_INNODB = True
+REPORT_INFOBRIGHT = True
 REPORT_MASTER = True
 REPORT_SLAVE  = True
 
 MAX_UPDATE_TIME = 15
 
-def update_stats(get_innodb=True, get_master=True, get_slave=True):
+# def update_stats(get_innodb=True, get_master=True, get_slave=True):
+def update_stats(get_master=True, get_slave=True):
 	"""
 
 	"""
@@ -93,7 +88,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		conn = MySQLdb.connect(**mysql_conn_opts)
 
 		cursor = conn.cursor(MySQLdb.cursors.DictCursor)
-		cursor.execute("SELECT GET_LOCK('gmetric-mysql', 0) as ok")
+		cursor.execute("SELECT GET_LOCK('gmetric-infobright', 0) as ok")
 		lock_stat = cursor.fetchone()
 		cursor.close()
 
@@ -117,16 +112,16 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		cursor.close()
 
 		# try not to fail ?
-		get_innodb = get_innodb and variables['have_innodb'].lower() == 'yes'
+# 		get_innodb = get_innodb and variables['have_innodb'].lower() == 'yes'
 		get_master = get_master and variables['log_bin'].lower() == 'on'
 
-		innodb_status = defaultdict(int)
-		if get_innodb:
-			cursor = conn.cursor(MySQLdb.cursors.Cursor)
-			cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
-			innodb_status = parse_innodb_status(cursor.fetchone()[0].split('\n'))
-			cursor.close()
-			logging.debug('innodb_status: ' + str(innodb_status))
+# 		innodb_status = defaultdict(int)
+# 		if get_innodb:
+# 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
+# 			cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
+# 			innodb_status = parse_innodb_status(cursor.fetchone()[0].split('\n'))
+# 			cursor.close()
+# 			logging.debug('innodb_status: ' + str(innodb_status))
 
 		master_logs = tuple
 		if get_master:
@@ -259,35 +254,35 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 
 	mysql_stats['open_files_used'] = int(global_status['open_files']) / int(variables['open_files_limit'])
 
-	innodb_delta = (
-		'data_fsyncs',
-		'data_reads',
-		'data_writes',
-		'log_writes'
-	)
+# 	innodb_delta = (
+# 		'data_fsyncs',
+# 		'data_reads',
+# 		'data_writes',
+# 		'log_writes'
+# 	)
 
 	# process innodb status
-	if get_innodb:
-		for istat in innodb_status:
-			key = 'innodb_' + istat
-
-			if istat in innodb_delta:
-				# Calculate deltas for counters
-				if time_delta <= 0:
-					#systemclock was set backwards, nog updating values.. to smooth over the graphs
-					pass
-				elif key in mysql_stats_last:
-					if delta_per_second:
-						mysql_stats[key] = (int(innodb_status[istat]) - int(mysql_stats_last[key])) / time_delta
-					else:
-						mysql_stats[key] = int(innodb_status[istat]) - int(mysql_stats_last[key])
-				else:
-					mysql_stats[key] = float(0)
-
-				mysql_stats_last[key] = innodb_status[istat]
-
-			else:
-				mysql_stats[key] = innodb_status[istat]
+# 	if get_innodb:
+# 		for istat in innodb_status:
+# 			key = 'innodb_' + istat
+# 
+# 			if istat in innodb_delta:
+# 				# Calculate deltas for counters
+# 				if time_delta <= 0:
+# 					#systemclock was set backwards, nog updating values.. to smooth over the graphs
+# 					pass
+# 				elif key in mysql_stats_last:
+# 					if delta_per_second:
+# 						mysql_stats[key] = (int(innodb_status[istat]) - int(mysql_stats_last[key])) / time_delta
+# 					else:
+# 						mysql_stats[key] = int(innodb_status[istat]) - int(mysql_stats_last[key])
+# 				else:
+# 					mysql_stats[key] = float(0)
+# 
+# 				mysql_stats_last[key] = innodb_status[istat]
+# 
+# 			else:
+# 				mysql_stats[key] = innodb_status[istat]
 
 	# process master logs
 	if get_master:
@@ -325,11 +320,12 @@ def get_stat(name):
 	global mysql_stats
 	#logging.debug(mysql_stats)
 
-	global REPORT_INNODB
+#	global REPORT_INNODB
 	global REPORT_MASTER
 	global REPORT_SLAVE
 
-	ret = update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+# 	ret = update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+	ret = update_stats(REPORT_MASTER, REPORT_SLAVE)
 
 	if ret:
 		if name.startswith('mysql_'):
@@ -352,11 +348,11 @@ def metric_init(params):
 	global mysql_stats
 	global delta_per_second
 
-	global REPORT_INNODB
+	global REPORT_INFOBRIGHT
 	global REPORT_MASTER
 	global REPORT_SLAVE
 
-	REPORT_INNODB = str(params.get('get_innodb', True)) == "True"
+	REPORT_INFOBRIGHT = str(params.get('get_innodb', True)) == "True"
 	REPORT_MASTER = str(params.get('get_master', True)) == "True"
 	REPORT_SLAVE  = str(params.get('get_slave', True)) == "True"
 
@@ -366,7 +362,7 @@ def metric_init(params):
 		host = params.get('host', 'localhost'),
 		user = params.get('user'),
 		passwd = params.get('passwd'),
-		port = params.get('port', 3306),
+		port = params.get('port', 5029),
 		connect_timeout = params.get('timeout', 30),
 	)
 	if params.get('unix_socket', '') != '':
@@ -376,7 +372,7 @@ def metric_init(params):
 		delta_per_second = True
 
 	master_stats_descriptions = {}
-	innodb_stats_descriptions = {}
+	infobright_stats_descriptions = {}
 	slave_stats_descriptions  = {}
 
 	misc_stats_descriptions = dict(
@@ -804,278 +800,229 @@ def metric_init(params):
 				'slope': 'both',
 			},
 		)
-
-	if REPORT_INNODB:
-		innodb_stats_descriptions = dict(
-			innodb_active_transactions = {
-				'description': "Active InnoDB transactions",
-				'value_type':'uint',
-				'units': 'txns',
-				'slope': 'both',
+		
+	if REPORT_INFOBRIGHT:
+ 		infobright_stats_descriptions = dict(
+ 			bh_gdc_false_wakeup = {
+ 				'description': "BrightHouse gdc false wakeup",
+ 				'value_type':'uint',
+ 				'units': 'fwkups',
+ 				'slope': 'both',
+ 			},
+			bh_gdc_hits = {
+ 				'description': "BrightHouse gdc hits",
+ 				'value_type':'uint',
+ 				'units': 'hits',
+ 				'slope': 'both',
 			},
-
-			innodb_current_transactions = {
-				'description': "Current InnoDB transactions",
-				'value_type':'uint',
-				'units': 'txns',
-				'slope': 'both',
+			bh_gdc_load_errors = {
+ 				'description': "BrightHouse gdc load errors",
+ 				'value_type':'uint',
+ 				'units': 'lderrs',
+ 				'slope': 'both',
 			},
-
-			innodb_buffer_pool_pages_data = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
+			bh_gdc_misses = {
+ 				'description': "BrightHouse gdc misses",
+ 				'value_type':'uint',
+ 				'units': 'misses',
+ 				'slope': 'both',
 			},
-
-			innodb_data_fsyncs = {
-				'description': "The number of fsync() operations",
-				'value_type':'float',
-				'units': 'fsyncs',
+			bh_gdc_pack_loads = {
+ 				'description': "BrightHouse gdc pack loads",
+ 				'value_type':'uint',
+ 				'units': 'pklds',
+ 				'slope': 'both',
 			},
-
-			innodb_data_reads = {
-				'description': "The number of data reads",
-				'value_type':'float',
-				'units': 'reads',
+			bh_gdc_prefetched  = {
+ 				'description': "BrightHouse gdc prefetched",
+ 				'value_type':'uint',
+ 				'units': 'prftchs',
+ 				'slope': 'both',
 			},
-
-			innodb_data_writes = {
-				'description': "The number of data writes",
-				'value_type':'float',
-				'units': 'writes',
+			bh_gdc_read_wait_in_progress = {
+ 				'description': "BrightHouse gdc in read wait",
+ 				'value_type':'uint',
+ 				'units': 'inrdwt',
+ 				'slope': 'both',
 			},
-
-			innodb_buffer_pool_pages_free = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
-				'slope': 'both',
+			bh_gdc_readwait = {
+ 				'description': "BrightHouse gdc read waits",
+ 				'value_type':'uint',
+ 				'units': 'rdwts',
+ 				'slope': 'both',
 			},
-
-			innodb_history_list = {
-				'description': "InnoDB",
-				'units': 'length',
-				'slope': 'both',
+			bh_gdc_redecompress = {
+ 				'description': "BrightHouse gdc redecompress",
+ 				'value_type':'uint',
+ 				'units': 'rdcmprs',
+ 				'slope': 'both',
 			},
-
-			innodb_ibuf_inserts = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'inserts',
+			bh_gdc_released = {
+ 				'description': "BrightHouse gdc released",
+ 				'value_type':'uint',
+ 				'units': 'rlss',
+ 				'slope': 'both',
 			},
-
-			innodb_ibuf_merged = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'recs',
+			bh_mm_alloc_blocs = {
+ 				'description': "BrightHouse mm allocated blocks",
+ 				'value_type':'uint',
+ 				'units': 'blocks',
+ 				'slope': 'both',
 			},
-
-			innodb_ibuf_merges = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'merges',
+			bh_mm_alloc_objs = {
+ 				'description': "BrightHouse mm allocated objects",
+ 				'value_type':'uint',
+ 				'units': 'objs',
+ 				'slope': 'both',
 			},
-
-			innodb_log_bytes_flushed = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'bytes',
+			bh_mm_alloc_pack_size = {
+ 				'description': "BrightHouse mm allocated pack size",
+ 				'value_type':'uint',
+ 				'units': 'pksz',
+ 				'slope': 'both',
 			},
-
-			innodb_log_bytes_unflushed = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'bytes',
-				'slope': 'both',
+			bh_mm_alloc_packs = {
+ 				'description': "BrightHouse mm allocated packs",
+ 				'value_type':'uint',
+ 				'units': 'packs',
+ 				'slope': 'both',
 			},
-
-			innodb_log_bytes_written = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'bytes',
+			bh_mm_alloc_size = {
+ 				'description': "BrightHouse mm allocated size",
+ 				'value_type':'uint',
+ 				'units': 'allocunits',
+ 				'slope': 'both',
 			},
-
-			innodb_log_writes = {
-				'description': "The number of physical writes to the log file",
-				'value_type':'float',
-				'units': 'writes',
+			bh_mm_alloc_temp = {
+ 				'description': "BrightHouse mm allocated temp",
+ 				'value_type':'uint',
+ 				'units': 'temps',
+ 				'slope': 'both',
 			},
-
-			innodb_buffer_pool_pages_dirty = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
-				'slope': 'both',
+			bh_mm_alloc_temp_size = {
+ 				'description': "BrightHouse mm allocated temp size",
+ 				'value_type':'uint',
+ 				'units': 'allocunits',
+ 				'slope': 'both',
 			},
-
-			innodb_os_waits = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'waits',
+			bh_mm_free_blocks = {
+ 				'description': "BrightHouse mm free blocks",
+ 				'value_type':'uint',
+ 				'units': 'blocks',
+ 				'slope': 'both',
 			},
-
-			innodb_pages_created = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
+			bh_mm_free_pack_size = {
+ 				'description': "BrightHouse mm free pack size",
+ 				'value_type':'uint',
+ 				'units': 'pkunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pages_read = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
+			bh_mm_free_packs = {
+ 				'description': "BrightHouse mm free packs",
+ 				'value_type':'uint',
+ 				'units': 'packs',
+ 				'slope': 'both',
 			},
-
-			innodb_pages_written = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'pages',
+			bh_mm_free_size = {
+ 				'description': "BrightHouse mm free size",
+ 				'value_type':'uint',
+ 				'units': 'szunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_aio_log_ios = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'ops',
+			bh_mm_free_temp = {
+ 				'description': "BrightHouse mm free temp",
+ 				'value_type':'uint',
+ 				'units': 'tmps',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_aio_sync_ios = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'ops',
+			bh_mm_free_temp_size = {
+ 				'description': "BrightHouse mm temp size",
+ 				'value_type':'uint',
+ 				'units': 'tmpunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_buffer_pool_flushes = {
-				'description': "The number of pending buffer pool page-flush requests",
-				'value_type':'uint',
-				'units': 'reqs',
-				'slope': 'both',
+			bh_mm_freeable = {
+ 				'description': "BrightHouse mm freeable",
+ 				'value_type':'uint',
+ 				'units': 'allocunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_chkp_writes = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'writes',
+			bh_mm_release1 = {
+ 				'description': "BrightHouse mm release1",
+ 				'value_type':'uint',
+ 				'units': 'relunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_ibuf_aio_reads = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'reads',
+			bh_mm_release2 = {
+ 				'description': "BrightHouse mm release2",
+ 				'value_type':'uint',
+ 				'units': 'relunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_log_flushes = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'reqs',
+			bh_mm_release3 = {
+ 				'description': "BrightHouse mm release3",
+ 				'value_type':'uint',
+ 				'units': 'relunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_log_writes = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'writes',
+			bh_mm_release4 = {
+ 				'description': "BrightHouse mm release4",
+ 				'value_type':'uint',
+ 				'units': 'relunits',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_normal_aio_reads = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'reads',
+			bh_mm_reloaded = {
+ 				'description': "BrightHouse mm reloaded",
+ 				'value_type':'uint',
+ 				'units': 'reloads',
+ 				'slope': 'both',
 			},
-
-			innodb_pending_normal_aio_writes = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'writes',
+			bh_mm_scale = {
+ 				'description': "BrightHouse mm scale",
+ 				'value_type':'uint',
+ 				'units': 'scales',
+ 				'slope': 'both',
 			},
-
-			innodb_buffer_pool_pages_total = {
-				'description': "The total size of buffer pool, in pages",
-				'value_type':'uint',
-				'units': 'pages',
-				'slope': 'both',
+			bh_mm_unfreeable = {
+ 				'description': "BrightHouse mm unfreeable",
+ 				'value_type':'uint',
+ 				'units': 'relunits',
+ 				'slope': 'both',
 			},
-
-			innodb_queries_inside = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'queries',
+			bh_readbytes = {
+ 				'description': "BrightHouse read bytes",
+ 				'value_type':'uint',
+ 				'units': 'fwkups',
+ 				'slope': 'both',
 			},
-
-			innodb_queries_queued = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'queries',
-				'slope': 'both',
+			bh_readcount = {
+ 				'description': "BrightHouse read count",
+ 				'value_type':'uint',
+ 				'units': 'fwkups',
+ 				'slope': 'both',
 			},
-
-			innodb_read_views = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'views',
+			bh_writebytes = {
+ 				'description': "BrightHouse write bytes",
+ 				'value_type':'uint',
+ 				'units': 'fwkups',
+ 				'slope': 'both',
 			},
-
-			innodb_rows_deleted = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'rows',
-			},
-
-			innodb_rows_inserted = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'rows',
-			},
-
-			innodb_rows_read = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'rows',
-			},
-
-			innodb_rows_updated = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'rows',
-			},
-
-			innodb_spin_rounds = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'spins',
-				'slope': 'both',
-			},
-
-			innodb_spin_waits = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'spins',
-				'slope': 'both',
-			},
-
-			innodb_transactions = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'txns',
-			},
-
-			innodb_transactions_purged = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'txns',
-			},
-
-			innodb_transactions_unpurged = {
-				'description': "InnoDB",
-				'value_type':'uint',
-				'units': 'txns',
-			},
+			bh_writecount = {
+ 				'description': "BrightHouse write count",
+ 				'value_type':'uint',
+ 				'units': 'fwkups',
+ 				'slope': 'both',
+			}
 		)
 
-	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
+
+	update_stats(REPORT_INFOBRIGHT, REPORT_MASTER, REPORT_SLAVE)
 
 	time.sleep(MAX_UPDATE_TIME)
-	update_stats(REPORT_INNODB, REPORT_MASTER, REPORT_SLAVE)
 
-	for stats_descriptions in (innodb_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
+	update_stats(REPORT_INFOBRIGHT, REPORT_MASTER, REPORT_SLAVE)
+
+	for stats_descriptions in (infobright_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
 		for label in stats_descriptions:
 			if mysql_stats.has_key(label):
 				format = '%u'
@@ -1084,7 +1031,7 @@ def metric_init(params):
 						format = '%f'
 
 				d = {
-					'name': 'mysql_' + label,
+					'name': 'infobright_' + label,
 					'call_back': get_stat,
 					'time_max': 60,
 					'value_type': "uint",
@@ -1120,7 +1067,7 @@ if __name__ == '__main__':
 	parser.add_option("-p", "--password", dest="passwd", help="password", default="")
 	parser.add_option("-P", "--port", dest="port", help="port", default=3306, type="int")
 	parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
-	parser.add_option("--no-innodb", dest="get_innodb", action="store_false", default=True)
+	parser.add_option("--no-infobright", dest="get_innodb", action="store_false", default=True)
 	parser.add_option("--no-master", dest="get_master", action="store_false", default=True)
 	parser.add_option("--no-slave", dest="get_slave", action="store_false", default=True)
 	parser.add_option("-b", "--gmetric-bin", dest="gmetric_bin", help="path to gmetric binary", default="/usr/bin/gmetric")
@@ -1135,7 +1082,7 @@ if __name__ == '__main__':
 		'passwd': options.passwd,
 		'user': options.user,
 		'port': options.port,
-		'get_innodb': options.get_innodb,
+#		'get_innodb': options.get_innodb,
 		'get_master': options.get_master,
 		'get_slave': options.get_slave,
 		'unix_socket': options.unix_socket,

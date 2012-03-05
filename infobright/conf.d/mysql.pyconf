@@ -42,172 +42,145 @@ collection_group {
   time_threshold = 60
 
   metric {
-    name = "mysql_innodb_pending_normal_aio_reads"
+    name = "mysql_bh_gdc_false_wakeup"
   }
 
   metric {
-    name = "mysql_innodb_pending_log_writes"
+    name = "mysql_bh_gdc_hits"
   }
 
   metric {
-    name = "mysql_innodb_transactions"
+    name = "mysql_bh_gdc_load_errors"
   }
 
   metric {
-    name = "mysql_innodb_pending_chkp_writes"
+    name = "mysql_bh_gdc_misses"
   }
 
   metric {
-    name = "mysql_innodb_rows_updated"
+    name = "mysql_bh_gdc_pack_loads"
   }
 
   metric {
-    name = "mysql_innodb_data_fsyncs"
+    name = "mysql_bh_gdc_prefetched"
   }
 
   metric {
-    name = "mysql_innodb_spin_rounds"
+    name = "mysql_bh_gdc_read_wait_in_progress"
   }
 
   metric {
-    name = "mysql_innodb_spin_waits"
+    name = "mysql_bh_gdc_readwait"
   }
 
   metric {
-    name = "mysql_innodb_pending_aio_log_ios"
+    name = "mysql_bh_gdc_redecompress"
   }
 
   metric {
-    name = "mysql_innodb_pending_log_flushes"
+    name = "mysql_bh_gdc_released"
   }
 
   metric {
-    name = "mysql_innodb_rows_read"
+    name = "mysql_bh_mm_alloc_blocs"
   }
 
   metric {
-    name = "mysql_innodb_transactions_unpurged"
+    name = "mysql_bh_mm_alloc_objs"
   }
 
   metric {
-    name = "mysql_innodb_queries_queued"
+    name = "mysql_bh_mm_alloc_pack_size"
   }
 
   metric {
-    name = "mysql_innodb_pending_ibuf_aio_reads"
+    name = "mysql_bh_mm_alloc_packs"
   }
 
   metric {
-    name = "mysql_innodb_pending_normal_aio_writes"
+    name = "mysql_bh_mm_alloc_size"
   }
 
   metric {
-    name = "mysql_innodb_pages_read"
+    name = "mysql_bh_mm_alloc_temp"
   }
 
   metric {
-    name = "mysql_innodb_read_views"
+    name = "mysql_bh_mm_alloc_temp_size"
   }
 
   metric {
-    name = "mysql_innodb_buffer_pool_pages_data"
+    name = "mysql_bh_mm_free_blocks"
   }
 
   metric {
-    name = "mysql_innodb_data_reads"
+    name = "mysql_bh_mm_free_pack_size"
   }
 
   metric {
-    name = "mysql_innodb_queries_inside"
+    name = "mysql_bh_mm_free_packs"
   }
 
   metric {
-    name = "mysql_innodb_log_bytes_written"
+    name = "mysql_bh_mm_free_size"
   }
 
   metric {
-    name = "mysql_innodb_buffer_pool_pages_dirty"
+    name = "mysql_bh_mm_free_temp"
   }
 
   metric {
-    name = "mysql_innodb_pending_aio_sync_ios"
+    name = "mysql_bh_mm_free_temp_size"
   }
 
   metric {
-    name = "mysql_innodb_ibuf_merged"
+    name = "mysql_bh_mm_freeable"
   }
 
   metric {
-    name = "mysql_innodb_pages_created"
+    name = "mysql_bh_mm_release1"
   }
 
   metric {
-    name = "mysql_innodb_buffer_pool_pages_free"
+    name = "mysql_bh_mm_release2"
   }
 
   metric {
-    name = "mysql_innodb_pages_written"
+    name = "mysql_bh_mm_release3"
   }
 
   metric {
-    name = "mysql_innodb_rows_inserted"
+    name = "mysql_bh_mm_release4"
   }
 
   metric {
-    name = "mysql_innodb_active_transactions"
+    name = "mysql_bh_mm_reloaded"
   }
 
   metric {
-    name = "mysql_innodb_log_bytes_flushed"
+    name = "mysql_bh_mm_scale"
   }
 
   metric {
-    name = "mysql_innodb_history_list"
+    name = "mysql_bh_mm_unfreeable"
   }
 
   metric {
-    name = "mysql_innodb_pending_buffer_pool_flushes"
+    name = "mysql_bh_readbytes"
   }
 
   metric {
-    name = "mysql_innodb_current_transactions"
+    name = "mysql_bh_readcount"
   }
 
   metric {
-    name = "mysql_innodb_ibuf_inserts"
+    name = "mysql_bh_writebytes"
   }
 
   metric {
-    name = "mysql_innodb_rows_deleted"
+    name = "mysql_bh_writecount"
   }
 
-  metric {
-    name = "mysql_innodb_buffer_pool_pages_total"
-  }
-
-  metric {
-    name = "mysql_innodb_log_bytes_unflushed"
-  }
-
-  metric {
-    name = "mysql_innodb_data_writes"
-  }
-
-  metric {
-    name = "mysql_innodb_transactions_purged"
-  }
-
-  metric {
-    name = "mysql_innodb_os_waits"
-  }
-
-  metric {
-    name = "mysql_innodb_log_writes"
-  }
-
-  metric {
-    name = "mysql_innodb_ibuf_merges"
-  }
 /*
   metric {
     name = "mysql_binlog_space_used"
