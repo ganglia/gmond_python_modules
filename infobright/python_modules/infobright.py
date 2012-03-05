@@ -1,4 +1,4 @@
-kj"""
+"""
 The MIT License
 
 Copyright (c) 2008 Gilad Raphaelli <gilad@raphaelli.com>
@@ -60,7 +60,7 @@ REPORT_SLAVE  = True
 MAX_UPDATE_TIME = 15
 
 # def update_stats(get_innodb=True, get_master=True, get_slave=True):
-def update_stats(get_master=True, get_slave=True):
+def update_stats(get_infobright=True, get_master=True, get_slave=True):
 	"""
 
 	"""
@@ -1082,7 +1082,7 @@ if __name__ == '__main__':
 		'passwd': options.passwd,
 		'user': options.user,
 		'port': options.port,
-#		'get_innodb': options.get_innodb,
+#		'get_infobright': options.get_infobright,
 		'get_master': options.get_master,
 		'get_slave': options.get_slave,
 		'unix_socket': options.unix_socket,
