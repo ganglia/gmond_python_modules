@@ -53,13 +53,14 @@ infobright_stats = {}
 infobright_stats_last = {}
 delta_per_second = False
 
-# REPORT_INFOBRIGHT = True
+REPORT_BRIGHTHOUSE = True
+REPORT_BRIGHTHOUSE_ENGINE = False
 REPORT_MASTER = True
 REPORT_SLAVE  = True
 
 MAX_UPDATE_TIME = 15
 
-def update_stats(get_master=True, get_slave=True):
+def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=True, get_slave=True):
 	"""
 
 	"""
@@ -115,8 +116,13 @@ def update_stats(get_master=True, get_slave=True):
 		cursor.close()
 
 		# try not to fail ?
+		# BRIGHTHOUSE ENGINE status variables are pretty obscure
+		get_brighthouse_engine = get_brighthouse_engine and variables.has_key('brighthouse_ini_controlmessages')
 		get_master = get_master and variables['log_bin'].lower() == 'on'
 
+		if get_brighthouse_engine:
+			logging.warn('get_brighthouse_engine status not implemented')
+			
 		master_logs = tuple
 		if get_master:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
@@ -152,41 +158,11 @@ def update_stats(get_master=True, get_slave=True):
 	infobright_stats['max_connections'] = variables['max_connections']
 	infobright_stats['query_cache_size'] = variables['query_cache_size']
 
-	# process global status
+	# process mysql status
 	# http://www.infobright.com/
-	interesting_global_status_vars = (
+	interesting_mysql_status_vars = (
 		'aborted_clients',
 		'aborted_connects',
-		'bh_gdc_false_wakeup',
-		'bh_gdc_hits',
-		'bh_gdc_load_errors',
-		'bh_gdc_misses',
-		'bh_gdc_pack_loads',
-		'bh_gdc_prefetched',
-		'bh_gdc_readwait',
-		'bh_gdc_redecompress',
-		'bh_gdc_released',
-		'bh_gdc_released',
-		'bh_mm_alloc_blocs',
-		'bh_mm_alloc_objs',
-		'bh_mm_alloc_pack_size',
-		'bh_mm_alloc_packs',
-		'bh_mm_alloc_temp',
-		'bh_mm_free_blocks',
-		'bh_mm_free_packs',
-		'bh_mm_free_size',
-		'bh_mm_free_temp',
-		'bh_mm_freeable',
-		'bh_mm_release1',
-		'bh_mm_release2',
-		'bh_mm_release3',
-		'bh_mm_release4',
-		'bh_mm_reloaded',
-		'bh_mm_unfreeable',
-		'bh_readbytes',
-		'bh_readcount',
-		'bh_writebytes',
-		'bh_writecount',
 		'binlog_cache_disk_use',
 		'binlog_cache_use',
 		'bytes_received',
@@ -243,12 +219,7 @@ def update_stats(get_master=True, get_slave=True):
 		'uptime',
 	)
 
-	non_delta = (
-		'bh_gdc_read_wait_in_progress',
-		'bh_mm_alloc_size',
-		'bh_mm_alloc_temp_size',
-		'bh_mm_free_pack_size',
-		'bh_mm_scale',
+	non_delta_mysql_status_vars = (
 		'max_used_connections',
 		'open_files',
 		'open_tables',
@@ -261,24 +232,76 @@ def update_stats(get_master=True, get_slave=True):
 		'threads_running',
 		'uptime'
 	)
+	
+	interesting_brighthouse_status_vars = (
+		'bh_gdc_false_wakeup',
+		'bh_gdc_hits',
+		'bh_gdc_load_errors',
+		'bh_gdc_misses',
+		'bh_gdc_pack_loads',
+		'bh_gdc_prefetched',
+		'bh_gdc_readwait',
+		'bh_gdc_read_wait_in_progress',
+		'bh_gdc_redecompress',
+		'bh_gdc_released',
+		'bh_gdc_released',
+		'bh_mm_alloc_blocs',
+		'bh_mm_alloc_objs',
+		'bh_mm_alloc_pack_size',
+		'bh_mm_alloc_packs',
+		'bh_mm_alloc_size',
+		'bh_mm_alloc_temp',
+		'bh_mm_alloc_temp_size',
+		'bh_mm_free_blocks',
+		'bh_mm_free_pack_size',
+		'bh_mm_free_packs',
+		'bh_mm_free_size',
+		'bh_mm_free_temp',
+		'bh_mm_free_temp_size',
+		'bh_mm_freeable',
+		'bh_mm_release1',
+		'bh_mm_release2',
+		'bh_mm_release3',
+		'bh_mm_release4',
+		'bh_mm_reloaded',
+		'bh_mm_scale',
+		'bh_mm_unfreeable',
+		'bh_readbytes',
+		'bh_readcount',
+		'bh_writebytes',
+		'bh_writecount',
+	)
+	
+	non_delta_brighthouse_status_vars = (
+		'bh_gdc_read_wait_in_progress',
+		'bh_mm_alloc_size',
+		'bh_mm_alloc_temp_size',
+		'bh_mm_free_pack_size',
+		'bh_mm_scale',
+	)
 
 	# don't put all of global_status in infobright_stats b/c it's so big
-	for key in interesting_global_status_vars:
-		if key in non_delta:
+	all_interesting_status_vars = interesting_mysql_status_vars + interesting_brighthouse_status_vars
+	all_non_delta_status_vars = non_delta_mysql_status_vars + non_delta_brighthouse_status_vars
+	for key in all_interesting_status_vars:
+		if key in all_non_delta_status_vars:
 			infobright_stats[key] = global_status[key]
+			#debug print key + " in non delta, value " + global_status[key]
 		else:
 			# Calculate deltas for counters
 			if time_delta <= 0:
-				#systemclock was set backwards, nog updating values.. to smooth over the graphs
+				#systemclock was set backwards, not updating values.. to smooth over the graphs
 				pass
 			elif key in infobright_stats_last:
+				#debug key + " key in stats last, value " + infobright_stats_last[key]
 				if delta_per_second:
 					infobright_stats[key] = (int(global_status[key]) - int(infobright_stats_last[key])) / time_delta
 				else:
 					infobright_stats[key] = int(global_status[key]) - int(infobright_stats_last[key])
 			else:
+				#debug key + " is new"
 				infobright_stats[key] = float(0)
-
+			#debug "global status " + global_status[key] + " key " + key
 			infobright_stats_last[key] = global_status[key]
 
 	infobright_stats['open_files_used'] = int(global_status['open_files']) / int(variables['open_files_limit'])
@@ -319,13 +342,16 @@ def get_stat(name):
 	global infobright_stats
 	#logging.debug(infobright_stats)
 
+	global REPORT_BRIGHTHOUSE
+	global REPORT_BRIGHTHOUSE_ENGINE
 	global REPORT_MASTER
 	global REPORT_SLAVE
 
-	ret = update_stats(REPORT_MASTER, REPORT_SLAVE)
+	ret = update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
 
 	if ret:
 		if name.startswith('infobright_'):
+			# note that offset depends on length of "startswith"
 			label = name[11:]
 		else:
 			label = name
@@ -345,32 +371,39 @@ def metric_init(params):
 	global infobright_stats
 	global delta_per_second
 
+	global REPORT_BRIGHTHOUSE
+	global REPORT_BRIGHTHOUSE_ENGINE
 	global REPORT_MASTER
 	global REPORT_SLAVE
 
+	REPORT_BRIGHTHOUSE = str(params.get('get_brighthouse', True)) == "True"
+	REPORT_BRIGHTHOUSE_ENGINE = str(params.get('get_brighthouse_engine', True)) == "True"
 	REPORT_MASTER = str(params.get('get_master', True)) == "True"
 	REPORT_SLAVE  = str(params.get('get_slave', True)) == "True"
 
 	logging.debug("init: " + str(params))
 
 	infobright_conn_opts = dict(
-		host = params.get('host', 'localhost'),
 		user = params.get('user'),
 		passwd = params.get('passwd'),
-		port = params.get('port', 5029),
+		unix_socket = params.get('unix_socket', '/tmp/mysql-ib.sock'),
 		connect_timeout = params.get('timeout', 30),
 	)
-	if params.get('unix_socket', '') != '':
-		infobright_conn_opts['unix_socket'] = params.get('unix_socket')
+	if params.get('host', '') != '':
+		infobright_conn_opts['host'] = params.get('host')
+
+	if params.get('port', 5029) != 5029:
+		infobright_conn_opts['port'] = params.get('port')
 
 	if params.get("delta_per_second", '') != '':
 		delta_per_second = True
 
+	mysql_stats_descriptions = {}
 	master_stats_descriptions = {}
-# 	infobright_stats_descriptions = {}
+ 	brighthouse_stats_descriptions = {}
 	slave_stats_descriptions  = {}
 
-	misc_stats_descriptions = dict(
+	mysql_stats_descriptions = dict(
 		aborted_clients = {
 			'description': 'The number of connections that were aborted because the client died without closing the connection properly',
 			'value_type': 'float',
@@ -717,7 +750,7 @@ def metric_init(params):
 		}, 
 
 		version = {
-			'description': "Infobright Version",
+			'description': "Infobright uses MySQL Version",
 			'value_type': 'string',
 		    'format': '%s',
 		},
@@ -731,188 +764,188 @@ def metric_init(params):
 			'description': "The amount of memory allocated for caching query results",
 			'slope': 'zero',
 		},
-# 	)
-# 	
-# 	infobright_stats_descriptions = dict(
+ 	)
+ 	
+ 	brighthouse_stats_descriptions = dict(
+ 		bh_gdc_read_wait_in_progress = {
+ 			'description': "The number of current read waits in Brighthouse tables.",
+ 			'slope': 'zero',
+ 		},
+ 
+		bh_mm_alloc_size = {
+			'description': "The Brighthouse memory allocation size.",
+			'slope': 'zero',
+		},
+		
+		bh_mm_alloc_temp_size = {
+			'description': "Brighthouse memory allocation temp size.",
+			'slope': 'zero',
+		},
+		
+		bh_mm_free_pack_size = {
+			'description': "Brighthouse memory free pack size.",
+			'slope': 'zero',
+		},
+		
+		bh_mm_scale = {
+			'description': "Brighthouse memory scale.",
+			'slope': 'zero',
+		},
 
 		bh_gdc_false_wakeup = {
 			'description': "BrightHouse gdc false wakeup",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'fwkups',
 			'slope': 'both',
 		},
 		bh_gdc_hits = {
 			'description': "BrightHouse gdc hits",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'hits',
 			'slope': 'both',
 		},
 		bh_gdc_load_errors = {
 			'description': "BrightHouse gdc load errors",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'lderrs',
 			'slope': 'both',
 		},
 		bh_gdc_misses = {
 			'description': "BrightHouse gdc misses",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'misses',
 			'slope': 'both',
 		},
 		bh_gdc_pack_loads = {
 			'description': "BrightHouse gdc pack loads",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'pklds',
 			'slope': 'both',
 		},
 		bh_gdc_prefetched  = {
 			'description': "BrightHouse gdc prefetched",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'prftchs',
 			'slope': 'both',
 		},
-		bh_gdc_read_wait_in_progress = {
-			'description': "BrightHouse gdc in read wait",
-			'value_type':'uint',
-			'units': 'inrdwt',
-			'slope': 'both',
-		},
+# 		bh_gdc_read_wait_in_progress = {
+# 			'description': "BrightHouse gdc in read wait",
+# 			'value_type':'uint',
+# 			'units': 'inrdwt',
+# 			'slope': 'both',
+# 		},
 		bh_gdc_readwait = {
 			'description': "BrightHouse gdc read waits",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'rdwts',
 			'slope': 'both',
 		},
 		bh_gdc_redecompress = {
 			'description': "BrightHouse gdc redecompress",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'rdcmprs',
 			'slope': 'both',
 		},
 		bh_gdc_released = {
 			'description': "BrightHouse gdc released",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'rlss',
 			'slope': 'both',
 		},
 		bh_mm_alloc_blocs = {
 			'description': "BrightHouse mm allocated blocks",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'blocks',
 			'slope': 'both',
 		},
 		bh_mm_alloc_objs = {
 			'description': "BrightHouse mm allocated objects",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'objs',
 			'slope': 'both',
 		},
 		bh_mm_alloc_pack_size = {
 			'description': "BrightHouse mm allocated pack size",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'pksz',
 			'slope': 'both',
 		},
 		bh_mm_alloc_packs = {
 			'description': "BrightHouse mm allocated packs",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'packs',
-			'slope': 'both',
-		},
-		bh_mm_alloc_size = {
-			'description': "BrightHouse mm allocated size",
-			'value_type':'uint',
-			'units': 'allocunits',
 			'slope': 'both',
 		},
 		bh_mm_alloc_temp = {
 			'description': "BrightHouse mm allocated temp",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'temps',
-			'slope': 'both',
-		},
-		bh_mm_alloc_temp_size = {
-			'description': "BrightHouse mm allocated temp size",
-			'value_type':'uint',
-			'units': 'allocunits',
 			'slope': 'both',
 		},
 		bh_mm_free_blocks = {
 			'description': "BrightHouse mm free blocks",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'blocks',
-			'slope': 'both',
-		},
-		bh_mm_free_pack_size = {
-			'description': "BrightHouse mm free pack size",
-			'value_type':'uint',
-			'units': 'pkunits',
 			'slope': 'both',
 		},
 		bh_mm_free_packs = {
 			'description': "BrightHouse mm free packs",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'packs',
 			'slope': 'both',
 		},
 		bh_mm_free_size = {
 			'description': "BrightHouse mm free size",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'szunits',
 			'slope': 'both',
 		},
 		bh_mm_free_temp = {
 			'description': "BrightHouse mm free temp",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'tmps',
 			'slope': 'both',
 		},
 		bh_mm_free_temp_size = {
 			'description': "BrightHouse mm temp size",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'tmpunits',
 			'slope': 'both',
 		},
 		bh_mm_freeable = {
 			'description': "BrightHouse mm freeable",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'allocunits',
 			'slope': 'both',
 		},
 		bh_mm_release1 = {
 			'description': "BrightHouse mm release1",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'relunits',
 			'slope': 'both',
 		},
 		bh_mm_release2 = {
 			'description': "BrightHouse mm release2",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'relunits',
 			'slope': 'both',
 		},
 		bh_mm_release3 = {
 			'description': "BrightHouse mm release3",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'relunits',
 			'slope': 'both',
 		},
 		bh_mm_release4 = {
 			'description': "BrightHouse mm release4",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'relunits',
 			'slope': 'both',
 		},
 		bh_mm_reloaded = {
 			'description': "BrightHouse mm reloaded",
-			'value_type':'uint',
+			'value_type':'float',
 			'units': 'reloads',
-			'slope': 'both',
-		},
-		bh_mm_scale = {
-			'description': "BrightHouse mm scale",
-			'value_type':'uint',
-			'units': 'scales',
 			'slope': 'both',
 		},
 		bh_mm_unfreeable = {
@@ -1010,15 +1043,21 @@ def metric_init(params):
 				'slope': 'both',
 			},
 		)
+		
+	#debug "=========================================="
 
-	update_stats(REPORT_MASTER, REPORT_SLAVE)
+	update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
+
+	#debug "=========================================="
 
 	time.sleep(MAX_UPDATE_TIME)
 
-	update_stats(REPORT_MASTER, REPORT_SLAVE)
+	update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
+	
+	#debug "=========================================="
 
-#	for stats_descriptions in (infobright_stats_descriptions, master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
-	for stats_descriptions in (master_stats_descriptions, misc_stats_descriptions, slave_stats_descriptions):
+
+	for stats_descriptions in (brighthouse_stats_descriptions, master_stats_descriptions, mysql_stats_descriptions, slave_stats_descriptions):
 		for label in stats_descriptions:
 			if infobright_stats.has_key(label):
 				format = '%u'
@@ -1063,6 +1102,8 @@ if __name__ == '__main__':
 	parser.add_option("-p", "--password", dest="passwd", help="password", default="")
 	parser.add_option("-P", "--port", dest="port", help="port", default=3306, type="int")
 	parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
+	parser.add_option("--no-brighthouse", dest="get_brighthouse", action="store_false", default=True)
+	parser.add_option("--no-brighthouse-engine", dest="get_brighthouse_engine", action="store_false", default=False)
 	parser.add_option("--no-master", dest="get_master", action="store_false", default=True)
 	parser.add_option("--no-slave", dest="get_slave", action="store_false", default=True)
 	parser.add_option("-b", "--gmetric-bin", dest="gmetric_bin", help="path to gmetric binary", default="/usr/bin/gmetric")
@@ -1077,6 +1118,8 @@ if __name__ == '__main__':
 		'passwd': options.passwd,
 		'user': options.user,
 		'port': options.port,
+		'get_brighthouse': options.get_brighthouse,
+		'get_brighthouse_engine': options.get_brighthouse_engine,
 		'get_master': options.get_master,
 		'get_slave': options.get_slave,
 		'unix_socket': options.unix_socket,
