@@ -23,8 +23,8 @@ THE SOFTWARE.
 """
 
 ###  Changelog:
-###    v1.0.0 - 2012-03-05
-###       * Initial version for InfoBright module, derived from infobrightd module
+###    v1.0.0 - 2012-03-07
+###       * Initial version for infobright module, derived from mysqld module
 ###
 
 ###  Requires:
@@ -37,9 +37,6 @@ THE SOFTWARE.
 
 import time
 import MySQLdb
-
-# from IBUtil import defaultdict
-
 import logging
 
 descriptors = []
@@ -286,22 +283,18 @@ def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=T
 	for key in all_interesting_status_vars:
 		if key in all_non_delta_status_vars:
 			infobright_stats[key] = global_status[key]
-			#debug print key + " in non delta, value " + global_status[key]
 		else:
 			# Calculate deltas for counters
 			if time_delta <= 0:
 				#systemclock was set backwards, not updating values.. to smooth over the graphs
 				pass
 			elif key in infobright_stats_last:
-				#debug key + " key in stats last, value " + infobright_stats_last[key]
 				if delta_per_second:
 					infobright_stats[key] = (int(global_status[key]) - int(infobright_stats_last[key])) / time_delta
 				else:
 					infobright_stats[key] = int(global_status[key]) - int(infobright_stats_last[key])
 			else:
-				#debug key + " is new"
 				infobright_stats[key] = float(0)
-			#debug "global status " + global_status[key] + " key " + key
 			infobright_stats_last[key] = global_status[key]
 
 	infobright_stats['open_files_used'] = int(global_status['open_files']) / int(variables['open_files_limit'])
@@ -1044,18 +1037,11 @@ def metric_init(params):
 			},
 		)
 		
-	#debug "=========================================="
-
 	update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
-
-	#debug "=========================================="
 
 	time.sleep(MAX_UPDATE_TIME)
 
 	update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
-	
-	#debug "=========================================="
-
 
 	for stats_descriptions in (brighthouse_stats_descriptions, master_stats_descriptions, mysql_stats_descriptions, slave_stats_descriptions):
 		for label in stats_descriptions:

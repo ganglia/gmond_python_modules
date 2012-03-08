@@ -13,18 +13,12 @@ modules {
   module {
     name = "infobright"
     language = "python"
-#     param host {
-#       value = 'localhost'
-#     }
     param user {
       value = 'your_user'
     }
     param passwd {
       value = 'your_password'
     }
-#     param port {
-#       value = 5029
-#     }
     param unix_socket {
     	value = "/tmp/mysql-ib.sock"
     }
