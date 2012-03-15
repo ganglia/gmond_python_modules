@@ -26,11 +26,14 @@ The following metrics have been implemented:
 * gpu_graphics_speed
 * gpu_sm_speed
 * gpu_mem_speed
+* gpu_max_graphics_speed
+* gpu_max_sm_speed
+* gpu_max_mem_speed
 * gpu_temp
 * gpu_util
 * gpu_mem_util
 * gpu_mem_used
 * gpu_fan
 * gpu_power_usage
-* gpu_power_state
+* gpu_perf_state
 * gpu_ecc_mode
