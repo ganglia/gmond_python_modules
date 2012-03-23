@@ -15,7 +15,7 @@ def dig_it_up(obj,path):
         return False
 
 # Set IP address and JSON Url
-url="http://localhost:9200/_cluster/nodes/_local/stats"
+url="http://localhost:9200/_cluster/nodes/_local/stats?all=true"
 
 # short name to full path for stats
 keyToPath=dict()
