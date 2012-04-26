@@ -15,6 +15,12 @@ collection_group {
   }
 
   metric {
+    name = "procs_created"
+    title = "Processes/Threads created"
+    value_threshold = 0.0
+  }
+
+  metric {
       name_match = "softirq_(.+)"
       value_threshold = 1.0
   }
@@ -23,6 +29,7 @@ collection_group {
       name_match = "cpu_(.+)"
       value_threshold = 1.0
   }
+
 
 
 }

@@ -26,6 +26,8 @@ softirq_pos = {
 LAST_METRICS = dict(METRICS)
 METRICS_CACHE_MAX = 5
 
+
+
 stat_file = "/proc/stat"
 
 ###############################################################################
@@ -86,6 +88,9 @@ def get_delta(name):
     NAME_PREFIX="cpu_"
 
     name = name.replace(NAME_PREFIX,"") # remove prefix from name
+
+    if name == "procs_created":
+      name = "processes"
 
     try:
       delta = (float(curr_metrics['data'][name][0]) - float(last_metrics['data'][name][0])) /(curr_metrics['time'] - last_metrics['time'])
@@ -152,6 +157,12 @@ def metric_init(params):
                 "name"       : "cpu_ctxt",
                 "units"      : "ctxs/sec",
                 "description": "Context Switches",
+                }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : "procs_created",
+                "units"      : "proc/sec",
+                "description": "Number of processes and threads created",
                 }))
 
     descriptors.append(create_desc(Desc_Skel, {
