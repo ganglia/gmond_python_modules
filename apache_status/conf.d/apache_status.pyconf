@@ -3,7 +3,7 @@ modules {
     name     = "apache_status"
     language = "python"
     param url {
-        value = "http://localhost/server-status?auto"
+        value = "http://localhost:7070/server-status"
     }
 
     param virtual_host {
@@ -15,11 +15,16 @@ modules {
         value = "apache"
     }
 
+    param collect_ssl {
+        value = False
+    }
+
+
   }
 }
 
 collection_group {
-  collect_every  = 20
+  collect_every  = 30
   time_threshold = 90
 
   metric {
@@ -90,13 +95,21 @@ collection_group {
 
   metric {
     name  = "ap_rps"
-    title = "Request per second"
+    title = "Requests per second"
     value_threshold = 0.0
   }
-
+  
   metric {
-    name  = "ap_requests"
-    title = "Requests"
+    name  = "ap_cpuload"
+    title = "Pct of time CPU utilized"
     value_threshold = 0.0
-  }
+  }  
+
+#  Uncomment if you are collecting SSL metrics
+#  metric {
+#      name_match = "apssl_(.+)"
+#      value_threshold = 0.0
+#  }
+
+
 }
