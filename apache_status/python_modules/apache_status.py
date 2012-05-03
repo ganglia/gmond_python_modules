@@ -379,8 +379,7 @@ if __name__ == '__main__':
     try:
         params = {
             'url'         : 'http://localhost:7070/server-status',
-            'collect_ssl' : True
-            #'virtual_host': 'health',
+            'collect_ssl' : False
             }
         metric_init(params)
         while True:

@@ -6,15 +6,13 @@ modules {
         value = "http://localhost:7070/server-status"
     }
 
-    param virtual_host {
-        value = "health"
-    }
-
     # Which metric group should these metrics be put into
     param metric_group {
         value = "apache"
     }
 
+    # Collecting SSL metrics under Apache 2.2 appears to cause a memory leak
+    # in mod_status. Watch Apache memory utilization if you enable them
     param collect_ssl {
         value = False
     }
