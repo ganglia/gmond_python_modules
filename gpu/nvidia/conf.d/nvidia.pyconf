@@ -73,11 +73,16 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_power_state"
-    name = "\\1_power_state"
-    title= "\\1 Power State"
+    name_match = "([\\S]+)_performance_state"
+    name = "\\1_performance_state"
+    title= "\\1 Performance State"
     value_threshold = 1.0
   }
+}
+
+collection_group {
+  collect_every = 600
+  time_threshold = 1200
 
   metric {
     name_match = "([\\S]+)_ecc_mode"
@@ -85,6 +90,21 @@ collection_group {
     title= "\\1 ECC Mode"
     value_threshold = 1.0
   }
+
+  metric {
+    name_match = "([\\S]+)_power_man_mode"
+    name = "\\1_power_man_mode"
+    title= "\\1 Power Management Mode"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_power_man_limit"
+    name = "\\1_power_man_limit"
+    title= "\\1 Power Management Limit"
+    value_threshold = 1.0
+  }
+
 }
 
 collection_group {
@@ -124,4 +144,29 @@ collection_group {
     name = "\\1_mem_total"
     title = "\\1 Memory Total"
   }
+
+  metric {
+    name_match = "([\\S]+)_max_graphics_speed"
+    name = "\\1_max_graphics_speed"
+    title = "\\1 Max Graphics Clock Speed"
+  }
+
+  metric {
+    name_match = "([\\S]+)_max_sm_speed"
+    name = "\\1_max_sm_speed"
+    title = "\\1 Max SM Clock Speed"
+  }
+
+  metric {
+    name_match = "([\\S]+)_max_mem_speed"
+    name = "\\1_max_mem_speed"
+    title = "\\1 Max Memory Clock Speed"
+  }
+
+  metric {
+    name_match = "([\\S]+)_serial"
+    name = "\\1_serial"
+    title = "\\1 Board Serial Number"
+  }
 }
+
