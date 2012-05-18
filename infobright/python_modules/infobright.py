@@ -23,13 +23,12 @@ THE SOFTWARE.
 """
 
 ###  Changelog:
-###    v1.0.0 - 2012-03-07
-###       * Initial version for infobright module, derived from mysqld module
+###    v1.0.0 - 2012-05-18
+###       * Brighthouse columnar database "Infobright" module, derived from mysqld module
 ###
 
 ###  Requires:
 ###       * yum install Infobright-python
-###       * IBUtil.py
 
 ###  Copyright Bob Webber, 2012
 ###  License to use, modify, and distribute under the GPL
