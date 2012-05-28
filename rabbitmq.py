@@ -1,9 +1,9 @@
 #!/usr/bin/python
 from subprocess import Popen, PIPE
-import simplejson as json
+import json
 import urllib
 import time
-from String import Template
+from string import Template
 
 global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
 INTERVAL = 20
@@ -13,10 +13,10 @@ GMETRIC="/usr/bin/gmetric"
 RABBITMQCTL="/usr/sbin/rabbitmqctl"
 stats = {}
 last_update = {}
-compiled_results = {}
+compiled_results = {"nodes" : None, "queues" : None, "connections" : None}
 #Make initial stat test time dict
 for stat_type in ('queues', 'connections','exchanges', 'nodes'):
-    last_update[stat_type] = time.time()
+    last_update[stat_type] = None
 
 keyToPath = {}
 
@@ -64,26 +64,35 @@ def dig_it_up(obj,path):
         return False
 
 def refreshGroup(group):
+  
 
-
-    urlstring = url_template.safe_substitute(stat = group)
+    global url_template
+    urlstring = url_template.safe_substitute(stats = group)
 
     global last_update, url, compiled_results
 
     now = time.time()
-    diff = now - last_update[group]
+    if not last_update[group]:
+        diff = INTERVAL
+    else:
+    	diff = now - last_update[group]
     
-    if diff > INTERVAL:
+    if diff >= INTERVAL or not last_update[group]:
+        result_dict = {}
         print "Fetching stats after %d seconds" % INTERVAL
+        print urlstring
         result = json.load(urllib.urlopen(urlstring))
+	print urlstring
 	compiled_results[group] = result
+        print result
         last_update[group] = now
 	#Refresh dict by names. We'll probably move this elsewhere.
-        if group in (queues, nodes):
+        if group in ('queues', 'nodes'):
 	    for entry in result:
 		name_attribute = entry['name']
 		result_dict[name_attribute] = entry
 	    compiled_results[group] = result_dict
+    print compiled_results.keys()
 	
     return compiled_results[group]
 
@@ -104,13 +113,11 @@ def validatedResult(value):
 def list_queues():
     # Make a list of queues
     results = refreshGroup('queues')
-    queues = [queue["name"] for queue in results]
-    return queues
+    return results.keys()
 
 def list_nodes():
     results = refreshGroup('nodes')
-    nodes = [node['name'] for node in results]
-    return nodes
+    return results.keys()
 
 def getQueueStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate-access"
@@ -128,19 +135,38 @@ def getQueueStat(name):
         value = 0
 
     return value
+
+def getNodeStat(name):
+    #Split a name like "rmq_backing_queue_ack_egress_rate-access"
+    stat_name, node_name = name.split("-")
+
+    result = refreshGroup('nodes')
+   
+    value = dig_it_up(result, keyToPath[stat_name] % node_name)
+    print value
+
+    #Convert Booleans
+    if value is True:
+        value = 1
+    elif value is False:
+        value = 0
+
+    return value
     
 def metric_init(params):
     ''' Create the metric definition object '''
-    global descriptors, params, stats, vhost, username, password, urlstring
+    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results
     print 'received the following params:'
-
     #Set this globally so we can refresh stats
     vhost = params['vhost']
-    stats = get_vhost_stats(params['vhost'])
     username, password = params['username'], params['password']
 
     url = 'http://%s:%s@localhost:55672/api/$stats' % (username, password)
     url_template = Template(url)
+
+    refreshGroup("nodes")
+    refreshGroup("queues")
+
 
     for queue in list_queues():
         for metric in QUEUE_METRICS:
@@ -156,7 +182,7 @@ def metric_init(params):
     for node in list_nodes():
         for stat in NODE_METRICS:
 	    d1 = {'name': '%s-%s' % (stat, node),
-		'call_back': get_messages_ready,
+		'call_back': getNodeStat,
 		'units': 'N',
 		'slope': 'both',
 		'format': '%d',
@@ -190,6 +216,6 @@ def get_vhost_stats(vhost, qtypes):
     return data
 
 if __name__ == "__main__":
-    params = {"vhost":"/", "username":"guest","password":"guest"}
-    metric_init(params)
+    parameters = {"vhost":"/", "username":"guest","password":"guest"}
+    metric_init(parameters)
 
