@@ -175,7 +175,8 @@ def metric_init(params):
 		'units': 'N',
 		'slope': 'both',
 		'format': '%d',
-		'description': 'Queue_Metric'}
+		'description': 'Queue_Metric',
+		'groups':'rabbitmq'}
 	    
 	    descriptors.append(d1)
 
@@ -186,7 +187,8 @@ def metric_init(params):
 		'units': 'N',
 		'slope': 'both',
 		'format': '%d',
-		'description': 'Get Messages Ready in Queue'}
+		'description': 'Get Messages Ready in Queue',
+		'groups':'rabbitmq'}
 		
 	    descriptors.append(d1)
 
@@ -196,26 +198,11 @@ def metric_init(params):
     return descriptors
 	
 
-
-def get_vhost_stats(vhost, qtypes):
-    data = {}
-    VALID_TYPES = ['messages_ready', 'messages_unacknowledged']
-    qtypes = [t for t in qtypes if t in VALID_TYPES]
-    cmd = [RABBITMQCTL,
-           'list_queues',
-           '-p', vhost, 'name']
-    cmd.extend(qtypes)
-    stdout, stderr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-    for l in stdout.split("\n")[1:-2]:
-        l = l.split()
-        name = l.pop(0)
-        data[name] = {}
-        for i, t in enumerate(qtypes):
-            data[name][t] = int(l[i])
-    print data
-    return data
-
 if __name__ == "__main__":
     parameters = {"vhost":"/", "username":"guest","password":"guest"}
-    metric_init(parameters)
+    descriptors = metric_init(parameters)
+    for d1 in descriptors:
+	print d1['name']
+	d1['call_back'](d1['name'])
+    
 
