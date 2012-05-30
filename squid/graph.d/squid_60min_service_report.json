@@ -1,0 +1,14 @@
+{
+   "report_name" : "squid_60min_service_report",
+   "report_type" : "standard",
+   "title" : "Squid 60 min Service Times",
+   "vertical_label" : "seconds",
+   "series" : [
+	{ "metric" : "squid_cacheDnsSvcTime_60", "color": "3366ff", "label": "DNS", "line_width": "2", "type": "line" },
+	{ "metric" : "squid_cacheHttpAllSvcTime_60", "color": "cc99ff", "label": "HTTP All", "line_width": "2", "type": "line" },
+	{ "metric" : "squid_cacheHttpHitSvcTime_60", "color": "ff3366", "label": "HTTP Hit", "line_width": "2", "type": "line" },
+	{ "metric" : "squid_cacheHttpMissSvcTime_60", "color": "00ff00", "label": "HTTP Miss", "line_width": "2", "type": "line" },
+	{ "metric" : "squid_cacheHttpNhSvcTime_60", "color": "ff9999", "label": "HTTP Refresh", "line_width": "2", "type": "line" },
+	{ "metric" : "squid_cacheHttpNmSvcTime_60", "color": "cc0000", "label": "HTTP not-mod", "line_width": "2", "type": "line" }
+   ]
+}
