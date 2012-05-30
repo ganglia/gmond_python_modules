@@ -150,6 +150,7 @@ def getNodeStat(name):
 
     result = refreshGroup('nodes')
    
+    print stat_name, node_name, keyToPath[stat_name]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
     #Convert Booleans
@@ -174,6 +175,7 @@ def metric_init(params):
 
     refreshGroup("nodes")
     refreshGroup("queues")
+    print compiled_results['nodes'].keys()
 
 
     Desc_Skel = {
@@ -187,40 +189,54 @@ def metric_init(params):
         'description' : 'XXX',
         'groups'      : params["metric_group"],
     }
+
+    def buildTestNodeStat():
+	d = create_desc({
+	'name' : u'rmq_disk_free.rmqone'.encode('ascii','ignore'),
+	'call_back' : getNodeStat,
+	'units': 'N',
+	'slope': 'both',
+	'format': '%d',	
+	'groups' : 'rabbitmq',
+        'description' : 'test'})
+       
+	descriptors.append(d)
+
+    def buildQueueDescriptors():
+	for queue in list_queues():
+	    for metric in QUEUE_METRICS:
+		name = "%s.%s" % (metric, queue)
+		print name
+		d1 = create_desc({'name': name.encode('ascii','ignore'),
+		    'call_back': getQueueStat,
+		    'units': 'N',
+		    'slope': 'both',
+		    'format': '%d',
+		    'description': 'Queue_Metric',
+		    'groups' : 'rabbitmq,queue'})
+		
+		descriptors.append(d1)
     
-    def testFunc(name):
-        return 1
+    def buildNodeDescriptors():
+	for node in list_nodes():
+	    node = node.split('@')[0]
+	    for stat in NODE_METRICS:
+		name = '%s.%s' % (stat, node)
+		print name
+		d2 = create_desc({'name': name.encode('ascii','ignore'),
+		    'call_back': getNodeStat,
+		    'units': 'N',
+		    'slope': 'both',
+		    'format': '%d',
+		    'description': 'Node_Metric',
+		    'groups' : 'rabbitmq,node'}) 
+                print d2
+		descriptors.append(d2)
 
-    for queue in list_queues():
-        queue = queue.encode('ascii','ignore')
-        for metric in QUEUE_METRICS:
-            name = "%s.%s" % (metric, queue)
-            print name
-	    d1 = create_desc({'name': name,
-		'call_back': getQueueStat,
-		'units': 'N',
-		'slope': 'both',
-		'format': '%d',
-		'description': 'Queue_Metric',
-                'groups' : 'rabbitmq,queue'})
-	    
-	    descriptors.append(d1)
-
-    for node in list_nodes():
-        node = node.split('@')[0]
-        for stat in NODE_METRICS:
-            stat = stat.encode('ascii','ignore')
-            name = '%s.%s' % (stat, node)
-            print name
-	    d2 = create_desc({'name': name,
-                'call_back': getQueueStat,
-                'units': 'N',
-                'slope': 'both',
-                'format': '%d',
-                'description': 'Queue_Metric',
-                'groups' : 'rabbitmq,queue'}) 
- 	    descriptors.append(d2)
-
+    buildQueueDescriptors()
+    buildNodeDescriptors()
+    # buildTestNodeStat()
+	
     return descriptors
 
 def metric_cleanup():
