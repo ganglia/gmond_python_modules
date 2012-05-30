@@ -1,0 +1,26 @@
+squid
+========
+
+Python module for ganglia 3.1.
+
+This module uses squidclient to get statistics from a running squid proxy.
+It attempts to parse the output into key/value pairs, it will need to be
+updated if new metrics are added to squidclient. The metric names are based
+on those returned by the squid snmp module, new ones were created with 
+similar names where there were values in the output that didn't map directly
+to existing snmp metrics.
+
+It has been tested on squid 2.6 and 2.7, I believe it should work on 3.1
+as well.
+
+## NOTES
+    The user running gmond will need to have the rights to run
+    "squidclient mgr:info".
+
+    The python module may be run as a standalone script to see the 
+    metrics that generated when included into gmond.
+   
+## AUTHOR
+
+Author: Daniel Rich &lt;drich [at] employees [dot] org&gt;
+
