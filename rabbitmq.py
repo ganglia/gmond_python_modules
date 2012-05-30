@@ -1,6 +1,7 @@
-#!/usr/bin/python
-from subprocess import Popen, PIPE
-import json
+#!/usr/bin/python2.4
+import sys
+import os
+import simplejson as json
 import urllib
 import time
 from string import Template
@@ -19,6 +20,13 @@ for stat_type in ('queues', 'connections','exchanges', 'nodes'):
     last_update[stat_type] = None
 
 keyToPath = {}
+
+
+def create_desc(prop):
+    d = Desc_Skel.copy()
+    for k,v in prop.iteritems():
+        d[k] = v
+    return d
 
 # QUEUE METRICS #
 keyToPath['rmq_messages_ready'] = "%s.messages_ready"
@@ -54,6 +62,10 @@ keyToPath['rmq_mem_proc_used'] = "%s.mem_proc_used"
 keyToPath['rmq_running'] = "%s.running" #Boolean
 
 NODE_METRICS = ['rmq_disk_free', 'rmq_mem_used', 'rmq_disk_free_alarm', 'rmq_running', 'rmq_proc_used', 'rmq_mem_proc_used', 'rmq_fd_used', 'rmq_mem_alarm', 'rmq_mem_code', 'rmq_mem_binary', 'rmq_sockets_used']
+	
+
+def metric_cleanup():
+    pass
 
 def dig_it_up(obj,path):
     try:
@@ -80,11 +92,8 @@ def refreshGroup(group):
     if diff >= INTERVAL or not last_update[group]:
         result_dict = {}
         print "Fetching stats after %d seconds" % INTERVAL
-        print urlstring
         result = json.load(urllib.urlopen(urlstring))
-	print urlstring
 	compiled_results[group] = result
-        print result
         last_update[group] = now
 	#Refresh dict by names. We'll probably move this elsewhere.
         if group in ('queues', 'nodes'):
@@ -92,7 +101,6 @@ def refreshGroup(group):
 		name_attribute = entry['name']
 		result_dict[name_attribute] = entry
 	    compiled_results[group] = result_dict
-    print compiled_results.keys()
 	
     return compiled_results[group]
 
@@ -121,12 +129,11 @@ def list_nodes():
 
 def getQueueStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate-access"
-    stat_name, queue_name = name.split("-")
+    stat_name, queue_name = name.split(".")
 
     result = refreshGroup('queues')
     
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
-    print value
 
     #Convert Booleans
     if value is True:
@@ -138,12 +145,12 @@ def getQueueStat(name):
 
 def getNodeStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate-access"
-    stat_name, node_name = name.split("-")
+    print name
+    stat_name, node_name = name.split(".")
 
     result = refreshGroup('nodes')
    
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
-    print value
 
     #Convert Booleans
     if value is True:
@@ -155,7 +162,7 @@ def getNodeStat(name):
     
 def metric_init(params):
     ''' Create the metric definition object '''
-    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results
+    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, Desc_Skel
     print 'received the following params:'
     #Set this globally so we can refresh stats
     vhost = params['vhost']
@@ -163,46 +170,68 @@ def metric_init(params):
 
     url = 'http://%s:%s@localhost:55672/api/$stats' % (username, password)
     url_template = Template(url)
+    print params
 
     refreshGroup("nodes")
     refreshGroup("queues")
 
 
+    Desc_Skel = {
+        'name'        : 'XXX',
+        'call_back'   : getQueueStat,
+        'time_max'    : 60,
+        'value_type'  : 'uint',
+        'units'       : 'units',
+        'slope'       : 'both',
+        'format'      : '%d',
+        'description' : 'XXX',
+        'groups'      : params["metric_group"],
+    }
+    
+    def testFunc(name):
+        return 1
+
     for queue in list_queues():
+        queue = queue.encode('ascii','ignore')
         for metric in QUEUE_METRICS:
-	    d1 = {'name': "%s-%s" % (metric, queue),
+            name = "%s.%s" % (metric, queue)
+            print name
+	    d1 = create_desc({'name': name,
 		'call_back': getQueueStat,
 		'units': 'N',
 		'slope': 'both',
 		'format': '%d',
 		'description': 'Queue_Metric',
-		'groups':'rabbitmq'}
+                'groups' : 'rabbitmq,queue'})
 	    
 	    descriptors.append(d1)
 
     for node in list_nodes():
+        node = node.split('@')[0]
         for stat in NODE_METRICS:
-	    d1 = {'name': '%s-%s' % (stat, node),
-		'call_back': getNodeStat,
-		'units': 'N',
-		'slope': 'both',
-		'format': '%d',
-		'description': 'Get Messages Ready in Queue',
-		'groups':'rabbitmq'}
-		
-	    descriptors.append(d1)
-
-    for d in descriptors:
-        print d
+            stat = stat.encode('ascii','ignore')
+            name = '%s.%s' % (stat, node)
+            print name
+	    d2 = create_desc({'name': name,
+                'call_back': getQueueStat,
+                'units': 'N',
+                'slope': 'both',
+                'format': '%d',
+                'description': 'Queue_Metric',
+                'groups' : 'rabbitmq,queue'}) 
+ 	    descriptors.append(d2)
 
     return descriptors
-	
+
+def metric_cleanup():
+    pass
+  
 
 if __name__ == "__main__":
-    parameters = {"vhost":"/", "username":"guest","password":"guest"}
+    parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
     descriptors = metric_init(parameters)
     for d1 in descriptors:
 	print d1['name']
-	d1['call_back'](d1['name'])
+	print d1['call_back'](d1['name'])
     
 
