@@ -10,8 +10,6 @@ global url, descriptors, last_update, vhost, username, password, url_template, r
 INTERVAL = 20
 descriptors = list()
 username, password = "guest", "guest"
-GMETRIC="/usr/bin/gmetric"
-RABBITMQCTL="/usr/sbin/rabbitmqctl"
 stats = {}
 last_update = {}
 compiled_results = {"nodes" : None, "queues" : None, "connections" : None}
@@ -22,12 +20,6 @@ for stat_type in ('queues', 'connections','exchanges', 'nodes'):
 keyToPath = {}
 
 
-def create_desc(prop):
-    d = Desc_Skel.copy()
-    for k,v in prop.iteritems():
-        d[k] = v
-    return d
-
 # QUEUE METRICS #
 keyToPath['rmq_messages_ready'] = "%s.messages_ready"
 keyToPath['rmq_messages_unacknowledged'] = "%s.messages_unacknowledged"
@@ -37,6 +29,8 @@ keyToPath['rmq_backing_queue_egress_rate'] = "%s.backing_queue_status.avg_egress
 keyToPath['rmq_backing_queue_ingress_rate'] = "%s.backing_queue_status.avg_ingress_rate"
 keyToPath['rmq_backing_queue_mirror_senders'] = "%s.backing_queue_status.mirror_senders"
 keyToPath['rmq_memory'] = "%s.memory"
+keyToPath['rmq_consumers'] = "%s.consumers"
+keyToPath['rmq_messages'] = "%s.messages"
 
 QUEUE_METRICS = ['rmq_messages_ready',
 		'rmq_messages_unacknowledged',
@@ -45,7 +39,9 @@ QUEUE_METRICS = ['rmq_messages_ready',
 		'rmq_backing_queue_egress_rate',
 		'rmq_backing_queue_ingress_rate',
 		'rmq_backing_queue_mirror_senders',
-		'rmq_memory']
+		'rmq_memory',
+                'rmq_consumers',
+		'rmq_messages']
 
 # NODE METRICS #
 keyToPath['rmq_disk_free'] = "%s.disk_free"
@@ -105,7 +101,6 @@ def refreshGroup(group):
     return compiled_results[group]
 
 def getConnectionTotal(name):
-    
     result = refreshGroup('connections')
     return result.length()
 
@@ -145,12 +140,10 @@ def getQueueStat(name):
 
 def getNodeStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate-access"
-    print name
     stat_name, node_name = name.split(".")
 
     result = refreshGroup('nodes')
    
-    print stat_name, node_name, keyToPath[stat_name]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
     #Convert Booleans
@@ -163,44 +156,37 @@ def getNodeStat(name):
     
 def metric_init(params):
     ''' Create the metric definition object '''
-    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, Desc_Skel
+    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results
     print 'received the following params:'
     #Set this globally so we can refresh stats
     vhost = params['vhost']
     username, password = params['username'], params['password']
+    host = params['host']
 
-    url = 'http://%s:%s@localhost:55672/api/$stats' % (username, password)
+    url = 'http://%s:%s@%s:55672/api/$stats' % (username, password, host)
     url_template = Template(url)
     print params
 
     refreshGroup("nodes")
     refreshGroup("queues")
-    print compiled_results['nodes'].keys()
 
+    def create_desc(prop):
+	d = {
+	    'name'        : 'XXX',
+	    'call_back'   : getQueueStat,
+	    'time_max'    : 60,
+	    'value_type'  : 'uint',
+	    'units'       : 'units',
+	    'slope'       : 'both',
+	    'format'      : '%d',
+	    'description' : 'XXX',
+	    'groups'      : params["metric_group"],
+	}
 
-    Desc_Skel = {
-        'name'        : 'XXX',
-        'call_back'   : getQueueStat,
-        'time_max'    : 60,
-        'value_type'  : 'uint',
-        'units'       : 'units',
-        'slope'       : 'both',
-        'format'      : '%d',
-        'description' : 'XXX',
-        'groups'      : params["metric_group"],
-    }
+	for k,v in prop.iteritems():
+	    d[k] = v
+	return d
 
-    def buildTestNodeStat():
-	d = create_desc({
-	'name' : u'rmq_disk_free.rmqone'.encode('ascii','ignore'),
-	'call_back' : getNodeStat,
-	'units': 'N',
-	'slope': 'both',
-	'format': '%d',	
-	'groups' : 'rabbitmq',
-        'description' : 'test'})
-       
-	descriptors.append(d)
 
     def buildQueueDescriptors():
 	for queue in list_queues():
@@ -209,6 +195,7 @@ def metric_init(params):
 		print name
 		d1 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getQueueStat,
+                    'value_type': 'float',
 		    'units': 'N',
 		    'slope': 'both',
 		    'format': '%d',
@@ -225,6 +212,7 @@ def metric_init(params):
 		print name
 		d2 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getNodeStat,
+                    'value_type': 'float',
 		    'units': 'N',
 		    'slope': 'both',
 		    'format': '%d',
@@ -244,10 +232,10 @@ def metric_cleanup():
   
 
 if __name__ == "__main__":
+    url = 'http://%s:%s@localhost:55672/api/$stats' % (username, password)
+    url_template = Template(url)
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
-    descriptors = metric_init(parameters)
-    for d1 in descriptors:
-	print d1['name']
-	print d1['call_back'](d1['name'])
-    
+    metric_init(parameters)
+    result = refreshGroup('queues')
+    print dig_it_up(result, 'clientlog.backing_queue_status.avg_egress_rate')
 

@@ -5,6 +5,13 @@ modules {
     name = "rabbitmq"
     language = "python"
     
+    param metric_group {
+      value = "rabbitmq"
+    }
+    param host {
+      value = "localhost"
+    }
+
     param vhost {
       value = "/"
     }
@@ -16,7 +23,7 @@ modules {
     }
 
     param metric_group {
-      value = "rabbitmq"
+      value = "rmq"
     }
 
   }
@@ -27,7 +34,7 @@ collection_group {
   time_threshold = 60
 
   metric {
-    name_match = "rabbitmq_(.+)"
+    name_match = "rmq_(.+)"
   }
 }
 
