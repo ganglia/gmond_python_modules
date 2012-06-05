@@ -1,0 +1,78 @@
+modules {
+  module {
+    name     = "passenger"
+    language = "python"
+    param status {
+        value = "sudo /usr/bin/passenger-status"
+    }
+    param memory_stats {
+        value = "sudo /usr/bin/passenger-memory-stats"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 20
+  time_threshold = 90
+
+  # metric {
+  #   name  = "passenger_apache_private_total"
+  #   title = "Apache private total"
+  #   value_threshold = 0
+  # }
+  # metric {
+  #   name  = "passenger_private_total"
+  #   title = "Passenger private total"
+  #   value_threshold = 0
+  # }
+  # metric {
+  #   name  = "passenger_apache_processes"
+  #   title = "Apache processes"
+  #   value_threshold = 0
+  # }
+  # metric {
+  #   name  = "passenger_apache_vmsize_total"
+  #   title = "Apache vmsize total"
+  #   value_threshold = 0
+  # }
+  # metric {
+  #   name  = "passenger_vmsize_total"
+  #   title = "Passenger vmsize total"
+  #   value_threshold = 0
+  # }
+  # metric {
+  #   name  = "passenger_nginx_processes"
+  #   title = "Nginx processes"
+  #   value_threshold = 0
+  # }
+  metric {
+    name  = "passenger_processes_active"
+    title = "Passenger Active Processes"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_open_processes"
+    title = "Passenger Open Processes"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_global_queue_depth"
+    title = "Passenger Global Queue Depth"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_max_pool_size"
+    title = "Passenger Max Pool Size"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_processes_inactive"
+    title = "Passenger Inactive Processes"
+    value_threshold = 0
+  }
+  metric {
+    name  = "passenger_memory_usage"
+    title = "Passenger Memory Usage"
+    value_threshold = 0
+  }
+}

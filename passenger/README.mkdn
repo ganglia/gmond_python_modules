@@ -1,0 +1,29 @@
+passenger
+===============
+
+a python module for ganglia 3.1.
+
+[Passenger](http://www.modrails.com/) is a Ruby on Rails / Rack Application server.
+
+This module collects metrics from the passenger-status command, including:
+
+* Active Processes
+* Idle Processes
+* Global Queue Depth
+* Max Pool Size
+
+## Installation
+
+Metrics are collected using the `passenger-status` and
+`passenger-memory-stats` commands via `sudo`. Assuming the `ganglia` user is
+running your gmond process, you'll have to add this to sudoers:
+
+    Cmnd_Alias STATS = /usr/bin/passenger-status, \
+                       /usr/bin/passenger-memory-stats
+
+    ganglia ALL=(ALL) NOPASSWD: STATS
+
+## AUTHOR
+
+Jesse Newland <jnewland@gmail.com>
+

@@ -1,0 +1,109 @@
+modules {
+  module {
+    name     = "__HOSTNAME__"
+    language = "python"
+
+    param host {
+      value = "__HOSTNAME__"
+    }
+    param port {
+      value = 11211
+    }
+    param type {
+      value = "memcached"
+    }
+
+    param refresh_rate {
+      value = 15
+    }
+
+    param metrix_prefix {
+      value = "__HOSTNAME__"
+    }
+    param spoof_host {
+      value = "__IPADDRESS__:__HOSTNAME__"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 20
+  time_threshold = 90
+
+  metric {
+    name  = "__HOSTNAME___curr_items"
+    title = "Current number of items stored"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_get"
+    title = "Cumulative number of retrieval reqs"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_set"
+    title = "Cumulative number of storage reqs"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_get_rate"
+    title = "Retrieval reqs/sec"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___cmd_set_rate"
+    title = "Storage reqs/sec"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___bytes_read"
+    title = "Total number of bytes read by this server from network"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___bytes_written"
+    title = "Total number of bytes sent by this server to network"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___bytes"
+    title = "Current number of bytes used to store items"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___limit_maxbytes"
+    title = "Number of bytes this server is allowed to use for storage"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___curr_connections"
+    title = "Number of open connections"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___evictions"
+    title = "Number of valid items removed from cache to free memory for new items"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___get_hits"
+    title = "Number of keys that have been requested and found present "
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___get_misses"
+    title = "Number of items that have been requested and not found"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___get_hits_rate"
+    title = "Hits/sec"
+    value_threshold = 0
+  }
+  metric {
+    name  = "__HOSTNAME___get_misses_rate"
+    title = "Misses/sec"
+    value_threshold = 0
+  }
+
+}

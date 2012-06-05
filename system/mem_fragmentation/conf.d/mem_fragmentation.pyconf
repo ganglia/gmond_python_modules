@@ -1,0 +1,17 @@
+modules {
+  module {
+    name = "mem_fragmentation"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 30
+
+  metric {
+      name_match = "buddy_(.+)"
+      value_threshold = 1.0
+  }
+
+}

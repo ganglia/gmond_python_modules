@@ -1,0 +1,14 @@
+blueeyes_service
+===============
+
+Python module for ganglia 3.1.
+
+This module parses health statistics from a BlueEyes service and creates
+"blueeyes_*" metrics:
+
+ * DELETE/GET/POST/PUT requests per second
+ * DELETE/GET/POST/PUT errors per second
+
+## AUTHOR
+
+Author: Michael T. Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

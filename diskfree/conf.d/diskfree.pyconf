@@ -1,0 +1,31 @@
+modules {
+    module {
+        name = "diskfree"
+        language = "python"
+        param mounts {
+            value = '/proc/mounts'
+        }
+    }
+}
+
+collection_group {
+    collect_every = 60
+    time_threshold = 180
+    metric {
+        name = "disk_free_absolute_rootfs"
+        title = "Disk Space Available On /"
+    }
+    metric {
+        name = "disk_free_percent_rootfs"
+        title = "Disk Space Available On / in %"
+    }
+
+# Add additional by specifying the mount point e.g.
+#    metric {
+#        name = "disk_free_percent_mnt"
+#        title = "Disk Space Available On /mnt in %"
+#    }
+# 
+
+}
+

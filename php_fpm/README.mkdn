@@ -1,0 +1,36 @@
+php_fpm
+===============
+
+python module for ganglia 3.1.
+
+"php_fpm" send metrics on PHP's [FPM](http://www.php.net/manual/en/install.fpm.php) status.
+
+This module can monitor multiple php-fpm pools by passing in multiple ports separated by commas into the ports parameter.
+
+## Metrics
+ * php_fpm_server_version
+ * php_fpm_pool_name
+ * php_fpm_process_manager
+ * php_fpm_accepted_connections
+ * php_fpm_active_processes
+ * php_fpm_idle_processes
+ * php_fpm_total_processes
+
+## Params
+  * status_path (The path to query for php-fpm status. Default: '/status')
+  * host (The hostname/ip of the server running php-fpm. Default: localhost)
+  * ports (The list of ports of which the php-fpm pool are running on. Default: 9000)
+  * php_fpm_bin (The full path to the php_fpm binary. Default '/usr/sbin/php5-fpm')
+  * refresh_rate (The time in seconds between polling php-fpm. Default: 15)
+  * prefix (The string to prefix the metric name. Default: 'php_fpm_')
+
+## NOTES
+ * This has only been tested on python 2.6.5 on Ubuntu 10.04.
+ * If more than one port is specified in the ports param, the port number will be appended onto the mectric's prefix. IE, given prefix = 'php_fpm_' and ports = '9000,9001,9002', your metric name will include 'php_fpm_9000_active_processes', 'php_fpm_9001_active_processes' and 'php_fpm_9002_active_processes'.
+ * Ensure your PHP-FPM configuration has a pm.status_path set to the same value as this module's status_path param.
+ * This module uses the [flup python module](http://pypi.python.org/pypi/flup/1.0) as the fastcgi client library. Please ensure it's installed.
+
+## AUTHOR
+
+Patrick Ting <pcting@gmail.com>
+

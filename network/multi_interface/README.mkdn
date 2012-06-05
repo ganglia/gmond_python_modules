@@ -1,0 +1,59 @@
+multi_interface
+===============
+
+Python module for ganglia 3.1+
+
+This module allows you to collect per network interface network stats. Out
+of the box Ganglia provides only aggregate network metrics. This module will
+give you rx (receive) and tx (transmit) stats for every interface it encounters
+e.g.
+
+value for rx_bytes_lo is 21847.3723
+value for rx_pkts_lo is 17.5771
+value for rx_errs_lo is 0.0000
+value for rx_drops_lo is 0.0000
+value for tx_bytes_lo is 21847.3723
+value for tx_pkts_lo is 17.5771
+value for tx_errs_lo is 0.0000
+value for tx_drops_lo is 0.0000
+value for rx_bytes_eth0 is 0.0000
+value for rx_pkts_eth0 is 0.0000
+value for rx_errs_eth0 is 0.0000
+value for rx_drops_eth0 is 0.0000
+value for tx_bytes_eth0 is 0.0000
+value for tx_pkts_eth0 is 0.0000
+value for tx_errs_eth0 is 0.0000
+value for tx_drops_eth0 is 0.0000
+value for rx_bytes_eth1 is 0.0000
+value for rx_pkts_eth1 is 0.0000
+value for rx_errs_eth1 is 0.0000
+value for rx_drops_eth1 is 0.0000
+value for tx_bytes_eth1 is 0.0000
+value for tx_pkts_eth1 is 0.0000
+value for tx_errs_eth1 is 0.0000
+value for tx_drops_eth1 is 0.0000
+
+You can run the multi_interface.py script by hand to see all of the metrics.
+
+Install 
+=============== 
+
+Copy multi_interface.py from python_modules to your python modules directory e.g.
+
+/usr/lib64/ganglia/python_modules
+
+and multi_interface.pyconf to
+
+/etc/ganglia/conf.d/
+
+Restart Gmond and you are done. If you want only specific interfaces add a space
+delimited list of interfaces in multi_interface.pyconf e.g.
+
+    param interfaces {
+      value = "eth0 eth2"
+    }
+
+
+## AUTHOR
+
+Author: Vladimir Vuksan https://github.com/vvuksan

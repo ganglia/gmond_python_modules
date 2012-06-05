@@ -1,0 +1,189 @@
+#/* squid server metrics */
+#
+modules {
+  module {
+    name = "squid"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 60
+  metric {
+    name = squid_cacheVersionId
+    title = 'Cache Software Version'
+  }
+  metric {
+    name = squid_cacheSysVMsize
+    title = 'Storage Mem size in KB'
+  }
+  metric {
+    name = squid_cacheMemUsage
+    title = 'Total memory accounted for KB'
+  }
+  metric {
+    name = squid_cacheSysPageFaults
+    title = 'Page faults with physical i/o'
+  }
+  metric {
+    name = squid_cacheCpuTime
+    title = 'Amount of cpu seconds consumed'
+  }
+  metric {
+    name = squid_cacheCpuUsage
+    title = 'The percentage use of the CPU'
+  }
+  metric {
+    name = squid_cacheCpuUsage_5
+    title = 'The percentage use of the CPU - 5 min'
+  }
+  metric {
+    name = squid_cacheCpuUsage_60
+    title = 'The percentage use of the CPU - 60 min'
+  }
+  metric {
+    name = squid_cacheMaxResSize
+    title = 'Maximum Resident Size in KB'
+  }
+  metric {
+    name = squid_cacheNumObjCount
+    title = 'Number of objects stored by the cache'
+  }
+  metric {
+    name = squid_cacheNumObjCountMemObj
+    title = 'Number of memobjects stored by the cache'
+  }
+  metric {
+    name = squid_cacheNumObjCountHot
+    title = 'Number of hot objects stored by the cache'
+  }
+  metric {
+    name = squid_cacheNumObjCountOnDisk
+    title = 'Number of objects stored by the cache on-disk'
+  }
+  metric {
+    name = squid_cacheCurrentUnusedFDescrCnt
+    title = 'Available number of file descriptors'
+  }
+  metric {
+    name = squid_cacheCurrentResFileDescrCnt
+    title = 'Reserved number of file descriptors'
+  }
+  metric {
+    name = squid_cacheCurrentFileDescrCnt
+    title = 'Number of file descriptors in use'
+  }
+  metric {
+    name = squid_cacheCurrentFileDescrMax
+    title = 'Highest file descriptors in use'
+  }
+  metric {
+    name = squid_cacheProtoClientHttpRequests
+    title = 'Number of HTTP requests received'
+  }
+  metric {
+    name = squid_cacheIcpPktsSent
+    title = 'Number of ICP messages sent'
+  }
+  metric {
+    name = squid_cacheIcpPktsRecv
+    title = 'Number of ICP messages received'
+  }
+  metric {
+    name = squid_cacheCurrentSwapSize
+    title = 'Storage Swap size'
+  }
+  metric {
+    name = squid_cacheClients
+    title = 'Number of clients accessing cache'
+  }
+  metric {
+    name = squid_cacheHttpAllSvcTime_5
+    title = 'HTTP all service time - 5 min'
+  }
+  metric {
+    name = squid_cacheHttpAllSvcTime_60
+    title = 'HTTP all service time - 60 min'
+  }
+  metric {
+    name = squid_cacheHttpMissSvcTime_5
+    title = 'HTTP miss service time - 5 min'
+  }
+  metric {
+    name = squid_cacheHttpMissSvcTime_60
+    title = 'HTTP miss service time - 60 min'
+  }
+  metric {
+    name = squid_cacheHttpNmSvcTime_5
+    title = 'HTTP hit not-modified service time - 5 min'
+  }
+  metric {
+    name = squid_cacheHttpNmSvcTime_60
+    title = 'HTTP hit not-modified service time - 60 min'
+  }
+  metric {
+    name = squid_cacheHttpHitSvcTime_5
+    title = 'HTTP hit service time - 5 min'
+  }
+  metric {
+    name = squid_cacheHttpHitSvcTime_60
+    title = 'HTTP hit service time - 60 min'
+  }
+  metric {
+    name = squid_cacheIcpQuerySvcTime_5
+    title = 'ICP query service time - 5 min'
+  }
+  metric {
+    name = squid_cacheIcpQuerySvcTime_60
+    title = 'ICP query service time - 60 min'
+  }
+  metric {
+    name = squid_cacheDnsSvcTime_5
+    title = 'DNS service time - 5 min'
+  }
+  metric {
+    name = squid_cacheDnsSvcTime_60
+    title = 'DNS service time - 60 min'
+  }
+  metric {
+    name = squid_cacheRequestHitRatio_5
+    title = 'Request Hit Ratios - 5 min'
+  }
+  metric {
+    name = squid_cacheRequestHitRatio_60
+    title = 'Request Hit Ratios - 60 min'
+  }
+  metric {
+    name = squid_cacheRequestByteRatio_5
+    title = 'Byte Hit Ratios - 5 min'
+  }
+  metric {
+    name = squid_cacheRequestByteRatio_60
+    title = 'Byte Hit Ratios - 60 min'
+  }
+  metric {
+    name = squid_cacheRequestMemRatio_5
+    title = 'Memory Hit Ratios - 5 min'
+  }
+  metric {
+    name = squid_cacheRequestMemRatio_60
+    title = 'Memory Hit Ratios - 60 min'
+  }
+  metric {
+    name = squid_cacheRequestDiskRatio_5
+    title = 'Disk Hit Ratios - 5 min'
+  }
+  metric {
+    name = squid_cacheRequestDiskRatio_60
+    title = 'Disk Hit Ratios - 60 min'
+  }
+  metric {
+    name = squid_cacheHttpNhSvcTime_5
+    title = 'HTTP refresh hit service time - 5 min'
+  }
+  metric {
+    name = squid_cacheHttpNhSvcTime_60
+    title = 'HTTP refresh hit service time - 60 min'
+  }
+}

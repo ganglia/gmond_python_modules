@@ -1,0 +1,440 @@
+###
+### Note:
+###   To setup database access:
+###   GRANT SUPER, PROCESS ON *.* TO your_user@localhost \
+###   IDENTIFIED BY "your_password";
+###
+###   Notice in this example binlogging is not enabled in the MySQL
+###   server. In this case the "mysql_binlog_*" metrics are
+###   commented out.
+###
+
+modules {
+  module {
+    name = "infobright"
+    language = "python"
+    param user {
+      value = 'your_user'
+    }
+    param passwd {
+      value = 'your_password'
+    }
+    param unix_socket {
+    	value = "/tmp/mysql-ib.sock"
+    }
+    param get_brighthouse {
+      value = True
+    }
+    param get_brighthouse_engine {
+      value = False
+    }
+    param get_master {
+      value = False
+    }
+    param get_slave {
+      value = False
+    }
+    param delta_per_second {
+      value = True
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name = "infobright_bh_gdc_false_wakeup"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_hits"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_load_errors"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_misses"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_pack_loads"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_prefetched"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_read_wait_in_progress"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_readwait"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_redecompress"
+  }
+
+  metric {
+    name = "infobright_bh_gdc_released"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_blocs"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_objs"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_pack_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_packs"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_temp"
+  }
+
+  metric {
+    name = "infobright_bh_mm_alloc_temp_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_blocks"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_pack_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_packs"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_temp"
+  }
+
+  metric {
+    name = "infobright_bh_mm_free_temp_size"
+  }
+
+  metric {
+    name = "infobright_bh_mm_freeable"
+  }
+
+  metric {
+    name = "infobright_bh_mm_release1"
+  }
+
+  metric {
+    name = "infobright_bh_mm_release2"
+  }
+
+  metric {
+    name = "infobright_bh_mm_release3"
+  }
+
+  metric {
+    name = "infobright_bh_mm_release4"
+  }
+
+  metric {
+    name = "infobright_bh_mm_reloaded"
+  }
+
+  metric {
+    name = "infobright_bh_mm_scale"
+  }
+
+  metric {
+    name = "infobright_bh_mm_unfreeable"
+  }
+
+  metric {
+    name = "infobright_bh_readbytes"
+  }
+
+  metric {
+    name = "infobright_bh_readcount"
+  }
+
+  metric {
+    name = "infobright_bh_writebytes"
+  }
+
+  metric {
+    name = "infobright_bh_writecount"
+  }
+
+/*
+  metric {
+    name = "infobright_binlog_space_used"
+  }
+
+  metric {
+    name = "infobright_binlog_space_current"
+  }
+
+  metric {
+    name = "infobright_binlog_count"
+  }
+
+  metric {
+    name = "infobright_binlog_space_total"
+  }
+*/
+  metric {
+    name = "infobright_key_write_requests"
+  }
+
+  metric {
+    name = "infobright_qcache_inserts"
+  }
+
+  metric {
+    name = "infobright_select_scan"
+  }
+
+  metric {
+    name = "infobright_key_writes"
+  }
+
+  metric {
+    name = "infobright_com_update_multi"
+  }
+
+  metric {
+    name = "infobright_table_locks_immediate"
+  }
+
+  metric {
+    name = "infobright_threads_created"
+  }
+
+  metric {
+    name = "infobright_connections"
+  }
+
+  metric {
+    name = "infobright_questions"
+  }
+
+  metric {
+    name = "infobright_bytes_received"
+  }
+
+  metric {
+    name = "infobright_qcache_queries_in_cache"
+  }
+
+  metric {
+    name = "infobright_binlog_cache_disk_use"
+  }
+
+  metric {
+    name = "infobright_uptime"
+  }
+
+  metric {
+    name = "infobright_slave_open_temp_tables"
+  }
+
+  metric {
+    name = "infobright_slow_launch_threads"
+  }
+
+  metric {
+    name = "infobright_open_tables"
+  }
+
+  metric {
+    name = "infobright_sort_range"
+  }
+
+  metric {
+    name = "infobright_select_range"
+  }
+
+  metric {
+    name = "infobright_com_insert"
+  }
+
+  metric {
+    name = "infobright_sort_rows"
+  }
+
+  metric {
+    name = "infobright_select_range_check"
+  }
+
+  metric {
+    name = "infobright_version"
+  }
+
+  metric {
+    name = "infobright_max_connections"
+  }
+
+  metric {
+    name = "infobright_query_cache_size"
+  }
+
+  metric {
+    name = "infobright_opened_tables"
+  }
+
+  metric {
+    name = "infobright_threads_running"
+  }
+
+  metric {
+    name = "infobright_slow_queries"
+  }
+
+  metric {
+    name = "infobright_created_tmp_tables"
+  }
+
+  metric {
+    name = "infobright_threads_connected"
+  }
+
+  metric {
+    name = "infobright_select_full_join"
+  }
+
+  metric {
+    name = "infobright_com_select"
+  }
+
+  metric {
+    name = "infobright_slave_retried_transactions"
+  }
+
+  metric {
+    name = "infobright_threads_cached"
+  }
+
+  metric {
+    name = "infobright_table_locks_waited"
+  }
+
+  metric {
+    name = "infobright_qcache_lowmem_prunes"
+  }
+
+  metric {
+    name = "infobright_binlog_cache_use"
+  }
+
+  metric {
+    name = "infobright_com_insert_select"
+  }
+
+  metric {
+    name = "infobright_qcache_hits"
+  }
+
+  metric {
+    name = "infobright_created_tmp_files"
+  }
+
+  metric {
+    name = "infobright_open_files"
+  }
+
+  metric {
+    name = "infobright_com_update"
+  }
+
+  metric {
+    name = "infobright_select_full_range_join"
+  }
+
+  metric {
+    name = "infobright_qcache_not_cached"
+  }
+
+  metric {
+    name = "infobright_sort_scan"
+  }
+
+  metric {
+    name = "infobright_max_used_connections"
+  }
+
+  metric {
+    name = "infobright_com_delete_multi"
+  }
+
+  metric {
+    name = "infobright_bytes_sent"
+  }
+
+  metric {
+    name = "infobright_com_replace"
+  }
+
+  metric {
+    name = "infobright_qcache_free_memory"
+  }
+
+  metric {
+    name = "infobright_qcache_total_blocks"
+  }
+
+  metric {
+    name = "infobright_com_delete"
+  }
+
+  metric {
+    name = "infobright_key_read_requests"
+  }
+
+  metric {
+    name = "infobright_qcache_free_blocks"
+  }
+
+  metric {
+    name = "infobright_aborted_connects"
+  }
+
+  metric {
+    name = "infobright_com_load"
+  }
+
+  metric {
+    name = "infobright_com_replace_select"
+  }
+
+  metric {
+    name = "infobright_created_tmp_disk_tables"
+  }
+
+  metric {
+    name = "infobright_key_reads"
+  }
+
+  metric {
+    name = "infobright_aborted_clients"
+  }
+}
+

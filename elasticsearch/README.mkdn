@@ -1,0 +1,17 @@
+elasticsearch
+===============
+
+python module for ganglia 3.1.
+
+"elasticsearch" sends metrics on ElasticSearch nodes using the stats api
+
+http://(node-ip):9200/_cluster/nodes/(node-ip)/stats
+
+This module requires that jsonpath python module be installed on the machine.
+
+
+## AUTHORS
+
+Jeremy Carroll <phobos182@gmail.com>
+Matt Radtke <matthew.radtke@gmail.com>
+Dave Rawks <dave@pandora.com>

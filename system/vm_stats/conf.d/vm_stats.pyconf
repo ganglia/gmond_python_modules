@@ -1,0 +1,17 @@
+modules {
+  module {
+    name = "vm_stats"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 30
+  time_threshold = 45
+
+  metric {
+      name_match = "vm_(.+)"
+      value_threshold = 1.0
+  }
+
+}

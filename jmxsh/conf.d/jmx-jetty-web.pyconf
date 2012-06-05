@@ -1,0 +1,97 @@
+#
+
+modules {
+  module {
+    name = 'jmxsh'
+    language = 'python'
+
+    param host {
+      value = 'localhost'
+    }
+    param port {
+      value = '8887'
+    }
+    param name {
+      value = 'jetty-web'
+    }
+    # Classifies these metrics in this group in the web GUI
+    param metric_group {
+      value = 'jmx'
+    }
+
+	# org.mortbay
+    param sessions {
+      value = 'org.mortbay.jetty.servlet:type=hashsessionmanager,id=0 sessions'
+    }
+    param threads {
+      value = 'org.mortbay.thread:type=queuedthreadpool,id=0 threads'
+    }
+    param idle_threads {
+      value = 'org.mortbay.thread:type=queuedthreadpool,id=0 idleThreads'
+    }
+    param queue_size {
+      value = 'org.mortbay.thread:type=queuedthreadpool,id=0 queueSize'
+    }
+
+    # java.lang
+    param daemon_threads { # composite data
+      value = 'java.lang:type=Threading DaemonThreadCount'
+    }
+    param thread_count {
+      value = 'java.lang:type=Threading ThreadCount'
+    }
+    param peak_thread_count {
+      value = 'java.lang:type=Threading PeakThreadCount'
+    }
+    param total_started_thread_count {
+      value = 'java.lang:type=Threading TotalStartedThreadCount'
+    }
+    param heap {
+      value = 'java.lang:type=Memory HeapMemoryUsage'
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name = 'jmx_jetty-web_sessions'
+  }
+  metric {
+    name = 'jmx_jetty-web_threads'
+  }
+  metric {
+    name = 'jmx_jetty-web_idle_threads'
+  }
+  metric {
+    name = 'jmx_jetty-web_queue_size'
+  }
+
+  metric {
+    name = 'jmx_jetty-web_daemon_threads'
+  }
+  metric {
+    name = 'jmx_jetty-web_thread_count'
+  }
+  metric {
+    name = 'jmx_jetty-web_peak_thread_count'
+  }
+  metric {
+    name = 'jmx_jetty-web_total_started_thread_count'
+  }
+  metric {
+    name = 'jmx_jetty-web_heap_max'
+  }
+  metric {
+    name = 'jmx_jetty-web_heap_committed'
+  }
+  metric {
+    name = 'jmx_jetty-web_heap_init'
+  }
+  metric {
+    name = 'jmx_jetty-web_heap_used'
+  }
+}
+

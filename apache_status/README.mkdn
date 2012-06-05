@@ -1,0 +1,34 @@
+apache_status
+===============
+
+python module for ganglia 3.1.
+
+"apache_status" sends metrics on Apache process status refering to
+server-status(mod_status.so).
+
+To use this you will need to enable mod_status in Apache. For example you
+add following to your Apache config. 
+
+Listen 8001
+<VirtualHost *:8001>
+    ServerName health.site
+    <Location /server-status>
+        SetHandler server-status
+        Order deny,allow
+        Deny from all
+        Allow from 127.0.0.1
+    </Location>
+</VirtualHost>
+
+Restart Apache. Now you should be able to hit
+
+http://localhost:8001/server-status
+
+on the box and get a web page with Apache status.
+
+
+## AUTHOR
+
+HIROSE Masaaki <hirose31@gmail.com>
+
+Modified by Vladimir Vuksan

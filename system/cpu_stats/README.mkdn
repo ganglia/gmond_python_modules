@@ -1,0 +1,36 @@
+cpu_stats
+===============
+
+Python module for ganglia 3.1.
+
+This module allows you to collect CPU stats that have been left out of stock
+Ganglia gmond. 
+
+/proc/meminfo
+
+
+Install
+===============
+
+Copy cpu_stats.py from python_modules to your python modules directory e.g.
+
+/usr/lib64/ganglia/python_modules
+
+and cpu_stats.pyconf to
+
+/etc/ganglia/conf.d/
+
+Restart Gmond and you should be set. If you would like only specific metrics
+instead of all replace the name_match stanza with entries like these
+
+  metric {
+    name = "procs_blocked"
+    title = "Blocked processes"
+    value_threshold = 1.0
+  }
+
+Restart Gmond and you are done.
+
+## AUTHOR
+
+Author: Vladimir Vuksan https://github.com/vvuksan

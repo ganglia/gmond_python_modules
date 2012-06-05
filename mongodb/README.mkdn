@@ -1,0 +1,35 @@
+mongodb
+===============
+
+Python module for ganglia 3.1.
+
+This module parses output from the db.serverStatus() and rs.status() commands
+and creates "mongodb_*" metrics:
+
+ * Inserts per Second
+ * Queries per Second
+ * Updates per Second
+ * Deletes per Second
+ * Getmores per Second
+ * Commands per Second
+ * Flushes per Second
+ * Memory-mapped Data
+ * Process Virtual Size
+ * Process Resident Size
+ * Page Faults per Second
+ * Global Write Lock Ratio
+ * BTree Page Miss Ratio
+ * Total Operations Waiting for Lock
+ * Readers Waiting for Lock
+ * Writers Waiting for Lock
+ * Total Active Clients
+ * Active Readers
+ * Active Writers
+ * Open Connections
+ * Open Connections (as a percentage of total available)
+ * Replica Set Slave Delay
+ * Asserts per Second
+
+## AUTHOR
+
+Author: Michael T. Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

@@ -1,0 +1,45 @@
+To use this package do following
+
+1. Copy extra/jmxsh.jar to a location of your choice e.g. /usr/share/java/jmxsh.jar
+  Module expects JMX without authentication. If you use auth you will need to modify
+  jmxsh.py script in python_modules. To test you can connect via JMX type
+  java -jar jmxsh.jar -h localhost -p 1099
+2. Copy python_modules/jmxsh.py to where your Ganglia Python modules are e.g. /usr/lib64/ganglia/python_modules/
+3. Copy one of the config files from conf.d/ directory to /etc/ganglia/conf.d
+
+It is advisable to run gmond in debug mode to make sure everything is OK. You can do following
+
+gmond -m | grep jmx
+
+You should get output similar to this
+
+# gmond -m | grep jmx
+jmx_tomcat_heap_init	heap_init (module python_module)
+jmx_tomcat_total_started_thread_count	total_started_thread_count (module python_module)
+jmx_tomcat_thread_count	thread_count (module python_module)
+jmx_tomcat_heap_max	heap_max (module python_module)
+jmx_tomcat_heap_used	heap_used (module python_module)
+jmx_tomcat_daemon_threads	daemon_threads (module python_module)
+jmx_tomcat_peak_thread_count	peak_thread_count (module python_module)
+jmx_tomcat_heap_committed	heap_committed (module python_module)
+
+Also try running gmond with debug e.g.
+
+# gmond -d 5
+
+make sure output is clean
+
+Enabling JMX
+============
+
+To enable the JMX interface in your servlet container (tomcat, jetty-web, et al.) add the 
+following options to the JAVA_OPTS environment variable defined in the rc startup script:
+
+-Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.port=8887  \ 
+  -Dcom.sun.management.jmxremote.ssl=false  -Dcom.sun.management.jmxremote.authenticate=false
+
+For instance, here's what JAVA_OPTS looks like in our /etc/init.d/tomcat-55 file:
+
+export JAVA_OPTS='-server -Xmx256M -XX:MaxPermSize=256m -Dsun.net.inetaddr.ttl=300 \ 
+-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=8887 \
+-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false'

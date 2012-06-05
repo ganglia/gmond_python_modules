@@ -1,0 +1,90 @@
+Index: src/jmxsh/JInterp.java
+===================================================================
+--- src/jmxsh/JInterp.java      (revision 25)
++++ src/jmxsh/JInterp.java      (working copy)
+@@ -24,6 +24,8 @@
+
+ import org.apache.log4j.*;
+ import tcl.lang.*;
++import java.io.InputStreamReader;
++import java.io.BufferedReader;
+
+ class JInterp extends Interp {
+
+@@ -111,6 +113,21 @@
+        }
+     }
+
++    static void evaluateStdin() {
++       try {
++               BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
++               String strLine;
++               while ((strLine = br.readLine()) != null) {
++                       //System.out.println(strLine);
++                       instance.eval(strLine);
++               }
++       }
++       catch (Exception e) {
++           logger.error("Tcl error while evaluating stdin.", e);
++           throw new IllegalArgumentException("Error processing stdin" + instance.getResult().toString());
++       }
++    }
++
+     static void processTclEvents() {
+        try {
+            Notifier.processTclEvents(instance.getNotifier());
+Index: src/jmxsh/Main.java
+===================================================================
+--- src/jmxsh/Main.java (revision 25)
++++ src/jmxsh/Main.java (working copy)
+@@ -153,6 +153,13 @@
+                 .hasArg(false)
+                 .create("I")
+         );
++
++        opts.addOption(
++            OptionBuilder.withLongOpt("quiet")
++                .withDescription("Quiet mode. Do not go into interactive mode.")
++                .hasArg(false)
++                .create("q")
++        );
+
+         opts.addOption(
+             OptionBuilder.withLongOpt("browse")
+@@ -343,10 +350,24 @@
+                 }
+             }
+
+-            // 5b. Otherwise, start interactive session.
+
+-            interactive = true;
+-            historyEnabled = true;
++            // Run stdinput commands
++            if (commandLine.hasOption("quiet")) {
++
++                JInterp.setGlobal("argv", scriptArgs, 1);
++                JInterp.setGlobal("argc", scriptArgs.length-1);
++
++                JInterp.evaluateStdin();
++
++               System.exit(0);
++            } else {
++
++            // 5b. Otherwise, start interactive session
++
++               interactive = true;
++               historyEnabled = true;
++                       }
++
+             if (commandLine.hasOption("nohistory")) {
+                 historyEnabled = false;
+             }
+@@ -438,7 +459,7 @@
+                 System.err.println("Exception caught: " + e.getMessage());
+             }
+         }
+-    }
++    }
+
+ }
+

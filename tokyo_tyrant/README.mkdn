@@ -1,0 +1,18 @@
+tokyo_tyrant
+===============
+
+Python module for ganglia 3.1.
+
+This module parses output from the tcrmgr command and creates "tokyo_tyrant_*"
+metrics:
+
+ * Record number
+ * File size
+ * Replication delay
+ * Put operations / missed per second
+ * Out operations / missed per second
+ * Get operations / missed per second
+
+## AUTHOR
+
+Author: Michael T. Conigliaro &lt;mike [at] conigliaro [dot] org&gt;

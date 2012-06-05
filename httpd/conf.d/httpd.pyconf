@@ -1,0 +1,96 @@
+#
+
+modules {
+  module {
+    name = 'httpd'
+    language = 'python'
+
+    param status_url {
+      value = 'http://localhost/server-status?auto'
+    }
+    param apache_conf {
+      value = '/etc/httpd/conf/httpd.conf'
+    }
+    param apache_ctl {
+      value = '/usr/sbin/apachectl'
+    }
+    param apache_bin {
+      value = '/usr/sbin/httpd'
+    }
+    param apache_user {
+      value = 'apache'
+    }
+    param get_extended {
+      value = True
+    }
+    param get_prefork {
+      value = True
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name = 'httpd_server_version'
+  }
+
+  metric {
+    name = 'httpd_busy_workers'
+  }
+
+  metric {
+    name = 'httpd_idle_workers'
+  }
+
+  metric {
+    name = 'httpd_avg_worker_size'
+  }
+
+  metric {
+    name = 'httpd_percent_cpu'
+  }
+
+  metric {
+    name = 'httpd_hits'
+  }
+
+  metric {
+    name = 'httpd_sent_kbytes'
+  }
+
+  metric {
+    name = 'httpd_uptime'
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name = 'httpd_start_servers'
+  }
+
+  metric {
+    name = 'httpd_min_spare_servers'
+  }
+
+  metric {
+    name = 'httpd_max_spare_servers'
+  }
+
+  metric {
+    name = 'httpd_server_limit'
+  }
+
+  metric {
+    name = 'httpd_max_clients'
+  }
+
+  metric {
+    name = 'httpd_max_requests_per_child'
+  }
+}
