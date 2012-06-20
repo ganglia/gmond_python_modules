@@ -73,9 +73,9 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_power_state"
-    name = "\\1_power_state"
-    title= "\\1 Power State"
+    name_match = "([\\S]+)_perf_state"
+    name = "\\1_perf_state"
+    title= "\\1 Performance State"
     value_threshold = 1.0
   }
 
@@ -123,5 +123,26 @@ collection_group {
     name_match = "([\\S]+)_mem_total"
     name = "\\1_mem_total"
     title = "\\1 Memory Total"
+  }
+
+  metric {
+    name_match = "([\\S]+)_max_graphics_speed"
+    name = "\\1_max_graphics_speed"
+    title = "\\1 Max Graphics Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_max_sm_speed"
+    name = "\\1_max_sm_speed"
+    title = "\\1 Max SM Speed"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_max_mem_speed"
+    name = "\\1_max_mem_speed"
+    title = "\\1 Max Memory Speed"
+    value_threshold = 1.0
   }
 }

@@ -1,0 +1,16 @@
+rabbit
+===============
+
+python module for ganglia 3.1.
+
+"rabbit" sends metrics on RabbitMQ nodes using the stats api. It is based off the very similar ElasticSearch module.
+
+http://(node-ip):55672/api/queues (or nodes)
+
+This module requires simplejson, or if using a 2.6 interpreter with mod_python, json. Modify accordingly.
+
+The digItUp function, and the keyToPath syntax, were borrowed from the ElasticSearch module.
+
+## AUTHORS
+
+Gregory Rice <gregrice@gmail.com>
