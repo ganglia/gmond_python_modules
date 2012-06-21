@@ -41,7 +41,7 @@ def get_value(name):
     """Return a value for the requested metric"""
 
     # parse unit type and path from name
-    name_parser = re.match("^%s([a-z]+)_(\w+)$" % NAME_PREFIX, name)
+    name_parser = re.match("^%s(absolute|percent)_(.*)$" % NAME_PREFIX, name)
     unit_type = name_parser.group(1)
     if name_parser.group(2) == 'rootfs':
         path = '/'
