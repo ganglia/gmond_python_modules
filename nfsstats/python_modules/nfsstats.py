@@ -7,6 +7,25 @@ import time
 import syslog
 import sys
 
+def test_proc3( p_file ):
+
+    """
+    Check if <p_file> contains keyword 'proc3'
+    """
+
+    p_fd = open( p_file )
+
+    p_contents = p_fd.read()
+
+    p_fd.close()
+
+    m = re.search(".*proc3.*", p_contents, flags=re.MULTILINE)
+
+    if not m:
+        return False
+    else:
+        return True
+
 verboselevel = 0
 descriptors = [ ]
 old_values = { }
@@ -14,7 +33,7 @@ old_values = { }
 configtable = [
     {
         'group': 'nfs_client',
-        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)' ],
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfs").st_mode)', 'test_proc3("/proc/net/rpc/nfs")' ],
         'prefix': 'nfs_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
         'file': '/proc/net/rpc/nfs',
@@ -47,7 +66,7 @@ configtable = [
     },
     {
         'group': 'nfs_server',
-        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)' ],
+        'tests': [ 'stat.S_ISREG(os.stat("/proc/net/rpc/nfsd").st_mode)', 'test_proc3("/proc/net/rpc/nfsd")' ],
         'prefix': 'nfsd_v3_',
         #  The next 4 lines can be at the 'group' level or the 'name' level
         'file': '/proc/net/rpc/nfsd',
