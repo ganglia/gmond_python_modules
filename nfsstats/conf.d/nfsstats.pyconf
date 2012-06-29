@@ -9,6 +9,10 @@ collection_group {
   collect_every = 60
   time_threshold = 120
   metric {
+    name = "nfs_v3_total"
+    title = "NFS v3 total"
+  }
+  metric {
     name = "nfs_v3_getattr"
     title = "NFS v3 getattr"
   }

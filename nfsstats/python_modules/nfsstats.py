@@ -6,6 +6,7 @@ import re
 import time
 import syslog
 import sys
+import string
 
 def test_proc3( p_file ):
 
@@ -41,6 +42,7 @@ configtable = [
         'units': 'calls/sec',
         'format': '%f',
         'names': {
+            'total':       { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\d+.*\d)\n" },
             'getattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\S*)" },
             'setattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){3}(\S*)" },
             'lookup':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){4}(\S*)" },
@@ -74,6 +76,7 @@ configtable = [
         'units': 'calls/sec',
         'format': '%f',
         'names': {
+            'total':       { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\d+.*\d)\n" },
             'getattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){2}(\S*)" },
             'setattr':     { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){3}(\S*)" },
             'lookup':      { 'description':'dummy description', 're':  ".*proc3 (?:\S*\s){4}(\S*)" },
@@ -197,10 +200,23 @@ def get_value(name):
             break
     contents = file(descriptors[i]['file']).read()
     m = re.search(descriptors[i]['re'], contents, flags=re.MULTILINE)
+
+    m_value = m.group(1)
+
+    #RB: multiple (space seperated) values: calculate sum
+    if string.count( m_value, ' ' ) > 0:
+        m_fields = string.split( m_value, ' ' )
+
+        sum_value = 0
+
+        for f in m_fields:
+            sum_value = sum_value + int(f)
+
+        m_value = sum_value
     
     #  Return time and value.
     ts = time.time()
-    return (ts, int(m.group(1)))
+    return (ts, int(m_value))
 
 def debug(level, text):
     global verboselevel
