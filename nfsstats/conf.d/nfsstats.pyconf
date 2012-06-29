@@ -97,6 +97,10 @@ collection_group {
     title = "NFS v3 commit"
   }
   metric {
+    name = "nfsd_v3_total"
+    title = "NFSD v3 total"
+  }
+  metric {
     name = "nfsd_v3_getattr"
     title = "NFSD v3 getattr"
   }
