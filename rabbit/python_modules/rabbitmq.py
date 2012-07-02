@@ -65,10 +65,10 @@ def metric_cleanup():
 
 def dig_it_up(obj,path):
     try:
-        if type(path) in (str,unicode):
-            path = path.split('.')
+	path = path.split('.')
         return reduce(lambda x,y:x[y],path,obj)
     except:
+        print "Exception"
         return False
 
 def refreshGroup(group):
@@ -123,12 +123,17 @@ def list_nodes():
     return results.keys()
 
 def getQueueStat(name):
-    #Split a name like "rmq_backing_queue_ack_egress_rate-access"
-    stat_name, queue_name = name.split(".")
-
+    #Split a name like "rmq_backing_queue_ack_egress_rate.access"
+    
+    #handle queue names with . in them
+    split_name = name.split(".")
+    stat_name = split_name[0]
+    queue_name = ".".join(split_name[1:])
+    
     result = refreshGroup('queues')
     
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
+    print name, value
 
     #Convert Booleans
     if value is True:
@@ -136,29 +141,29 @@ def getQueueStat(name):
     elif value is False:
         value = 0
 
-    return value
+    return float(value)
 
 def getNodeStat(name):
-    #Split a name like "rmq_backing_queue_ack_egress_rate-access"
-    stat_name, node_name = name.split(".")
-
+    #Split a name like "rmq_backing_queue_ack_egress_rate.access"
+    stat_name, node_name = name.split(".") 
     result = refreshGroup('nodes')
-   
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
-
+    print name,value
     #Convert Booleans
     if value is True:
         value = 1
     elif value is False:
         value = 0
 
-    return value
+    return float(value)
     
 def metric_init(params):
     ''' Create the metric definition object '''
     global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results
     print 'received the following params:'
     #Set this globally so we can refresh stats
+    if 'host' not in params:
+        params['host'], params['vhost'],params['username'],params['password'] = "localhost", "/", "guest", "guest"
     vhost = params['vhost']
     username, password = params['username'], params['password']
     host = params['host']
@@ -198,15 +203,15 @@ def metric_init(params):
                     'value_type': 'float',
 		    'units': 'N',
 		    'slope': 'both',
-		    'format': '%d',
+		    'format': '%f',
 		    'description': 'Queue_Metric',
 		    'groups' : 'rabbitmq,queue'})
-		
+		print d1
 		descriptors.append(d1)
     
     def buildNodeDescriptors():
 	for node in list_nodes():
-	    node = node.split('@')[0]
+	    #node = node.split('@')[0]
 	    for stat in NODE_METRICS:
 		name = '%s.%s' % (stat, node)
 		print name
@@ -215,7 +220,7 @@ def metric_init(params):
                     'value_type': 'float',
 		    'units': 'N',
 		    'slope': 'both',
-		    'format': '%d',
+		    'format': '%f',
 		    'description': 'Node_Metric',
 		    'groups' : 'rabbitmq,node'}) 
                 print d2
@@ -237,5 +242,8 @@ if __name__ == "__main__":
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
     metric_init(parameters)
     result = refreshGroup('queues')
-    print dig_it_up(result, 'clientlog.backing_queue_status.avg_egress_rate')
-
+    node_result = refreshGroup('nodes')
+    print '***'*10
+    getQueueStat('rmq_backing_queue_ack_egress_rate.gelf_client_three')
+    getNodeStat('rmq_disk_free.rmqtwo@inrmq02d1') 
+    getNodeStat('rmq_mem_used.rmqtwo@inrmq02d1')
