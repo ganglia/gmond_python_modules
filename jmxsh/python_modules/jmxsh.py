@@ -62,11 +62,6 @@ def get_numeric(val):
 	'''Try to return the numeric value of the string'''
 
 	try:
-		return int(val)
-	except:
-		pass
-
-	try:
 		return float(val)
 	except:
 		pass
