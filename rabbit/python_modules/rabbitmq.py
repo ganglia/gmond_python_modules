@@ -93,9 +93,9 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
             for vhost in vhosts:
 		result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
-                result = json.load(urllib.urlopen(urlstring)
+                result = json.load(urllib.urlopen(urlstring))
 		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
-		if group in ('queues', 'nodes', 'exchanges'):
+		if stat in ("queues", "nodes", "exchanges"):
 		    for entry in result:
 		        name = entry['name']
 			result_dict[name] = entry
@@ -104,7 +104,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
     return compiled_results
 
 def refreshGroup(group):
-  
+    # No longer in use in the multiple_vhosts version  
 
     global url_template
     urlstring = url_template.safe_substitute(stats = group, vhost = vhost)
@@ -139,11 +139,6 @@ def validatedResult(value):
         return None
 
 def list_queues(vhost):
-    # Make a list of queues
-    results = refreshGroup('queues', vhost = vhost)
-    return results.keys()
-
-def list_queues(vhost):
     global compiled_results
     queues = compiled_results[('queues', vhost)].keys()
     return queues
@@ -157,16 +152,17 @@ def getQueueStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     
     #handle queue names with . in them
+    print name
     split_name, vhost = name.split("#")
     split_name = split_name.split(".")
     stat_name = split_name[0]
     queue_name = ".".join(split_name[1:])
     
     # Run refreshStats to get the result object
-    result = refreshStats(('queues', vhost))
+    result = compiled_results[('queues', vhost)]
     
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
-    print name, values
+    print name, value
 
     #Convert Booleans
     if value is True:
@@ -180,7 +176,7 @@ def getNodeStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     stat_name = name.split(".")[0]
     node_name, vhost = name.split(".")[1].split("#")
-    result = refreshStats(('nodes', vhost))
+    result = compiled_results[('nodes', vhost)]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
     print name,value
@@ -221,9 +217,6 @@ def metric_init(params):
 
     refreshStats(stats = STATS, vhosts = vhosts)
 
-    refreshGroup("nodes", vhost = vhost)
-    refreshGroup("queues", vhost = vhost)
-
     def create_desc(prop):
 	d = {
 	    'name'        : 'XXX',
@@ -260,9 +253,9 @@ def metric_init(params):
 		descriptors.append(d1)
     
     def buildNodeDescriptors():
-        for vhost, metric in product(vhosts, NODE_METRICS)
-	    for node in list_nodes():
-		name = '%s.%s#%s' % (stat, node, vhost)
+        for vhost, metric in product(vhosts, NODE_METRICS):
+	    for node in list_nodes(vhost):
+		name = '%s.%s#%s' % (metric, node, vhost)
 		print name
 		d2 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getNodeStat,
@@ -290,9 +283,8 @@ if __name__ == "__main__":
     url_template = Template(url)
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
     metric_init(parameters)
-    result = refreshGroup('queues')
-    node_result = refreshGroup('nodes')
+    result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*10
-    getQueueStat('rmq_backing_queue_ack_egress_rate.gelf_client_three')
-    getNodeStat('rmq_disk_free.rmqtwo@inrmq02d1') 
-    getNodeStat('rmq_mem_used.rmqtwo@inrmq02d1')
+    getQueueStat('rmq_backing_queue_ack_egress_rate.gelf_client_three#/')
+    getNodeStat('rmq_disk_free.rmqtwo@inrmq02d1#/') 
+    getNodeStat('rmq_mem_used.rmqtwo@inrmq02d1#/')
