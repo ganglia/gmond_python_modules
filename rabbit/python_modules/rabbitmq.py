@@ -103,35 +103,6 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
 
     return compiled_results
 
-def refreshGroup(group):
-    # No longer in use in the multiple_vhosts version  
-
-    global url_template
-    urlstring = url_template.safe_substitute(stats = group, vhost = vhost)
-
-    global last_update, url, compiled_results
-
-    now = time.time()
-    if not last_update[(group, vhost)]:
-        diff = INTERVAL
-    else:
-    	diff = now - last_update[(group, vhost)]
-    
-    if diff >= INTERVAL or not last_update[(group, vhost)]:
-        result_dict = {}
-        print "Fetching stats after %d seconds" % INTERVAL
-        result = json.load(urllib.urlopen(urlstring))
-	compiled_results[(group, vhost)] = result
-        last_update[(group, vhost)] = now
-	#Refresh dict by names. We'll probably move this elsewhere.
-        if group in ('queues', 'nodes'):
-	    for entry in result:
-		name_attribute = entry['name']
-		result_dict[name_attribute] = entry
-	    compiled_results[(group,vhost)] = result_dict
-	
-    return compiled_results[(group, vhost)]
-
 def validatedResult(value):
     if not isInstance(value, bool):
         return float(value)
