@@ -7,9 +7,13 @@ python module for ganglia 3.1.
 
 http://(node-ip):55672/api/queues (or nodes)
 
-This module requires simplejson, or if using a 2.6 interpreter with mod_python, json. Modify accordingly.
+This module requires simplejson, or if using a 2.6 interpreter with mod_python, the json module. Modify accordingly.
 
 The digItUp function, and the keyToPath syntax, were borrowed from the ElasticSearch module.
+
+To use multiple vhosts, separate them by comma in the vhosts file.
+
+To get metrics besides nodes or queues, either check out how the buildQueueDescriptors and buildNodeDescriptors were set up and make a new descriptor builder/modify stats at the top of the python file and contribute the changes, or ask for my assistance and I'll see what I can do.
 
 ## AUTHORS
 
