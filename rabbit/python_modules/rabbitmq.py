@@ -91,8 +91,11 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
 	last_update = now
         for stat in stats:
             for vhost in vhosts:
+                if stat in ('nodes'):
+                    vhost = '/'
 		result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
+                print urlstring
                 result = json.load(urllib.urlopen(urlstring))
 		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
 		if stat in ("queues", "nodes", "exchanges"):
@@ -114,9 +117,9 @@ def list_queues(vhost):
     queues = compiled_results[('queues', vhost)].keys()
     return queues
 
-def list_nodes(vhost):
+def list_nodes():
     global compiled_results
-    nodes = compiled_results[('nodes', vhost)].keys()
+    nodes = compiled_results[('nodes', '/')].keys()
     return nodes
 
 def getQueueStat(name):
@@ -147,7 +150,7 @@ def getNodeStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     stat_name = name.split(".")[0]
     node_name, vhost = name.split(".")[1].split("#")
-    result = compiled_results[('nodes', vhost)]
+    result = compiled_results[('nodes', '/')]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
     print name,value
@@ -224,9 +227,9 @@ def metric_init(params):
 		descriptors.append(d1)
     
     def buildNodeDescriptors():
-        for vhost, metric in product(vhosts, NODE_METRICS):
-	    for node in list_nodes(vhost):
-		name = '%s.%s#%s' % (metric, node, vhost)
+        for metric in NODE_METRICS:
+	    for node in list_nodes():
+		name = '%s.%s#%s' % (metric, node, '/')
 		print name
 		d2 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getNodeStat,
