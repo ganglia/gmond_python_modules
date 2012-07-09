@@ -5,7 +5,9 @@ python module for ganglia 3.1.
 
 "rabbit" sends metrics on RabbitMQ nodes using the stats api. It is based off the very similar ElasticSearch module.
 
-http://(node-ip):55672/api/queues (or nodes)
+http://(node-ip):55672/api/queues (or nodes, or exchanges)
+
+Please see http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v2_7_1/priv/www/api/index.html for more info on the management API. That's a good place to start if you want to extend this module and include new metrics.
 
 This module requires simplejson, or if using a 2.6 interpreter with mod_python, the json module. Modify accordingly.
 
