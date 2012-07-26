@@ -1,0 +1,207 @@
+#
+
+modules {
+  module {
+    name = 'couchdb'
+    language = 'python'
+
+    param stats_url {
+      value = 'http://localhost:5984/_stats'
+    }
+
+    param refresh_rate {
+      value = '60'
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+
+  metric {
+    name = 'couchdb_couchdb_auth_cache_hits'
+    title = 'Number of authentication cache hits'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_couchdb_auth_cache_misses'
+    title = 'Number of authentication cache misses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_couchdb_database_reads'
+    title = 'Number of times a document was read from a database'
+    value_threshold = 1.0
+  }
+  
+  metric {
+    name = 'couchdb_couchdb_database_writes'
+    title = 'Number of times a document was changed'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_couchdb_open_databases'
+    title = 'Number of open databases'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_couchdb_open_os_files'
+    title = 'Number of file descriptors CouchDB has open'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_couchdb_request_time'
+    title = 'Request Time'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_bulk_requests'
+    title = 'Number of bulk requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_clients_requesting_changes'
+    title = 'Number of clients for continuous _changes'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_requests'
+    title = 'Number of HTTP requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_temporary_view_reads'
+    title = 'Number of temporary view reads'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_view_reads'
+    title = 'Number of view reads'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_COPY'
+    title = 'Number of HTTP COPY requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_DELETE'
+    title = 'Number of HTTP DELETE requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_GET'
+    title = 'Number of HTTP GET requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_HEAD'
+    title = 'Number of HTTP HEAD requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_POST'
+    title = 'Number of HTTP POST requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_request_methods_PUT'
+    title = 'Number of HTTP PUT requests'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_200'
+    title = 'Number of HTTP 200 OK responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_201'
+    title = 'Number of HTTP 201 Created responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_202'
+    title = 'Number of HTTP 202 Accepted responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_301'
+    title = 'Number of HTTP 301 Moved Permanently responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_304'
+    title = 'Number of HTTP 304 Not Modified responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_400'
+    title = 'Number of HTTP 400 Bad Request responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_401'
+    title = 'Number of HTTP 401 Unauthorized responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_403'
+    title = 'Number of HTTP 403 Forbidden responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_404'
+    title = 'Number of HTTP 404 Not Found responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_405'
+    title = 'Number of HTTP 405 Method Not Allowed responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_409'
+    title = 'Number of HTTP 409 Conflict responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_412'
+    title = 'Number of HTTP 412 Precondition Failed responses'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'couchdb_httpd_status_codes_500'
+    title = 'Number of HTTP 500 Internal Server Error responses'
+    value_threshold = 1.0
+  }
+}
