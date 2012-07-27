@@ -47,4 +47,4 @@ python module for ganglia 3.1.
 
 ## AUTHORS
 
-Andreas Lappe <nd [a-t] kaeufli [dot] ch>
+Andreas Lappe <nd@kaeufli.ch>
