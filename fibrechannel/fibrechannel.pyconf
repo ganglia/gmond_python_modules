@@ -1,0 +1,25 @@
+modules {
+    module {
+        name = "fibrechannel"
+        language = "python"
+	param switch_1 {
+            # ip:hostname
+            value = '192.168.1.1:switch1'
+    	}	    
+	#param switch_2 {
+        #    value = '192.168.1.2:switch2'
+    	#}
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 20
+    time_threshold = 50
+    metric {
+        name_match = "(.+)in"
+        }
+    metric {
+        name_match = "(.+)out"
+        }
+    }
