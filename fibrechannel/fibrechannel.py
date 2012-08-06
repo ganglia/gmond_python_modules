@@ -32,15 +32,6 @@ oidDict = {
     'ifOutUcastPkts' : (1,3,6,1,2,1,2,2,1,17),
     'ifOutErrors'    : (1,3,6,1,2,1,2,2,1,20),
     }
-#oidDict = {
-#    'ifIndex'       : (1,3,6,1,2,1,2,2,1,1),
-#    'ifName'        : (1,3,6,1,2,1,31,1,1,1,1),
-#    'ifAlias'       : (1,3,6,1,2,1,31,1,1,1,18),
-#    'ifHCInOctets'  : (1,3,6,1,2,1,31,1,1,1,6),
-#    'ifHCOutOctets' : (1,3,6,1,2,1,31,1,1,1,10),
-#    'ifInUcastPkts' : (1,3,6,1,2,1,2,2,1,11),
-#    'ifOutUcastPkts' : (1,3,6,1,2,1,2,2,1,17),
-#    }
 
 def get_metrics():
     """Return all metrics"""
@@ -86,11 +77,6 @@ def get_delta(name):
 def runSnmp(oidDict,ip):
     
     # cmdgen only takes tuples, oid strings don't work
-##    ifIndex       = (1,3,6,1,2,1,2,2,1,1)
-##    ifName        = (1,3,6,1,2,1,31,1,1,1,1)
-##    ifAlias       = (1,3,6,1,2,1,31,1,1,1,18)
-##    ifHCInOctets  = (1,3,6,1,2,1,31,1,1,1,6)
-##    ifHCOutOctets = (1,3,6,1,2,1,31,1,1,1,10)
 
 #    'ifIndex'       : (1,3,6,1,2,1,2,2,1,1),
 #    'ifDescr'       : (1,3,6,1,2,1,2,2,1,2),
@@ -141,7 +127,6 @@ def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based
             temp = str(t[t.index(line)][1][1]) #(use ifDescr)
             #lowercase the name, change spaces + '/' to '_'
             name = ((temp.lower()).replace(' ','_')).replace('/','_')
-            #print name
             inoct = str(t[t.index(line)][2][1])
             builtdict[switch+'_'+name+'_bitsin'] = int(inoct) * 8
             outoct = str(t[t.index(line)][5][1])
@@ -150,19 +135,11 @@ def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based
             builtdict[switch+'_'+name+'_pktsin'] = int(inpkt)
             outpkt = str(t[t.index(line)][7][1])
             builtdict[switch+'_'+name+'_pktsout'] = int(outpkt)
-        #if match and t[t.index(line)][0][1] != '':
-        #    alias = str(t[t.index(line)][0][1])
-        #    index = str(t[t.index(line)][1][1])
-        #    name = str(t[t.index(line)][2][1])
-        #    hcinoct = str(t[t.index(line)][3][1])
-        #    builtdict[switch+'_'+alias+'_bitsin'] = int(hcinoct) * 8
-        #    hcoutoct = str(t[t.index(line)][4][1])
-        #    builtdict[switch+'_'+alias+'_bitsout'] = int(hcoutoct) * 8
-        #    hcinpkt = str(t[t.index(line)][5][1])
-        #    builtdict[switch+'_'+alias+'_pktsin'] = int(hcinpkt)
-        #    hcoutpkt = str(t[t.index(line)][6][1])
-        #    builtdict[switch+'_'+alias+'_pktsout'] = int(hcoutpkt)
-
+            inerrors = str(t[t.index(line)][3][1])
+            builtdict[switch+'_'+name+'_inerrors'] = int(inerrors)
+            outerrors = str(t[t.index(line)][6][1])
+            builtdict[switch+'_'+name+'_outerrors'] = int(outerrors)
+                         
     #pprint.pprint(builtdict)
     return builtdict
 
@@ -173,6 +150,7 @@ def define_metrics(Desc_Skel, ipaddr, switch):
     aliasdict = buildDict(oidDict,snmpTable,switch)
     spoof_string = ipaddr + ':' + switch
     #print newdict
+    #pprint.pprint(aliasdict.keys())
 
     for key in aliasdict.keys():
         if "bitsin" in key:
@@ -204,6 +182,22 @@ def define_metrics(Desc_Skel, ipaddr, switch):
                         "name"        : key,
                         "units"       : "pkts/sec",
                         "description" : "transmitted packets per sec",
+                        "groups"      : "Packets",
+                        "spoof_host"  : spoof_string,
+                        }))
+        elif "inerrors" in key:
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : key,
+                        "units"       : "errors",
+                        "description" : "inbound packet errors",
+                        "groups"      : "Packets",
+                        "spoof_host"  : spoof_string,
+                        }))
+        elif "outerrors" in key:
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : key,
+                        "units"       : "errors",
+                        "description" : "outbound packet errors",
                         "groups"      : "Packets",
                         "spoof_host"  : spoof_string,
                         }))
