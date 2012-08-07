@@ -9,7 +9,7 @@ modules {
         value = 'localhost'
     }
 
-    param port {
+    param ports {
         value = '9000'
     }
 
