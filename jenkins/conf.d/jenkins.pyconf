@@ -1,0 +1,83 @@
+#
+
+modules {
+  module {
+    name = 'jenkins'
+    language = 'python'
+
+    param base_url {
+      value = 'http://127.0.0.1:8080'
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+
+  metric {
+    name = 'jenkins_overallload_busy_executors'
+    title = 'Number of busy executors on master and slaves'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_overallload_queue_length'
+    title = 'Length of the queue on master and slaves'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_overallload_total_executors'
+    title = 'Number of executors on master and slaves'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_total'
+    title = 'Total number of jobs'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_blue'
+    title = 'Number of jobs with status blue'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_red'
+    title = 'Number of jobs with status red'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_yellow'
+    title = 'Number of jobs with status yellow'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_grey'
+    title = 'Number of jobs with status grey'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_aborted'
+    title = 'Number of jobs with status aborted'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_notbuilt'
+    title = 'Number of jobs with status notbuilt'
+    value_threshold = 1.0
+  }
+
+  metric {
+    name = 'jenkins_jobs_disabled'
+    title = 'Number of jobs with status disabled'
+    value_threshold = 1.0
+  }
+}
