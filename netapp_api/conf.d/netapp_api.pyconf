@@ -1,0 +1,18 @@
+modules {
+    module {
+        name = "netapp_api"
+        language = "python"
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 15
+    time_threshold = 70
+    metric {
+        name_match = "(.+)latency"
+        }
+    metric {
+        name_match = "(.+)ops"
+        }
+}
