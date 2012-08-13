@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#Name: netapp_api.py
+#Desc: Uses Netapp Data Ontap API to get per volume latency & iops metrics.  Download the managemability SDK from now.netapp.com
+#Author: Evan Fraser <evan.fraser@trademe.co.nz>
+#Date: 13/08/2012
+
 import sys
 import time
 import pprint
