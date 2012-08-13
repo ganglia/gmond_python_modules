@@ -1,0 +1,29 @@
+jenkins
+=======
+
+python module for ganglia 3.1.
+
+## Metrics
+* Number of total executors
+* Number of busy executors
+* Length of the queue
+* Total number of jobs
+* Number of jobs with blue status
+* Number of jobs with red status
+* Number of jobs with yellow status
+* Number of jobs with grey status
+* Number of jobs with aborted status
+* Number of jobs with not-built status
+* Number of jobs with disabled status
+
+## Parameters
+ * base_url (The URL to query for Jenkins statistics. Default: 'http://127.0.0.1:8080'
+
+## Notes
+ * This has been tested with:
+  - python 2.7.1 on Mac OS X
+  - python 2.7.3 on Ubuntu 12.04
+
+## AUTHORS
+
+Andreas Lappe <nd@kaeufli.ch>
