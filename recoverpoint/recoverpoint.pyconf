@@ -24,5 +24,14 @@ collection_group {
     metric {
         name_match = "site2(.+)"
         }
+    metric {
+	name_match = "(.+)Time"
     }
+    metric {
+	name_match = "(.+)Data"
+    }
+    metric {
+	name_match = "(.+)Writes"
+    }
+}
 
