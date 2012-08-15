@@ -3,6 +3,10 @@ EMC RecoverPoint
 
 This is a GMOND Python Module that gets metrics from EMC RecoverPoint replication appliances.
 
+Currently gathers:
+  * Per RPA WAN/SAN traffic and Latency
+  * Per Consistency Group Write, Data and Time lags.
+
 ## DEPENDS
   * python YAML
   * paramiko modules
