@@ -19,19 +19,29 @@ collection_group {
     collect_every = 20
     time_threshold = 50
     metric {
-        name_match = "site1(.+)"
+        name_match = "(.+)_wan"
         }
     metric {
-        name_match = "site2(.+)"
+        name_match = "(.+)_lan"
+        }
+    metric {
+        name_match = "(.+)_latency"
         }
     metric {
 	name_match = "(.+)Time"
-    }
+        }
     metric {
 	name_match = "(.+)Data"
-    }
+        }
     metric {
 	name_match = "(.+)Writes"
-    }
+        }
+    metric {
+	name_match = "(.+)Traffic"
+        }
+    metric {
+	name_match = "(.+)Lag"
+        }
+
 }
 

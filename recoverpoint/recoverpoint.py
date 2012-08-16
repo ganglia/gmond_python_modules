@@ -47,7 +47,7 @@ def define_metrics(Desc_Skel, statsDict):
                             "groups"      : "Latency"
                             }))
             if "Traffic" in metric:
-                #define the Application/[SAN|WAN] metrics
+                #define the Appliance/[SAN|WAN] metrics
                 for net in statsDict['RPA statistics'][rpa]['Traffic']['Application'].keys():
                     #print net
                     descriptors.append(create_desc(Desc_Skel, {
@@ -56,12 +56,38 @@ def define_metrics(Desc_Skel, statsDict):
                                 "description" : net + ' traffic',
                                 "groups"      : net + " Traffic",
                                 }))
+
     #Define Consistency Group metrics this is paintfully nested in the dict.
     for group in statsDict['Group']:
+        #CG SAN and Journal lag are under the policies
+        for policyname in statsDict['Group'][group]['Copy stats']:
+            if 'SAN traffic' in statsDict['Group'][group]['Copy stats'][policyname]:
+                descriptors.append(create_desc(Desc_Skel, {
+                            "name"        : group + '_SAN_Traffic',
+                            "units"       : 'Bits/s',
+                            "description" : group + ' SAN Traffic',
+                            "groups"      : 'SAN Traffic',
+                            }))
+            elif 'Journal' in statsDict['Group'][group]['Copy stats'][policyname]:
+                descriptors.append(create_desc(Desc_Skel, {
+                            "name"        : group + '_Journal_Lag',
+                            "units"       : 'Bytes',
+                            "description" : group + ' Journal Lag',
+                            "groups"      : 'Lag',
+                            }))
+
+        #CG Lag and WAN stats are in the Link stats section
         for repname in statsDict['Group'][group]['Link stats']:
+            #Define CG WAN traffic metrics
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : group + '_WAN_Traffic',
+                        "units"       : 'Bits/s',
+                        "description" : group + ' WAN Traffic',
+                        "groups"      : 'WAN Traffic',
+                        }))
+            
             #Define CG Lag metrics
             for lagfields in statsDict['Group'][group]['Link stats'][repname]['Replication']['Lag']:
-                #print lagfields + ' = ' + str(statsDict['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields])
                 lagunit = ''
                 if 'Writes' in lagfields:
                     lagunit = 'Writes'
@@ -70,12 +96,12 @@ def define_metrics(Desc_Skel, statsDict):
                 elif 'Time' in lagfields:
                     lagunit = 'Seconds'
                 descriptors.append(create_desc(Desc_Skel, {
-                                "name"        : group + '_Lag_' + lagfields,
-                                "units"       : lagunit,
-                                "description" : group + ' Lag ' + lagunit,
-                                "groups"      : 'Lag',
-                                }))
-
+                            "name"        : group + '_Lag_' + lagfields,
+                            "units"       : lagunit,
+                            "description" : group + ' Lag ' + lagunit,
+                            "groups"      : 'Lag',
+                            }))
+                
     return descriptors
 
 def create_desc(skel, prop):
@@ -106,16 +132,36 @@ def get_metrics(name):
                     #store the Application/[SAN|WAN] metrics
                     for net in rawmetrics['RPA statistics'][rpa]['Traffic']['Application'].keys():
                         traffic,junk = rawmetrics['RPA statistics'][rpa]['Traffic']['Application'][net].split()
-                        metrics[(rpa.lower()).replace(' ','_') + '_' + net.lower()] = int(traffic)
+                        metrics[(rpa.lower()).replace(' ','_') + '_' + net.lower()] = float(traffic)
 
         for group in rawmetrics['Group']:
+            #CG SAN and Journal lag are under the policies
+            for policyname in rawmetrics['Group'][group]['Copy stats']:
+                #Get CG SAN metrics (remove 'Mbps' from end + convert to float and then bits)
+                if 'SAN traffic' in rawmetrics['Group'][group]['Copy stats'][policyname]:
+                    metrics[group + '_SAN_Traffic'] = float(rawmetrics['Group'][group]['Copy stats'][policyname]['SAN traffic']['Current throughput'][:-4]) * 1024 * 1024
+                elif 'Journal' in rawmetrics['Group'][group]['Copy stats'][policyname]:
+                    datastr = rawmetrics['Group'][group]['Copy stats'][policyname]['Journal']['Journal lag']
+                    amount = float(datastr[:-2])
+                    unitstr = datastr[-2:]
+                    if 'MB' in unitstr:
+                        amount = amount * 1024 * 1024
+                    elif 'KB' in unitstr:
+                        amount = amount * 1024
+                    elif 'GB' in unitstr:
+                        amount = amount * 1024 * 1024 * 1024
+                    metrics[group + '_Journal_Lag'] = amount
+            #CG Lag and WAN stats are in the Link stats section
             for repname in rawmetrics['Group'][group]['Link stats']:
+                #Get CG WAN metrics (remove 'Mbps' from end + convert to float and then bits)
+                metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
+                
+                #Get CG Lag metrics
                 for lagfields in rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag']:
-                    print lagfields + ' = ' + str(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields])
                     if 'Data' in lagfields:
                         #Convert 12.34(GB|MB|KB) to bytes
                         datastr = rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields]
-                        print datastr
+                        #print datastr
                         amount = float(datastr[:-2])
                         unitstr = datastr[-2:]
                         if 'MB' in unitstr:
@@ -125,7 +171,7 @@ def get_metrics(name):
                         elif 'GB' in unitstr:
                             amount = amount * 1024 * 1024 * 1024
                         metrics[group + '_Lag_' + lagfields] = amount
-                        #metrics[group + '_Lag_' + lagfields] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields])
+                        
                     elif 'Time' in lagfields:
                         #Strip 'sec' from value, convert to float.
                         lagtime = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields][:-3])
