@@ -5,7 +5,7 @@ This is a GMOND Python Module that gets metrics from EMC RecoverPoint replicatio
 
 Currently gathers:
   * Per RPA WAN/SAN traffic and Latency
-  * Per Consistency Group Write, Data and Time lags.
+  * Per Consistency Group Write, Data, Time and Journal Lags, as well as WAN and SAN traffic.
 
 ## DEPENDS
   * python YAML
