@@ -16,9 +16,13 @@ This is gmond python module that allows SNMP polling of Fibrechannel switches to
   * If FC metrics aren't appearing increase your net.core.rmem_max and default settings as below:
 
 net.core.rmem_max=104857600
+
 net.core.rmem_default=104857600
+
 vm.dirty_ratio=100
+
 vm.dirty_background_ratio=100
+
 vm.dirty_expire_centisecs=720000
 
 ## AUTHOR
