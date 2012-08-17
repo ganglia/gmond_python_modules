@@ -1,0 +1,17 @@
+modules {
+  module {
+    name = "conntrack"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 45
+
+  metric {
+      name_match = "conntrack_(.+)"
+      value_threshold = 1.0
+  }
+
+}

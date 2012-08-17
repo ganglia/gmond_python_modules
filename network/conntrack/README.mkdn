@@ -1,0 +1,36 @@
+conntrack
+===============
+
+Python module for ganglia 3.1.
+
+This module allows you to collect conntrack stats. These values that are collected by
+executing
+
+conntrack -S
+
+
+Install
+===============
+
+Copy conntrack.py from python_modules to your python modules directory e.g.
+
+/usr/lib64/ganglia/python_modules
+
+and conntrack.pyconf to
+
+/etc/ganglia/conf.d/
+
+If you would like only specific metrics emitted you will need to comment out the name_match section
+and replace it with a specific set of metrics e.g.
+
+  metric {
+    name = "conntrack_entries"
+    title = "Conntrack entries"
+    value_threshold = 1.0
+  }
+
+Restart Gmond and you are done.
+
+## AUTHOR
+
+Author: Vladimir Vuksan https://github.com/vvuksan
