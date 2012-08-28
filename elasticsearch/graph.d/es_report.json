@@ -1,0 +1,14 @@
+{
+   "report_name" : "es_report",
+   "report_type" : "standard",
+   "title" : "Elasticsearch",
+   "vertical_label" : "ms",
+   "series" : [
+      { "metric": "es_fetch_time", "color": "BBBBBB", "label": "Fetch", "type": "line" },
+      { "metric": "es_get_time", "color": "00FF00", "label": "Get", "line_width": "2", "type": "line" },
+      { "metric": "es_flush_time", "color": "FF0000", "label": "Flush", "line_width": "2", "type": "line" },
+      { "metric": "es_gc_time", "color": "2030F4", "label": "GC", "line_width": "2", "type": "line" },
+      { "metric": "es_indexing_delete_time", "color": "FF30F4", "label": "Indexing Delete", "line_width": "2", "type": "line" },
+      { "metric": "es_indexing_index_time", "color": "20FFF4", "label": "Indexing Index", "line_width": "2", "type": "line" }
+   ]
+}
