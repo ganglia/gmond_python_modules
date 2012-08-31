@@ -87,7 +87,7 @@ def parse_innodb_status(innodb_status_raw):
 
 	for line in innodb_status_raw:
 		istatus = line.split()
-
+    
 		isum = sumof(istatus)
 
 		# SEMAPHORES
@@ -97,15 +97,19 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['os_waits'] += longish(istatus[8])
 
 		elif "RW-shared spins" in line:
-			innodb_status['spin_waits'] += isum(2,8)
-			innodb_status['os_waits'] += isum(5,11)
+			innodb_status['spin_waits'] += longish(istatus[2])
+			innodb_status['os_waits'] += longish(istatus[7])
 
+		elif "RW-excl spins" in line:
+			innodb_status['spin_waits'] += longish(istatus[2])
+			innodb_status['os_waits'] += longish(istatus[7])
+      
 		# TRANSACTIONS
 		elif "Trx id counter" in line:
-			innodb_status['transactions'] += isum(3,4)
+			innodb_status['transactions'] += long(int(istatus[3],16))
 
 		elif "Purge done for trx" in line:
-			innodb_status['transactions_purged'] += isum(6,7)
+			innodb_status['transactions_purged'] += long(int(istatus[6],16))
 
 		elif "History list length" in line:
 			innodb_status['history_list'] = longish(istatus[3])
@@ -141,10 +145,8 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['pending_buffer_pool_flushes'] = longish(istatus[7])
 
 		# INSERT BUFFER AND ADAPTIVE HASH INDEX
-		elif 'merged recs' in line:
-			innodb_status['ibuf_inserts'] = longish(istatus[0])
-			innodb_status['ibuf_merged'] = longish(istatus[2])
-			innodb_status['ibuf_merges'] = longish(istatus[5])
+		elif 'Ibuf: size' in line:
+			innodb_status['ibuf_merges'] = longish(istatus[9])
 
 		# LOG
 		elif "log i/o's done" in line:
@@ -155,13 +157,13 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['pending_chkp_writes'] = longish(istatus[4])
 		
 		elif "Log sequence number" in line:
-			innodb_status['log_bytes_written'] = isum(3,4)
+			innodb_status['log_bytes_written'] = longish(istatus[3])
 		
 		elif "Log flushed up to" in line:
-			innodb_status['log_bytes_flushed'] = isum(4,5)
+			innodb_status['log_bytes_flushed'] = longish(istatus[4])
 
 		# BUFFER POOL AND MEMORY
-		elif "Buffer pool size" in line:
+		elif "Buffer pool size" in line and "bytes" not in line:
 			innodb_status['buffer_pool_pages_total'] = longish(istatus[3])
 		
 		elif "Free buffers" in line:
@@ -173,7 +175,7 @@ def parse_innodb_status(innodb_status_raw):
 		elif "Modified db pages" in line:
 			innodb_status['buffer_pool_pages_dirty'] = longish(istatus[3])
 		
-		elif "Pages read" in line:
+		elif "Pages read" in line and "ahead" not in line:
 			innodb_status['pages_read'] = longish(istatus[2])
 			innodb_status['pages_created'] = longish(istatus[4])
 			innodb_status['pages_written'] = longish(istatus[6])
