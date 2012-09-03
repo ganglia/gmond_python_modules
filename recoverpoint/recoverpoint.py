@@ -75,6 +75,13 @@ def define_metrics(Desc_Skel, statsDict):
                             "description" : group + ' Journal Lag',
                             "groups"      : 'Lag',
                             }))
+                #Protection window
+                descriptors.append(create_desc(Desc_Skel, {
+                            "name"        : group + '_Protection_Window',
+                            "units"       : 'mins',
+                            "description" : group + ' Protection Window',
+                            "groups"      : 'Protection',
+                            }))
 
         #CG Lag and WAN stats are in the Link stats section
         for repname in statsDict['Group'][group]['Link stats']:
@@ -151,6 +158,18 @@ def get_metrics(name):
                     elif 'GB' in unitstr:
                         amount = amount * 1024 * 1024 * 1024
                     metrics[group + '_Journal_Lag'] = amount
+                    #Protection Window is in Journal section
+                    prowindowstr = rawmetrics['Group'][group]['Copy stats'][policyname]['Journal']['Protection window']['Current']['Value']
+                    protectmins = 0
+                    protimelist = prowindowstr.split(' ')
+                    if 'hr' in protimelist:
+                        hrindex = protimelist.index('hr')
+                        protectmins = protectmins + (int(protimelist[int(hrindex) - 1]) * 60)
+                    if 'min' in protimelist:
+                        minindex = protimelist.index('min')
+                        protectmins = protectmins + int(protimelist[int(minindex) -1])
+                    metrics[group + '_Protection_Window'] = float(protectmins)
+                                                     
             #CG Lag and WAN stats are in the Link stats section
             for repname in rawmetrics['Group'][group]['Link stats']:
                 #Get CG WAN metrics (remove 'Mbps' from end + convert to float and then bits)

@@ -42,6 +42,9 @@ collection_group {
     metric {
 	name_match = "(.+)Lag"
         }
+    metric {
+        name_match = "(.+)Window"
+       }
 
 }
 
