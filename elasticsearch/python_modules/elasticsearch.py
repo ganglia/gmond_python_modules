@@ -169,6 +169,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Java Heap Committed (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -176,6 +177,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Java Heap Used (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -183,6 +185,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Java Non Heap Committed (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -190,6 +193,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Java Non Heap Used (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -235,6 +239,7 @@ def metric_init(params):
          'format'     : '%.0f',
          'slope'      : 'positive',
          'description': 'RX (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -272,6 +277,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Index Size (Bytes)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -320,6 +326,7 @@ def metric_init(params):
          'format'     : '%.0f',
          'slope'      : 'positive',
          'description': 'Merges size (total)',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -351,6 +358,7 @@ def metric_init(params):
          'units'      : 'docs',
          'format'     : '%.0f',
          'description': 'Number of Documents',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -358,6 +366,7 @@ def metric_init(params):
          'units'      : 'docs',
          'format'     : '%.0f',
          'description': 'Number of Documents Deleted',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -380,6 +389,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Field Cache Size',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -400,6 +410,7 @@ def metric_init(params):
          'units'      : 'Bytes',
          'format'     : '%.0f',
          'description': 'Filter Cache Size',
+         'value_type' : 'double',
     }))
 
     descriptors.append(create_desc({
@@ -511,6 +522,7 @@ def metric_init(params):
          'name'       : 'es_indexing_delete_total',
          'units'      : 'docs',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Delete Total',
     }))
 
@@ -526,6 +538,7 @@ def metric_init(params):
          'name'       : 'es_indexing_index_total',
          'units'      : 'docs',
          'format'     : '%d',
+         'slope'      : 'positive',
          'description': 'Indexing Documents Total',
     }))
 
