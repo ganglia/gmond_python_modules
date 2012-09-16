@@ -8,20 +8,8 @@ except ImportError:
 
 import time
 import urllib
+from functools import partial
 
-global url, last_update, keyToPath
-
-
-def dig_it_up(obj, path):
-    try:
-        if type(path) in (str, unicode):
-            path = path.split('.')
-        return reduce(lambda x, y: x[y], path, obj)
-    except:
-        return False
-
-# Set IP address and JSON Url
-url = "http://localhost:9200/_cluster/nodes/_local/stats?all=true"
 
 # short name to full path for stats
 keyToPath = dict()
@@ -122,8 +110,17 @@ keyToPath[
     'es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
 
 
-def getStat(name):
-    global last_update, result, url
+def dig_it_up(obj, path):
+    try:
+        if type(path) in (str, unicode):
+            path = path.split('.')
+        return reduce(lambda x, y: x[y], path, obj)
+    except:
+        return False
+
+
+def getStat(result, url, name):
+    global last_update
 
     # If time delta is > 20 seconds, then update the JSON results
     now = time.time()
@@ -144,42 +141,44 @@ def getStat(name):
         return None
 
 
-def create_desc(prop):
-    d = Desc_Skel.copy()
+def create_desc(skel, prop):
+    d = skel.copy()
     for k, v in prop.iteritems():
         d[k] = v
     return d
 
 
 def metric_init(params):
-    global result, url, descriptors, Desc_Skel
+    descriptors = []
 
     print '[elasticsearch] Received the following parameters'
     print params
+
+    host = params.get('host', 'http://localhost:9200/')
+    url = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
 
     # First iteration - Grab statistics
     print '[elasticsearch] Fetching ' + url
     result = json.load(urllib.urlopen(url))
 
-    descriptors = []
-
-    if "metric_group" not in params:
-        params["metric_group"] = "elasticsearch"
+    metric_group = params.get('metric_group', 'elasticsearch')
 
     Desc_Skel = {
         'name': 'XXX',
-        'call_back': getStat,
+        'call_back': partial(getStat, result, url),
         'time_max': 60,
         'value_type': 'uint',
         'units': 'units',
         'slope': 'both',
         'format': '%d',
         'description': 'XXX',
-        'groups': params["metric_group"],
+        'groups': metric_group,
     }
 
+    _create_desc = partial(create_desc, Desc_Skel)
+
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_heap_committed',
             'units': 'Bytes',
             'format': '%.0f',
@@ -189,7 +188,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_heap_used',
             'units': 'Bytes',
             'format': '%.0f',
@@ -199,7 +198,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_non_heap_committed',
             'units': 'Bytes',
             'format': '%.0f',
@@ -209,7 +208,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_non_heap_used',
             'units': 'Bytes',
             'format': '%.0f',
@@ -219,7 +218,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_threads',
             'units': 'threads',
             'format': '%d',
@@ -228,7 +227,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_threads_peak',
             'units': 'threads',
             'format': '%d',
@@ -237,7 +236,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_gc_time',
             'units': 'ms',
             'format': '%d',
@@ -247,7 +246,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_transport_open',
             'units': 'sockets',
             'format': '%d',
@@ -256,7 +255,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_transport_rx_count',
             'units': 'rx',
             'format': '%d',
@@ -266,7 +265,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_transport_rx_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -277,7 +276,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_transport_tx_count',
             'units': 'tx',
             'format': '%d',
@@ -287,7 +286,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_transport_tx_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -297,7 +296,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_http_current_open',
             'units': 'sockets',
             'format': '%d',
@@ -306,7 +305,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_http_total_open',
             'units': 'sockets',
             'format': '%d',
@@ -315,7 +314,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_indices_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -325,7 +324,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_gc_count',
             'format': '%d',
             'slope': 'positive',
@@ -334,7 +333,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_current',
             'format': '%d',
             'description': 'Merges (current)',
@@ -342,7 +341,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_current_docs',
             'format': '%d',
             'description': 'Merges (docs)',
@@ -350,7 +349,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_total',
             'format': '%d',
             'slope': 'positive',
@@ -359,7 +358,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_total_docs',
             'format': '%d',
             'slope': 'positive',
@@ -368,7 +367,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_current_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -377,7 +376,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_total_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -388,7 +387,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_merges_time',
             'units': 'ms',
             'format': '%d',
@@ -398,7 +397,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_refresh_total',
             'units': 'refreshes',
             'format': '%d',
@@ -408,7 +407,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_refresh_time',
             'units': 'ms',
             'format': '%d',
@@ -418,7 +417,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_docs_count',
             'units': 'docs',
             'format': '%.0f',
@@ -428,7 +427,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_docs_deleted',
             'units': 'docs',
             'format': '%.0f',
@@ -438,7 +437,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_open_file_descriptors',
             'units': 'files',
             'format': '%d',
@@ -447,7 +446,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_cache_field_eviction',
             'units': 'units',
             'format': '%d',
@@ -457,7 +456,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_cache_field_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -467,7 +466,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_cache_filter_count',
             'format': '%d',
             'description': 'Filter Cache Count',
@@ -475,7 +474,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_cache_filter_evictions',
             'format': '%d',
             'slope': 'positive',
@@ -484,7 +483,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_cache_filter_size',
             'units': 'Bytes',
             'format': '%.0f',
@@ -494,7 +493,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_query_current',
             'units': 'Queries',
             'format': '%d',
@@ -503,7 +502,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_query_time',
             'units': 'ms',
             'format': '%d',
@@ -513,7 +512,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_fetch_current',
             'units': 'fetches',
             'format': '%d',
@@ -522,7 +521,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_fetch_total',
             'units': 'fetches',
             'format': '%d',
@@ -532,7 +531,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_fetch_time',
             'units': 'ms',
             'format': '%d',
@@ -542,7 +541,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_flush_total',
             'units': 'flushes',
             'format': '%d',
@@ -551,7 +550,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_flush_time',
             'units': 'ms',
             'format': '%d',
@@ -561,7 +560,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_exists_time',
             'units': 'ms',
             'format': '%d',
@@ -571,7 +570,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_exists_total',
             'units': 'total',
             'format': '%d',
@@ -580,7 +579,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_time',
             'units': 'ms',
             'format': '%d',
@@ -590,7 +589,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_total',
             'units': 'total',
             'format': '%d',
@@ -599,7 +598,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_missing_time',
             'units': 'ms',
             'format': '%d',
@@ -609,7 +608,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_get_missing_total',
             'units': 'total',
             'format': '%d',
@@ -618,7 +617,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_indexing_delete_time',
             'units': 'ms',
             'format': '%d',
@@ -628,7 +627,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_indexing_delete_total',
             'units': 'docs',
             'format': '%d',
@@ -638,7 +637,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_indexing_index_time',
             'units': 'ms',
             'format': '%d',
@@ -648,7 +647,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_indexing_index_total',
             'units': 'docs',
             'format': '%d',
@@ -658,7 +657,7 @@ def metric_init(params):
     )
 
     descriptors.append(
-        create_desc({
+        _create_desc({
             'name': 'es_query_total',
             'units': 'Queries',
             'format': '%d',
@@ -674,7 +673,7 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
-    metric_init({})
+    descriptors = metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
         print 'value for %s is %s' % (d['name'], str(v))
