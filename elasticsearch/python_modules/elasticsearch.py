@@ -119,7 +119,7 @@ def dig_it_up(obj, path):
         return False
 
 
-def getStat(result, url, name):
+def update_result(result, url):
     global last_update
 
     # If time delta is > 20 seconds, then update the JSON results
@@ -129,6 +129,22 @@ def getStat(result, url, name):
         print '[elasticsearch] ' + str(diff) + ' seconds passed - Fetching ' + url
         result = json.load(urllib.urlopen(url))
         last_update = now
+
+    return result
+
+
+def get_stat_index(result, url, path, name):
+    result = update_result(result, url)
+    val = dig_it_up(result, path)
+
+    if not isinstance(val, bool):
+        return int(val)
+    else:
+        return None
+
+
+def getStat(result, url, name):
+    result = update_result(result, url)
 
     node = result['nodes'].keys()[0]
     val = dig_it_up(result, keyToPath[name] % node)
@@ -148,24 +164,48 @@ def create_desc(skel, prop):
     return d
 
 
+def get_indices_descriptors(index, skel, result, url):
+    metric_tpl = 'es_index_{0}_{{0}}'.format(index)
+    callback = partial(get_stat_index, result, url)
+    _create_desc = partial(create_desc, skel)
+
+    descriptors = [
+        _create_desc({
+            'call_back': partial(callback, '_all.primaries.docs.count'),
+            'name': metric_tpl.format('docs_count'),
+            'description': 'document count for index {0}'.format(index),
+        }),
+        _create_desc({
+            'call_back': partial(callback, '_all.primaries.store.size_in_bytes'),
+            'name': metric_tpl.format('size'),
+            'description': 'size in bytes for index {0}'.format(index),
+            'units': 'Bytes',
+            'format': '%.0f',
+            'value_type': 'double'
+        })
+    ]
+
+    return descriptors
+
+
 def metric_init(params):
     descriptors = []
 
-    print '[elasticsearch] Received the following parameters'
-    print params
+    print('[elasticsearch] Received the following parameters')
+    print(params)
 
     host = params.get('host', 'http://localhost:9200/')
-    url = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
+    url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
 
     # First iteration - Grab statistics
-    print '[elasticsearch] Fetching ' + url
-    result = json.load(urllib.urlopen(url))
+    print('[elasticsearch] Fetching ' + url_cluster)
+    result = json.load(urllib.urlopen(url_cluster))
 
     metric_group = params.get('metric_group', 'elasticsearch')
 
     Desc_Skel = {
         'name': 'XXX',
-        'call_back': partial(getStat, result, url),
+        'call_back': partial(getStat, result, url_cluster),
         'time_max': 60,
         'value_type': 'uint',
         'units': 'units',
@@ -174,6 +214,17 @@ def metric_init(params):
         'description': 'XXX',
         'groups': metric_group,
     }
+
+    indices = params.get('indices', '*').split()
+    for index in indices:
+        url_indices = '{0}{1}/_stats'.format(host, index)
+        print('[elasticsearch] Fetching ' + url_indices)
+
+        r_indices = json.load(urllib.urlopen(url_indices))
+        descriptors += get_indices_descriptors(index,
+                                               Desc_Skel,
+                                               r_indices,
+                                               url_indices)
 
     _create_desc = partial(create_desc, Desc_Skel)
 
@@ -670,6 +721,7 @@ def metric_init(params):
 
 def metric_cleanup():
     pass
+
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
