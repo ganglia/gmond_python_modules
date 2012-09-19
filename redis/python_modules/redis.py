@@ -28,6 +28,8 @@ def metric_handler(name):
         for line in info.splitlines()[1:]:
             if "" == line:
                 continue
+            if "#" == line[0]:
+                continue
             n, v = line.split(":")
             if n in metric_handler.descriptors:
                 metric_handler.info[n] = int(v) # TODO Use value_type.
