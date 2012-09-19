@@ -66,7 +66,6 @@ def metric_init(params={}):
         "expired_keys": {"units": "keys"},
         "pubsub_channels": {"units": "channels"},
         "pubsub_patterns": {"units": "patterns"},
-        "vm_enabled": {"units": "yes/no"},
         "master_last_io_seconds_ago": {"units": "seconds ago"},
     }
     metric_handler.descriptors = {}
