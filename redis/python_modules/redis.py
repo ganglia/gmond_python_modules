@@ -28,6 +28,8 @@ def metric_handler(name):
         for line in info.splitlines()[1:]:
             if "" == line:
                 continue
+            if "#" == line[0]:
+                continue
             n, v = line.split(":")
             if n in metric_handler.descriptors:
                 metric_handler.info[n] = int(v) # TODO Use value_type.
@@ -64,7 +66,6 @@ def metric_init(params={}):
         "expired_keys": {"units": "keys"},
         "pubsub_channels": {"units": "channels"},
         "pubsub_patterns": {"units": "patterns"},
-        "vm_enabled": {"units": "yes/no"},
         "master_last_io_seconds_ago": {"units": "seconds ago"},
     }
     metric_handler.descriptors = {}
