@@ -1,0 +1,13 @@
+apc_status
+===============
+
+python module for ganglia 3.1.
+
+"apc_status" sends metrics on Another PHP Cache process status refering to
+apc-json.php.
+
+To use this you will need to copy apc-json.php to your webdir.
+
+## AUTHOR
+
+Jacob V. Rasmussen <jacobvrasmussen@gmail.com>
