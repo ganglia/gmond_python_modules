@@ -190,7 +190,7 @@ def timeout_command(command, timeout):
         time.sleep(0.2)
         now = datetime.datetime.now()
         if (now - start).seconds> timeout:
-            os.kill(process.pid, signal.SIGKILL)
+            os.system("sudo kill %s" % process.pid)
             os.waitpid(-1, os.WNOHANG)
             return None
     return process.stdout.readlines()
