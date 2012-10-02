@@ -99,7 +99,7 @@ def gpu_device_handler(name):
         except NVMLError, nvmlError:
             if NVML_ERROR_NOT_SUPPORTED == nvmlError.value:
                 return 'N/A'
-    elif (metric == 'perf_state' || metric == 'performance_state'):
+    elif (metric == 'perf_state' or metric == 'performance_state'):
         state = nvmlDeviceGetPerformanceState(gpu_device)
         try:
             int(state)
