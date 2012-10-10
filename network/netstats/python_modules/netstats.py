@@ -1,6 +1,7 @@
 import sys
 import re
 import time
+import copy
 
 PARAMS = {}
 
@@ -13,7 +14,7 @@ METRICS = {
 tcpext_file = "/proc/net/netstat"
 snmp_file = "/proc/net/snmp"
 
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 stats_pos = {} 
@@ -188,10 +189,10 @@ def get_metrics():
 	    if re.match("TcpExt: [0-9]", line):
                 metrics = re.split("\s+", line)
 
-	file.close
+	file.close()
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'tcpext': metrics
@@ -216,7 +217,7 @@ def get_metrics():
                 METRICS['tcp'] = re.split("\s+", line)
 
 
-    	file.close
+    	file.close()
 
     return [METRICS, LAST_METRICS]
 
