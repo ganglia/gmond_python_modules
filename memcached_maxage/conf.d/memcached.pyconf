@@ -1,0 +1,133 @@
+# Gmond configuration for memcached metric module
+# Install to /etc/ganglia/conf.d
+
+modules {
+  module {
+    name = "memcached"
+    language = "python"
+    param host {
+      value = "127.0.0.1"
+    }
+    param port {
+      value = "11211"
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 60
+  
+  metric {
+    name = "curr_items"
+    title = "curr_items"
+  }
+  metric {
+    name = "total_items"
+    title = "total_items"
+  }
+  metric {
+    name = "bytes"
+    title = "bytes"
+  }
+  metric {
+    name = "curr_connections"
+    title = "curr_connections"
+  }
+  metric {
+    name = "total_connections"
+    title = "total_connections"
+  }
+  metric {
+    name = "connection_structures"
+    title = "connection_structures"
+  }
+  metric {
+    name = "cmd_get"
+    title = "cmd_get"
+  }
+  metric {
+    name = "cmd_set"
+    title = "cmd_set"
+  }
+  metric {
+    name = "get_hits"
+    title = "get_hits"
+  }
+  metric {
+    name = "get_misses"
+    title = "get_misses"
+  }
+  metric {
+    name = "delete_hits"
+    title = "delete_hits"
+  }
+  metric {
+    name = "delete_misses"
+    title = "delete_misses"
+  }
+  metric {
+    name = "incr_hits"
+    title = "incr_hits"
+  }
+  metric {
+    name = "incr_misses"
+    title = "incr_misses"
+  }
+  metric {
+    name = "decr_hits"
+    title = "decr_hits"
+  }
+  metric {
+    name = "decr_misses"
+    title = "decr_misses"
+  }
+  metric {
+    name = "cas_hits"
+    title = "cas_hits"
+  }
+  metric {
+    name = "cas_misses"
+    title = "cas_misses"
+  }
+  metric {
+    name = "evictions"
+    title = "evictions"
+  }
+  metric {
+    name = "bytes_read"
+    title = "bytes_read"
+  }
+  metric {
+    name = "bytes_written"
+    title = "bytes_written"
+  }
+  metric {
+    name = "limit_maxbytes"
+    title = "limit_maxbytes"
+  }
+  metric {
+    name = "threads"
+    title = "threads"
+  }
+  metric {
+    name = "conn_yields"
+    title = "conn_yields"
+  }
+  metric {
+    name = "age_mean"
+    title = "age_mean"
+  }
+  metric {
+    name = "age_median"
+    title = "age_median"
+  }
+  metric {
+    name = "age_min"
+    title = "age_min"
+  }
+  metric {
+    name = "age_max"
+    title = "age_max"
+  }
+}

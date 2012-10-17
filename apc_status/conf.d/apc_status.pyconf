@@ -1,0 +1,97 @@
+modules {
+  module {
+    name     = "apc_status"
+    language = "python"
+
+    # URL of the resident apc-json.php script, which will translate the APC figures to JSON
+    param url {
+    	value = "http://localhost/apc-json.php"
+    }
+
+    # Which metric group should these metrics be put into
+    param metric_group {
+        value = "apc_cache"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 90
+
+  metric {
+    name  = "apc_mem_size"
+    title = "Total Memory"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_mem_avail"
+    title = "Free Memory"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_mem_used"
+    title = "Used Memory"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_slots"
+    title = "Number of Slots"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_hits"
+    title = "Number of Cache Hits"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_misses"
+    title = "Number of Cache Misses"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_inserts"
+    title = "Number of Cache Inserts"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_expunges"
+    title = "Number of Cache Deletes"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_entries"
+    title = "Cached Files"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_num_seg"
+    title = "Segments"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_uptime"
+    title = "Uptime"
+    value_threshold = 0
+  }
+  metric {
+    name  = "apc_request_rate"
+    title = "Request Rate (hits, misses)"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "apc_hit_rate"
+    title = "Hit Rate"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "apc_miss_rate"
+    title = "Miss Rate"
+    value_threshold = 0.0
+  }
+  metric {
+    name  = "apc_insert_rate"
+    title = "Insert Rate"
+    value_threshold = 0.0
+  }
+}

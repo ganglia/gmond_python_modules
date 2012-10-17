@@ -1,0 +1,31 @@
+Brocade FibreChannel
+This is gmond python module that allows SNMP polling of Fibrechannel switches to get interface packet and throughput metrics.
+
+  * It works for Brocade FC switches, and probably for any other SNMP enabled switch.
+  * It requires pysnmp (available in debian repositorys)
+  * Handles polling multiple switches from a single gmond.
+  * Spoofs the switch hostname, so each switch shows up separately in ganglia
+
+## DEPENDS
+  * python pysnmp
+
+## USAGE
+  * Save the fibrechannel.pyconf into directory and update the switch(s) name & IP's
+  * Save the fibrechannel.py into your ganglia python module dir eg:  /usr/lib/ganglia/python_modules
+  * Update SNMP community / ports if necessary
+  * If FC metrics aren't appearing, increase your net.core.rmem_max and default settings as below:
+
+net.core.rmem_max=104857600
+
+net.core.rmem_default=104857600
+
+vm.dirty_ratio=100
+
+vm.dirty_background_ratio=100
+
+vm.dirty_expire_centisecs=720000
+
+## AUTHOR
+
+Author: Evan Fraser &lt;evan.fraser@trademe.co.nz&gt;
+

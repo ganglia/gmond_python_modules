@@ -1,0 +1,50 @@
+couchdb
+=======
+
+python module for ganglia 3.1.
+
+## Metrics
+ * Number of authentication cache hits
+ * Number of authentication cache misses
+ * Number of times a document was read from a database
+ * Number of times a document was changed
+ * Number of open databases
+ * Number of file descriptors CouchDB has open
+ * Request time
+ * Number of bulk requests
+ * Number of clients for continuous _changes
+ * Number of HTTP requests
+ * Number of temporary view reads
+ * Number of view reads
+ * Number of HTTP COPY requests
+ * Number of HTTP DELETE requests
+ * Number of HTTP GET requests
+ * Number of HTTP HEAD requests
+ * Number of HTTP POST requests
+ * Number of HTTP PUT requests
+ * Number of HTTP 200 OK responses
+ * Number of HTTP 201 Created responses
+ * Number of HTTP 202 Accepted responses
+ * Number of HTTP 301 Moved Permanently responses
+ * Number of HTTP 304 Not Modified responses
+ * Number of HTTP 400 Bad Request responses
+ * Number of HTTP 401 Unauthorized responses
+ * Number of HTTP 403 Forbidden responses
+ * Number of HTTP 404 Not Found responses
+ * Number of HTTP 405 Method Not Allowed responses
+ * Number of HTTP 409 Conflict responses
+ * Number of HTTP 412 Precondition Failed responses
+ * Number of HTTP 500 Internal Server Error responses
+
+## Parameters
+ * stats_url (The URL to query for CouchDB _stats. Default: 'http://127.0.0.1:5984/_stats'
+ * refresh_rate (The time in seconds between polling the stats. Either 60, 300 or 900. Default: 60)
+
+## Notes
+ * This has been tested with:
+  - python 2.7.1 on Mac OS X
+  - python 2.7.3 on Ubuntu 12.04
+
+## AUTHORS
+
+Andreas Lappe <nd@kaeufli.ch>

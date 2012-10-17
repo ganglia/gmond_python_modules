@@ -1,0 +1,50 @@
+# Name: recoverpoint.pyconf
+# Author: Evan Fraser (evan.fraser@trademe.co.nz)
+# Desc: Config file for the ganglia gmond recoverpoint module.
+# Date: 03/08/2012
+# To use: Save this file in /etc/ganglia/conf.d/, update the mgmtip value to the IP address of one of your RecoverPoint management IP's and change the name_match lines below to match your site names.
+
+modules {
+    module {
+        name = "recoverpoint"
+        language = "python"
+        param mgmtip {
+            value = '192.168.1.100'
+        }           
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 20
+    time_threshold = 50
+    metric {
+        name_match = "(.+)_wan"
+        }
+    metric {
+        name_match = "(.+)_lan"
+        }
+    metric {
+        name_match = "(.+)_latency"
+        }
+    metric {
+	name_match = "(.+)Time"
+        }
+    metric {
+	name_match = "(.+)Data"
+        }
+    metric {
+	name_match = "(.+)Writes"
+        }
+    metric {
+	name_match = "(.+)Traffic"
+        }
+    metric {
+	name_match = "(.+)Lag"
+        }
+    metric {
+        name_match = "(.+)Window"
+       }
+
+}
+

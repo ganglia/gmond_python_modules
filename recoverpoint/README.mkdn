@@ -1,0 +1,23 @@
+EMC RecoverPoint
+===============
+
+This is a GMOND Python Module that gets metrics from EMC RecoverPoint replication appliances.
+
+Currently gathers:
+  * Per RPA WAN/SAN traffic and Latency
+  * Per Consistency Group Write, Data, Time and Journal Lags, as well as WAN and SAN traffic.
+  * Per Consistency Group Protection Window metrics.
+
+## DEPENDS
+  * python YAML
+  * paramiko modules
+  * ssh access to the recoverpoint appliance (paramiko can use ssh keys if required)
+
+## USAGE
+  * Save the recoverpoint.pyconf into /etc/ganglia/conf.d directory and update the management IP and sitenames (the sitenames have been lowercase'd)
+  * Save the recoverpoint.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.  Update the username/passwords if necessary.
+  * Restart gmond and a "recoverpoint" host should appear in ganglia.
+
+## AUTHOR
+
+Author: Evan Fraser &lt;evan.fraser@trademe.co.nz&gt;
