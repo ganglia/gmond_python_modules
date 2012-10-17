@@ -31,7 +31,7 @@ import re
 import socket
 import string
 import time
-
+import copy
 
 NAME_PREFIX = 'mongodb_'
 PARAMS = {
@@ -42,7 +42,7 @@ METRICS = {
     'time' : 0,
     'data' : {}
 }
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_TTL = 3
 
 
@@ -85,7 +85,7 @@ def get_metrics():
                 metrics = {}
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics

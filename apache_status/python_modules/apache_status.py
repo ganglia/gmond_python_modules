@@ -7,6 +7,7 @@ import time
 import urllib2
 import traceback
 import re
+import copy
 
 # global to store state for "total accesses"
 METRICS = {
@@ -14,7 +15,7 @@ METRICS = {
     'data' : {}
 }
 
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 #Metric prefix
@@ -106,7 +107,7 @@ def get_metrics():
                  traceback.print_exc()
 
 
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics

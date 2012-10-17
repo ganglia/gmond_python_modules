@@ -1,6 +1,7 @@
 import sys
 import re
 import time
+import copy
 
 PARAMS = {}
 
@@ -15,7 +16,7 @@ NAME_PREFIX = "buddy"
 
 buddyinfo_file = "/proc/buddyinfo"
 
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 stats_pos = {} 
@@ -82,7 +83,7 @@ def get_metrics():
 
 	file.close
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': values

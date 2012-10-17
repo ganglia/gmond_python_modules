@@ -30,6 +30,7 @@ import json
 import os
 import re
 import time
+import copy
 
 
 PARAMS = {
@@ -43,7 +44,7 @@ METRICS = {
     'time' : 0,
     'data' : {}
 }
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_TTL = 1
 
 
@@ -84,7 +85,7 @@ def get_metrics():
             metrics = {}
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics

@@ -27,7 +27,7 @@
 
 import os
 import time
-
+import copy
 
 NAME_PREFIX = 'tokyo_tyrant_'
 PARAMS = {
@@ -37,7 +37,7 @@ METRICS = {
     'time' : 0,
     'data' : {}
 }
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 1
 
 
@@ -61,7 +61,7 @@ def get_metrics():
                 metrics[values[0]] = values[1]
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics

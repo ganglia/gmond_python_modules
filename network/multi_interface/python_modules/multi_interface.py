@@ -2,6 +2,7 @@ import re
 import time
 import sys
 import os
+import copy
 
 PARAMS = {}
 
@@ -11,7 +12,7 @@ METRICS = {
     'time' : 0,
     'data' : {}
 }
-LAST_METRICS = dict(METRICS)
+LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
 INTERFACES = []
@@ -153,7 +154,7 @@ def get_metrics():
                 metrics[dev_name] = re.split("\s+", a[1].lstrip())
 
         # update cache
-        LAST_METRICS = dict(METRICS)
+        LAST_METRICS = copy.deepcopy(METRICS)
         METRICS = {
             'time': time.time(),
             'data': metrics
