@@ -6,9 +6,10 @@ import urllib
 import time
 from string import Template
 import itertools
+import threading
 
 global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
-INTERVAL = 20
+INTERVAL = 10
 descriptors = list()
 username, password = "guest", "guest"
 stats = {}
@@ -62,6 +63,8 @@ keyToPath['rmq_running'] = "%s.running" #Boolean
 
 NODE_METRICS = ['rmq_disk_free', 'rmq_mem_used', 'rmq_disk_free_alarm', 'rmq_running', 'rmq_proc_used', 'rmq_mem_proc_used', 'rmq_fd_used', 'rmq_mem_alarm', 'rmq_mem_code', 'rmq_mem_binary', 'rmq_sockets_used']
 	
+
+
 
 def metric_cleanup():
     pass
@@ -123,6 +126,7 @@ def list_nodes():
     return nodes
 
 def getQueueStat(name):
+    refreshStats(stats = STATS, vhosts = vhosts)
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     
     #handle queue names with . in them
@@ -147,6 +151,7 @@ def getQueueStat(name):
     return float(value)
 
 def getNodeStat(name):
+    refreshStats(stats = STATS, vhosts = vhosts)
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     stat_name = name.split(".")[0]
     node_name, vhost = name.split(".")[1].split("#")
@@ -174,7 +179,7 @@ def product(*args, **kwds):
     
 def metric_init(params):
     ''' Create the metric definition object '''
-    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS
+    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS, vhosts
     print 'received the following params:'
     #Set this globally so we can refresh stats
     if 'host' not in params:
@@ -259,6 +264,6 @@ if __name__ == "__main__":
     metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*10
-    getQueueStat('rmq_backing_queue_ack_egress_rate.gelf_client_three#/')
+    getQueueStat('rmq_backing_queue_ack_egress_rate.nfl_client#/')
     getNodeStat('rmq_disk_free.rmqtwo@inrmq02d1#/') 
     getNodeStat('rmq_mem_used.rmqtwo@inrmq02d1#/')
