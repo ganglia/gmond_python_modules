@@ -196,13 +196,6 @@ def metric_init(params):
 
     refreshStats(stats = STATS, vhosts = vhosts)
 
-    def metric_handler(name):
-        if 15 < time.time() - metric_handler.timestamp:
-            metric_handler.timestamp = time.time()
-            return refreshStats(stats = STATS, vhosts = vhosts)
-
-            
-
     def create_desc(prop):
 	d = {
 	    'name'        : 'XXX',
