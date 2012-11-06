@@ -16,7 +16,7 @@ python module for ganglia 3.1.
  * nginx_waiting
 
 ## Params
- * server_# (<nginxhostname>:<statusportnumber>)
+ * server_# (nginxhostname:statusportnumber)
 
 ## NOTES
  * Ensure that the status stub module is setup correctly when using this module.
