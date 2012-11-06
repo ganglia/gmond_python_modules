@@ -1,0 +1,45 @@
+#
+
+modules {
+  module {
+    name = 'multi_nginx_status'
+    language = 'python'
+    
+    param server_1 {
+      value = 'nginxserver1:8081'
+    }
+    param server_2 {
+      value = 'nginxserver2:8081'
+    }
+  }
+}
+
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+
+  metric {
+        name_match = "(.+)activeConn"
+        }
+
+  metric {
+    name_match = "(.+)accepts"
+  }
+  metric {
+    name_match = "(.+)handled"
+  }
+  metric {
+    name_match = "(.+)requests"
+  }
+  metric {
+    name_match = "(.+)reading"
+  }
+  metric {
+    name_match = "(.+)writing"
+  }
+  metric {
+    name_match = "(.+)waiting"
+  }
+
+}
