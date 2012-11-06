@@ -1,0 +1,28 @@
+multi_nginx_status
+===============
+
+python module for ganglia 3.1.
+
+"multi_nginx_status" gathers metrics from remote nginx status pages, handles multiple nginx servers from a single gmond. [status stub module](http://wiki.nginx.org/HttpStubStatusModule).
+
+
+## Metrics
+ * nginx_active_connections
+ * nginx_accepts
+ * nginx_handled
+ * nginx_requests
+ * nginx_reading
+ * nginx_writing
+ * nginx_waiting
+
+## Params
+ * server_# (nginxhostname:statusportnumber)
+
+## NOTES
+ * Ensure that the status stub module is setup correctly when using this module.
+ * Save the multi_nginx_status.pyconf file into /etc/ganglia/conf.d/ and update it with your nginx servers hostname and nginx_status port number
+ * Save the multi_nginx_status.py file into your gmond python module dir (eg: /usr/lib/ganglia/python_modules)
+
+## AUTHOR
+Evan Fraser <evan.fraser@trademe.co.nz>
+Reused code from Patrick Ting's nginx_status module <pcting@gmail.com>
