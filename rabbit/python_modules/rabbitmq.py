@@ -99,7 +99,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
 		result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
                 print urlstring
-                result = json.load(urllib.urlopen(urlstring))
+                result = json.load(urllib.urlopen(urlstring, None, 2))
 		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
 		if stat in ("queues", "nodes", "exchanges"):
 		    for entry in result:

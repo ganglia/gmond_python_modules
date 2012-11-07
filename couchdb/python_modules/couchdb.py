@@ -54,7 +54,8 @@ class UpdateCouchdbThread(threading.Thread):
             logging.warning('The specified refresh_rate of %d is invalid and has been substituted with 60!' % refresh_rate)
             url += '?range=60'
 
-        c = urllib2.urlopen(url)
+        # Set time out for urlopen to 2 seconds otherwise we run into the possibility of hosing gmond
+        c = urllib2.urlopen(url, None, 2)
         json_data = c.read()
         c.close()
 

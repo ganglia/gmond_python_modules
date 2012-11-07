@@ -52,7 +52,7 @@ class UpdateJenkinsThread(threading.Thread):
     url += '/api/json'
     url += '?tree=jobs[color],overallLoad[busyExecutors[min[latest]],queueLength[min[latest]],totalExecutors[min[latest]]]'
 
-    c = urllib2.urlopen(url)
+    c = urllib2.urlopen(url, None, 2)
     json_data = c.read()
     c.close()
 

@@ -49,7 +49,7 @@ class UpdateNginxThread(threading.Thread):
 
     @staticmethod
     def _get_nginx_status_stub_response(url):
-        c = urllib2.urlopen(url)
+        c = urllib2.urlopen(url, None, 2)
         data = c.read()
         c.close()
 

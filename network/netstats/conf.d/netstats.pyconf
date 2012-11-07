@@ -26,6 +26,11 @@ collection_group {
       value_threshold = 1.0
   }
   metric {
+      name_match = "icmpmsg_(.+)"
+      value_threshold = 1.0
+  }
+
+  metric {
       name_match = "icmp_(.+)"
       value_threshold = 1.0
   }

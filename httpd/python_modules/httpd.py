@@ -74,7 +74,7 @@ def update_stats():
 	try:
 		httpd_stats = {}
 		logging.debug(' opening URL: ' + str(STATUS_URL))
-		f = urllib.urlopen(STATUS_URL)
+		f = urllib.urlopen(STATUS_URL, None, 2)
 
 		for line in f.readlines():
 			diff = False
