@@ -36,6 +36,26 @@ def metric_handler(name):
                       v = v.split('=')[1].split(',')[0]
                   if n == "used_memory":
                       v = int(int(v) / 1000)
+                  if n == "total_connections_received":
+                      # first run, zero out and record total connections
+                      if metric_handler.prev_total_connections == 0:
+                          metric_handler.prev_total_connections = int(v)
+                          v = 0
+                      else:
+                          # calculate connections per second
+                          cps = (int(v) - metric_handler.prev_total_connections) / (time.time() - metric_handler.timestamp)
+                          metric_handler.prev_total_connections = int(v)
+                          v = cps
+                  if n == "total_commands_processed":
+                      # first run, zero out and record total commands
+                      if metric_handler.prev_total_commands == 0:
+                          metric_handler.prev_total_commands = int(v)
+                          v = 0
+                      else:
+                          # calculate commands per second
+                          cps = (int(v) - metric_handler.prev_total_commands) / (time.time() - metric_handler.timestamp)
+                          metric_handler.prev_total_commands = int(v)
+                          v = cps
                   #logging.debug("submittincg metric %s is %s" % (n, int(v)))
                   metric_handler.info[n] = int(v) # TODO Use value_type.
         except Exception, e:
@@ -51,6 +71,8 @@ def metric_init(params={}):
     metric_handler.host = params.get("host", "127.0.0.1")
     metric_handler.port = int(params.get("port", 6379))
     metric_handler.timestamp = 0
+    metric_handler.prev_total_commands = 0
+    metric_handler.prev_total_connections = 0
     metrics = {
         "connected_clients": {"units": "clients"},
         "connected_slaves": {"units": "slaves"},
@@ -61,15 +83,9 @@ def metric_init(params={}):
         "master_sync_in_progress": {"units": "yes/no"},
         "master_link_status": {"units": "yes/no"},
         #"aof_bgrewriteaof_in_progress": {"units": "yes/no"},
-        "total_connections_received": {
-            "units": "connections",
-            "slope": "positive",
-        },
+        "total_connections_received": { "units": "connections/sec" },
         "instantaneous_ops_per_sec": {"units": "ops"},
-        "total_commands_processed": {
-            "units": "commands",
-            "slope": "positive",
-        },
+        "total_commands_processed": { "units": "commands/sec" },
         "expired_keys": {"units": "keys"},
         "pubsub_channels": {"units": "channels"},
         "pubsub_patterns": {"units": "patterns"},
