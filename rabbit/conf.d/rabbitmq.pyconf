@@ -21,6 +21,9 @@ modules {
     param password {
       value = "guest"
     }
+    param port {
+      value = "15672"
+    }
 
     param metric_group {
       value = "rmq"
