@@ -2,13 +2,13 @@
 import sys
 import os
 import simplejson as json
-import urllib
+import urllib2
 import time
 from string import Template
 import itertools
 import threading
 
-global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
+global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath 
 INTERVAL = 10
 descriptors = list()
 username, password = "guest", "guest"
@@ -99,7 +99,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
 		result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
                 print urlstring
-                result = json.load(urllib.urlopen(urlstring, None, 2))
+                result = json.load(urllib2.urlopen(urlstring))
 		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
 		if stat in ("queues", "nodes", "exchanges"):
 		    for entry in result:
@@ -183,18 +183,33 @@ def metric_init(params):
     print 'received the following params:'
     #Set this globally so we can refresh stats
     if 'host' not in params:
-        params['host'], params['vhost'],params['username'],params['password'] = "localhost", "/", "guest", "guest"
+        params['host'], params['vhost'],params['username'],params['password'],params['port'] = "localhost", "/", "guest", "guest", "15672"
 
     # Set the vhosts as a list split from params
     vhosts = params['vhost'].split(',')
     username, password = params['username'], params['password']
     host = params['host']
-
-    url = 'http://%s:%s@%s:55672/api/$stats/$vhost' % (username, password, host)
+    port = params['port']
+    
+    url = 'http://%s:%s/api/$stats/$vhost' % (host,port)
+    base_url = 'http://%s:%s/api' % (host,port)
+    password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    password_mgr.add_password(None, base_url, username, password)
+    handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+    opener = urllib2.build_opener(handler)
+    opener.open(base_url)
+    urllib2.install_opener(opener)
     url_template = Template(url)
     print params
 
     refreshStats(stats = STATS, vhosts = vhosts)
+
+    def metric_handler(name):
+        if 15 < time.time() - metric_handler.timestamp:
+            metric_handler.timestamp = time.time()
+            return refreshStats(stats = STATS, vhosts = vhosts)
+
+            
 
     def create_desc(prop):
 	d = {
@@ -258,12 +273,12 @@ def metric_cleanup():
   
 
 if __name__ == "__main__":
-    url = 'http://%s:%s@localhost:55672/api/$stats' % (username, password)
+    url = 'http://%s:%s@localhost:15672/api/$stats' % (username, password)
     url_template = Template(url)
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
     metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*10
     getQueueStat('rmq_backing_queue_ack_egress_rate.nfl_client#/')
-    getNodeStat('rmq_disk_free.rmqtwo@inrmq02d1#/') 
-    getNodeStat('rmq_mem_used.rmqtwo@inrmq02d1#/')
+    getNodeStat('rmq_disk_free.rmqone@inrmq01d1#/') 
+    getNodeStat('rmq_mem_used.rmqone@inrmq01d1#/')
