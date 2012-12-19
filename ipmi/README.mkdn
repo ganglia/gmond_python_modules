@@ -5,31 +5,31 @@ Python module for ganglia 3.1+
 
 This module allows you to collect system statistics from IPMI e.g.
 
-ipmi_cpu2_temp = 42.0
-ipmi_vdimm_ef = 1.52
-ipmi_vdimm_gh = 1.52
-ipmi_vbat = 3.216
-ipmi_12v = 11.978
-ipmi_vdimm_ab = 1.504
-ipmi_fana = 2850.0
-ipmi_5v = 5.056
-ipmi_3.3v = 3.36
-ipmi_vtt = 1.04
-ipmi_1.5_v = 1.488
-ipmi_cpu1_temp = 41.0
-ipmi_cpu1_vcore = 1.008
-ipmi_5vsb = 5.056
-ipmi_cpu2_vcore = 1.104
-ipmi_pch_temp = 43.0
-ipmi_1.1_v = 1.088
-ipmi_peripheral_temp = 35.0
-ipmi_system_temp = 28.0
-ipmi_vdimm_cd = 1.52
-ipmi_3.3vsb = 3.36
-ipmi_fan1 = 2775.0
-ipmi_fan3 = 4275.0
-ipmi_fan2 = 2850.0
-ipmi_fan5 = 3750.0
+  ipmi_cpu2_temp = 42.0
+  ipmi_vdimm_ef = 1.52
+  ipmi_vdimm_gh = 1.52
+  ipmi_vbat = 3.216
+  ipmi_12v = 11.978
+  ipmi_vdimm_ab = 1.504
+  ipmi_fana = 2850.0
+  ipmi_5v = 5.056
+  ipmi_3.3v = 3.36
+  ipmi_vtt = 1.04
+  ipmi_1.5_v = 1.488
+  ipmi_cpu1_temp = 41.0
+  ipmi_cpu1_vcore = 1.008
+  ipmi_5vsb = 5.056
+  ipmi_cpu2_vcore = 1.104
+  ipmi_pch_temp = 43.0
+  ipmi_1.1_v = 1.088
+  ipmi_peripheral_temp = 35.0
+  ipmi_system_temp = 28.0
+  ipmi_vdimm_cd = 1.52
+  ipmi_3.3vsb = 3.36
+  ipmi_fan1 = 2775.0
+  ipmi_fan3 = 4275.0
+  ipmi_fan2 = 2850.0
+  ipmi_fan5 = 3750.0
 
 
 Install 
@@ -37,15 +37,15 @@ Install
 
 It requires installation of the timeout binary e.g.
 
-apt-get install timeout
+  apt-get install timeout
 
 Copy ipmi.py from python_modules to your python modules directory e.g.
 
-/usr/lib64/ganglia/python_modules
+  /usr/lib64/ganglia/python_modules
 
 and ipmi.pyconf to
 
-/etc/ganglia/conf.d/
+  /etc/ganglia/conf.d/
 
 In ipmi.pyconf adjust IPMI interface IP, username and password.
 
