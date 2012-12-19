@@ -17,6 +17,10 @@ To use multiple vhosts, separate them by comma in the vhosts file.
 
 To get metrics besides nodes or queues, either check out how the buildQueueDescriptors and buildNodeDescriptors were set up and make a new descriptor builder/modify stats at the top of the python file and contribute the changes, or ask for my assistance and I'll see what I can do.
 
+## UPDATE
+
+Just added Port parameter to the pyconf. If your broker is pre-3.0, use 55672. If you're on 3.0, use 15672.
+
 ## AUTHORS
 
 Gregory Rice <gregrice@gmail.com>
