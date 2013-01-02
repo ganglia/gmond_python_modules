@@ -107,10 +107,26 @@ def get_tcploss_percentage(name):
       if pct < 0:
 	print name + " is less 0"
 	pct = 0
-    except KeyError:
+    except Exception:
       pct = 0.0
 
     return pct
+
+def get_tcpattemptfail_percentage(name):
+
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+
+    try:
+      pct = 100 * (float(curr_metrics['data']['tcp']["attemptfails"]) - float(last_metrics["data"]['tcp']["attemptfails"])) / (float(curr_metrics['data']['tcp']['outsegs']) +  float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['outsegs']))
+      if pct < 0:
+	print name + " is less 0"
+	pct = 0
+    except Exception:
+      pct = 0.0
+
+    return pct
+
 
 def get_retrans_percentage(name):
 
@@ -122,7 +138,7 @@ def get_retrans_percentage(name):
       if pct < 0:
 	print name + " is less 0"
 	pct = 0
-    except KeyError:
+    except Exception:
       pct = 0.0
 
     return pct
@@ -195,6 +211,15 @@ def metric_init(params):
 	"units"      : "pct",
         'groups'      : 'tcpext'
 	}))
+
+    descriptors.append(create_desc(Desc_Skel, {
+	"name"       : "tcpext_" + "tcpattemptfail_percentage",
+	"call_back"  : get_tcpattemptfail_percentage,
+	"description": "TCP attemptfail percentage, tcpattemptfail / insegs + outsegs",
+	"units"      : "pct",
+        'groups'      : 'tcpext'
+	}))
+
 
     descriptors.append(create_desc(Desc_Skel, {
 	"name"       : "tcp_" + "retrans_percentage",
