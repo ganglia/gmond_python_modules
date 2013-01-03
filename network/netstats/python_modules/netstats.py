@@ -118,7 +118,7 @@ def get_tcpattemptfail_percentage(name):
     [curr_metrics, last_metrics] = get_metrics()
 
     try:
-      pct = 100 * (float(curr_metrics['data']['tcp']["attemptfails"]) - float(last_metrics["data"]['tcp']["attemptfails"])) / ( float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) )
+      pct = 100 * (float(curr_metrics['data']['tcp']["attemptfails"]) - float(last_metrics["data"]['tcp']["attemptfails"])) / (float(curr_metrics['data']['tcp']['outsegs']) +  float(curr_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['insegs']) - float(last_metrics['data']['tcp']['outsegs']))
       if pct < 0:
 	print name + " is less 0"
 	pct = 0
@@ -215,7 +215,7 @@ def metric_init(params):
     descriptors.append(create_desc(Desc_Skel, {
 	"name"       : "tcp_attemptfails_percentage",
 	"call_back"  : get_tcpattemptfail_percentage,
-	"description": "TCP attemptfail percentage, tcpattemptfail / insegs",
+	"description": "TCP attemptfail percentage, tcpattemptfail / insegs + outsegs",
 	"units"      : "pct",
         'groups'      : 'tcpext'
 	}))
