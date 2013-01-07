@@ -1,0 +1,37 @@
+# Sample configuration for zpubmon Ganglia module
+
+modules {
+  module {
+    name = "zpubmon"
+    language = "python"
+    param groups {
+        value = "ChangeMe"
+    }
+    param server-generated-raw {
+        value = "tcp://127.0.0.1:8421"
+    }
+    param client-generated-raw {
+        value = "tcp://127.0.0.1:8422"
+    }
+    param client-generated-valid {
+        value = "tcp://127.0.0.1:8484"
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 60
+  metric {
+      name = "server-generated-raw"
+      title = "Raw server-generated events"
+  }
+  metric {
+      name = "client-generated-raw"
+      title = "Raw client-generated events"
+  }
+  metric {
+      name = "client-generated-valid"
+      title = "Valid client-generated events"
+  }
+}
