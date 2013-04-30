@@ -115,9 +115,18 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		for (k,v) in cursor:
 			global_status[k.lower()] = v
 		cursor.close()
+		
+		cursor = conn.cursor(MySQLdb.cursors.Cursor)
+		cursor.execute("SHOW ENGINES")
+		have_innodb = False
+		for row in cursor:
+			if row[0] == 'InnoDB':
+				if row[1] == 'DEFAULT' or row[1] == "YES":
+					have_innodb = True
+		cursor.close()
 
 		# try not to fail ?
-		get_innodb = get_innodb and variables['have_innodb'].lower() == 'yes'
+		get_innodb = get_innodb and have_innodb
 		get_master = get_master and variables['log_bin'].lower() == 'on'
 
 		innodb_status = defaultdict(int)
