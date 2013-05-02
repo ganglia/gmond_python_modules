@@ -117,12 +117,15 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		cursor.close()
 		
 		cursor = conn.cursor(MySQLdb.cursors.Cursor)
-		cursor.execute("SHOW ENGINES")
+		cursor.execute("SELECT PLUGIN_STATUS, PLUGIN_VERSION FROM `information_schema`.Plugins WHERE PLUGIN_NAME LIKE '%innodb%' AND PLUGIN_TYPE LIKE 'STORAGE ENGINE';")
+		
 		have_innodb = False
-		for row in cursor:
-			if row[0] == 'InnoDB':
-				if row[1] == 'DEFAULT' or row[1] == "YES":
-					have_innodb = True
+		innodb_version = 1.0
+		row = cursor.fetchone()
+		
+		if row[0] == "ACTIVE":
+			have_innodb = True
+			innodb_version = row[1]
 		cursor.close()
 
 		# try not to fail ?
@@ -133,7 +136,7 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		if get_innodb:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
-			innodb_status = parse_innodb_status(cursor.fetchone()[0].split('\n'))
+			innodb_status = parse_innodb_status(cursor.fetchone()[2].split('\n'), innodb_version)
 			cursor.close()
 			logging.debug('innodb_status: ' + str(innodb_status))
 

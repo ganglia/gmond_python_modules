@@ -74,17 +74,25 @@ def longish(x):
 			return longish(x[:-1])
 	else:
 		raise ValueError
+		
+def hexlongish(x):
+	if len(x):
+		try:
+			return long(str(x), 16)
+		except ValueError:
+			return longish(x[:-1])
+	else:
+		raise ValueError
 
-def parse_innodb_status(innodb_status_raw):
+def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 	def sumof(status):
 		def new(*idxs):
 			return sum(map(lambda x: longish(status[x]), idxs))
-		#new.func_name = 'sumof'  #not ok in py2.3
 		return new
 
 	innodb_status = defaultdict(int)
 	innodb_status['active_transactions']
-
+	
 	for line in innodb_status_raw:
 		istatus = line.split()
 
@@ -97,15 +105,33 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['os_waits'] += longish(istatus[8])
 
 		elif "RW-shared spins" in line:
-			innodb_status['spin_waits'] += isum(2,8)
-			innodb_status['os_waits'] += isum(5,11)
+			if innodb_version == 1.0:
+				innodb_status['spin_waits'] += isum(2,8)
+				innodb_status['os_waits'] += isum(5,11)
+			elif innodb_version >= 5.5:
+				innodb_status['spin_waits'] += longish(istatus[2])
+				innodb_status['os_waits'] += longish(istatus[7])
+
+		elif "RW-excl spins" in line and innodb_version >= 5.5:
+			innodb_status['spin_waits'] += longish(istatus[2])
+			innodb_status['os_waits'] += longish(istatus[7])
 
 		# TRANSACTIONS
 		elif "Trx id counter" in line:
-			innodb_status['transactions'] += isum(3,4)
+			if innodb_version >= 5.6:
+				innodb_status['transactions'] += longish(istatus[3])
+			elif innodb_version == 5.5:
+				innodb_status['transactions'] += hexlongish(istatus[3])
+			else:
+				innodb_status['transactions'] += isum(3,4)
 
 		elif "Purge done for trx" in line:
-			innodb_status['transactions_purged'] += isum(6,7)
+			if innodb_version >= 5.6:
+				innodb_status['transactions_purged'] += longish(istatus[6])
+			elif innodb_version == 5.5:
+				innodb_status['transactions_purged'] += hexlongish(istatus[6])
+			else:
+				innodb_status['transactions_purged'] += isum(6,7)
 
 		elif "History list length" in line:
 			innodb_status['history_list'] = longish(istatus[3])
@@ -141,10 +167,21 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['pending_buffer_pool_flushes'] = longish(istatus[7])
 
 		# INSERT BUFFER AND ADAPTIVE HASH INDEX
-		elif 'merged recs' in line:
+		elif 'merged recs' in line and innodb_version == 1.0:
 			innodb_status['ibuf_inserts'] = longish(istatus[0])
 			innodb_status['ibuf_merged'] = longish(istatus[2])
 			innodb_status['ibuf_merges'] = longish(istatus[5])
+
+		elif 'Ibuf: size' in line and innodb_version >= 5.5:
+			innodb_status['ibuf_merges'] = longish(istatus[10])
+
+		elif 'merged operations' in line and innodb_version >= 5.5:
+			in_merged = 1
+
+		elif 'delete mark' in line and 'in_merged' in vars() and innodb_version >= 5.5:
+			innodb_status['ibuf_inserts'] = longish(istatus[1])
+			innodb_status['ibuf_merged'] = 0
+			del in_merged
 
 		# LOG
 		elif "log i/o's done" in line:
@@ -155,10 +192,16 @@ def parse_innodb_status(innodb_status_raw):
 			innodb_status['pending_chkp_writes'] = longish(istatus[4])
 		
 		elif "Log sequence number" in line:
-			innodb_status['log_bytes_written'] = isum(3,4)
+			if innodb_version >= 5.5:
+				innodb_status['log_bytes_written'] = longish(istatus[3])
+			else:
+				innodb_status['log_bytes_written'] = isum(3,4)
 		
 		elif "Log flushed up to" in line:
-			innodb_status['log_bytes_flushed'] = isum(4,5)
+			if innodb_version >= 5.5:
+				innodb_status['log_bytes_flushed'] = longish(istatus[4])
+			else:
+				innodb_status['log_bytes_flushed'] = isum(4,5)
 
 		# BUFFER POOL AND MEMORY
 		elif "Buffer pool size" in line:
@@ -173,10 +216,10 @@ def parse_innodb_status(innodb_status_raw):
 		elif "Modified db pages" in line:
 			innodb_status['buffer_pool_pages_dirty'] = longish(istatus[3])
 		
-		elif "Pages read" in line:
-			innodb_status['pages_read'] = longish(istatus[2])
-			innodb_status['pages_created'] = longish(istatus[4])
-			innodb_status['pages_written'] = longish(istatus[6])
+		elif "Pages read" in line and "ahead" not in line:
+				innodb_status['pages_read'] = longish(istatus[2])
+				innodb_status['pages_created'] = longish(istatus[4])
+				innodb_status['pages_written'] = longish(istatus[6])
 
 		# ROW OPERATIONS
 		elif 'Number of rows inserted' in line:
