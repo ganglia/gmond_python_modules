@@ -10,6 +10,7 @@ import sys
 import threading
 import time
 import traceback
+import socket
 import urllib2
 
 logging.basicConfig(level=logging.ERROR)
@@ -49,7 +50,8 @@ class UpdateNginxThread(threading.Thread):
 
     @staticmethod
     def _get_nginx_status_stub_response(url):
-        c = urllib2.urlopen(url, None, 2)
+        socket.setdefaulttimeout(5) # 5 seconds
+        c = urllib2.urlopen(url)
         data = c.read()
         c.close()
 
@@ -77,6 +79,7 @@ class UpdateNginxThread(threading.Thread):
     def refresh_metrics(self):
         logging.debug('refresh metrics')
 
+        data = {}
         try:
             logging.debug(' opening URL: ' + str(self.status_url))
 
@@ -91,12 +94,13 @@ class UpdateNginxThread(threading.Thread):
 
             for k, v in data.items():
                 self.metrics[k] = v
+
+            self._metrics_lock.release()
         except:
             logging.warning('error refreshing metrics')
             logging.warning(traceback.print_exc(file=sys.stdout))
-            return False
-        finally:
             self._metrics_lock.release()
+            return False
 
         if not self.metrics:
             logging.warning('error refreshing metrics')
@@ -132,11 +136,11 @@ class UpdateNginxThread(threading.Thread):
 
                 if len(line) > 1:
                     self.settings[key] = line[1]
+            self._settings_lock.release()
         except:
             logging.warning('error refreshing settings')
-            return False
-        finally:
             self._settings_lock.release()
+            return False
 
         logging.debug('success refreshing server settings')
         logging.debug('settings: ' + str(self.settings))
@@ -151,8 +155,10 @@ class UpdateNginxThread(threading.Thread):
                 try:
                     self._metrics_lock.acquire()
                     logging.debug('metric: %s = %s' % (name, self.metrics[name]))
-                    return self.metrics[name]
-                finally:
+                    ret = self.metrics[name]
+                    self._metrics_lock.release()
+                    return ret
+                except:
                     self._metrics_lock.release()
         except:
             logging.warning('failed to fetch ' + name)
@@ -284,15 +290,17 @@ if __name__ == '__main__':
             v = d['call_back'](d['name'])
 
             if not options.quiet:
-                print ' {0}: {1} {2} [{3}]' . format(d['name'], v, d['units'], d['description'])
+                print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
 
         os._exit(1)
 
     except KeyboardInterrupt:
+        metric_cleanup()
         time.sleep(0.2)
         os._exit(1)
     except StandardError:
+        metric_cleanup()
         traceback.print_exc()
         os._exit(1)
-    finally:
-        metric_cleanup()
+
+    metric_cleanup()
