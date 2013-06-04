@@ -12,7 +12,8 @@ METRICS = {
 
 METRICS_CACHE_MAX = 5
 
-stats_pos = {} 
+stats_pos = {}
+
 
 def get_metrics():
     """Return all metrics"""
@@ -24,7 +25,7 @@ def get_metrics():
 	new_metrics = {}
 	units = {}
 
-	command = [ params['timeout_bin'] , "3", params['ipmitool_bin'] , "-H", params['ipmi_ip'] , "-U" , params['username'] , '-P', params['password'] , 'sensor']	
+	command = [ params['timeout_bin'] , "3", params['ipmitool_bin'] , "-H", params['ipmi_ip'] , "-U" , params['username'] , '-P', params['password'] , 'sensor']
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
@@ -47,12 +48,12 @@ def get_metrics():
 
                 new_metrics[metric_name] = metric_value
                 units[metric_name] = data[2].strip().replace("degrees C", "C")
-		
+
             except ValueError:
                 continue
             except IndexError:
                 continue
-		
+
 	METRICS = {
             'time': time.time(),
             'data': new_metrics,
@@ -70,7 +71,7 @@ def get_value(name):
 	metrics = get_metrics()[0]
 
 	prefix_length = len(params['metric_prefix']) + 1
-	name = name[prefix_length:] # remove prefix from name
+	name = name[prefix_length:]  # remove prefix from name
 
 	result = metrics['data'][name]
 
@@ -79,11 +80,13 @@ def get_value(name):
 
     return result
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -97,13 +100,13 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.5f',
         'units'       : 'count/s',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'XXX',
         }
 
     metrics = get_metrics()[0]
-    
+
     for item in metrics['data']:
 	descriptors.append(create_desc(Desc_Skel, {
 		"name"       	: params['metric_prefix'] + "_" + item,
@@ -111,8 +114,8 @@ def metric_init(params):
 		'units'		: metrics['units'][item]
 		}))
 
-
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''
@@ -120,7 +123,7 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
-    
+
     params = {
         "metric_prefix" : "ipmi",
 	"ipmi_ip" : "10.1.2.3",

@@ -21,22 +21,23 @@ APC_STATUS_URL = ""
 descriptors = list()
 Desc_Skel   = {}
 metric_list = {
-	NAME_PREFIX + 'num_slots'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Slots', 		'desc': 'Number of slots' },
-	NAME_PREFIX + 'num_hits'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Hits', 		'desc': 'Number of cache hits' },
-	NAME_PREFIX + 'num_misses'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Misses', 	'desc': 'Number of cache misses' },
-	NAME_PREFIX + 'num_inserts'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Inserts', 	'desc': 'Number of cache inserts' },
-	NAME_PREFIX + 'expunges'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Deletes', 	'desc': 'Number of cache deletes' },
-	NAME_PREFIX + 'mem_size'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Bytes', 		'desc': 'Memory size' },
-	NAME_PREFIX + 'num_entries'	: { 'type': 'uint',  'format' : '%d', 'unit': 'Entries', 	'desc': 'Cached Files' },
-	NAME_PREFIX + 'uptime'		: { 'type': 'uint',  'format' : '%d', 'unit': 'seconds',	'desc': 'Uptime' },
-	NAME_PREFIX + 'request_rate'	: { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 	'desc': 'Request Rate (hits, misses)' },
-	NAME_PREFIX + 'hit_rate'	: { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 	'desc': 'Hit Rate' },
-	NAME_PREFIX + 'miss_rate'	: { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 	'desc': 'Miss Rate' },
-	NAME_PREFIX + 'insert_rate'	: { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 	'desc': 'Insert Rate' },
-	NAME_PREFIX + 'num_seg'		: { 'type': 'uint',  'format' : '%d', 'unit': 'fragments', 	'desc': 'Segments' },
-	NAME_PREFIX + 'mem_avail'	: { 'type': 'uint',  'format' : '%d', 'unit': 'bytes', 		'desc': 'Free Memory' },
-	NAME_PREFIX + 'mem_used'	: { 'type': 'uint',  'format' : '%d', 'unit': 'bytes', 		'desc': 'Used Memory' },
+	NAME_PREFIX + 'num_slots'   : { 'type': 'uint',  'format' : '%d', 'unit': 'Slots',        'desc': 'Number of slots' },
+	NAME_PREFIX + 'num_hits'    : { 'type': 'uint',  'format' : '%d', 'unit': 'Hits',         'desc': 'Number of cache hits' },
+	NAME_PREFIX + 'num_misses'  : { 'type': 'uint',  'format' : '%d', 'unit': 'Misses',       'desc': 'Number of cache misses' },
+	NAME_PREFIX + 'num_inserts' : { 'type': 'uint',  'format' : '%d', 'unit': 'Inserts',      'desc': 'Number of cache inserts' },
+	NAME_PREFIX + 'expunges'    : { 'type': 'uint',  'format' : '%d', 'unit': 'Deletes',      'desc': 'Number of cache deletes' },
+	NAME_PREFIX + 'mem_size'    : { 'type': 'uint',  'format' : '%d', 'unit': 'Bytes',        'desc': 'Memory size' },
+	NAME_PREFIX + 'num_entries' : { 'type': 'uint',  'format' : '%d', 'unit': 'Entries',      'desc': 'Cached Files' },
+	NAME_PREFIX + 'uptime'      : { 'type': 'uint',  'format' : '%d', 'unit': 'seconds',      'desc': 'Uptime' },
+	NAME_PREFIX + 'request_rate': { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 'desc': 'Request Rate (hits, misses)' },
+	NAME_PREFIX + 'hit_rate'    : { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 'desc': 'Hit Rate' },
+	NAME_PREFIX + 'miss_rate'   : { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 'desc': 'Miss Rate' },
+	NAME_PREFIX + 'insert_rate' : { 'type': 'float', 'format' : '%f', 'unit': 'requests/sec', 'desc': 'Insert Rate' },
+	NAME_PREFIX + 'num_seg'     : { 'type': 'uint',  'format' : '%d', 'unit': 'fragments',    'desc': 'Segments' },
+	NAME_PREFIX + 'mem_avail'   : { 'type': 'uint',  'format' : '%d', 'unit': 'bytes',        'desc': 'Free Memory' },
+	NAME_PREFIX + 'mem_used'    : { 'type': 'uint',  'format' : '%d', 'unit': 'bytes',        'desc': 'Used Memory' },
 	}
+
 
 def get_value(name):
 	try:
@@ -50,11 +51,13 @@ def get_value(name):
 
 	return apc_stats[name[len(NAME_PREFIX):]]
 
+
 def create_desc(prop):
 	d = Desc_Skel.copy()
 	for k,v in prop.iteritems():
 		d[k] = v
 	return d
+
 
 def metric_init(params):
 	global descriptors, Desc_Skel, APC_STATUS_URL
@@ -79,8 +82,7 @@ def metric_init(params):
 
 	if "url" not in params:
 		params["url"] = "http://localhost/apc-json.php"
-	
-	
+
 	APC_STATUS_URL = params["url"]
 
 	if "spoof_host" in params:
@@ -98,6 +100,7 @@ def metric_init(params):
 
 	return descriptors
 
+
 def metric_cleanup():
 	pass
 
@@ -106,5 +109,3 @@ if __name__ == '__main__':
 	for d in descriptors:
 		v = d['call_back'](d['name'])
 		print 'value for %s is %s' % (d['name'], v)
-
-

@@ -52,6 +52,7 @@ def every(*args, **kwargs):
     the return value is discarded.
     """
     interval = total_seconds(timedelta(*args, **kwargs))
+
     def decorator(func):
         def poll():
             func()

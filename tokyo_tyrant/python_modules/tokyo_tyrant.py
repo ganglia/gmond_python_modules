@@ -75,7 +75,7 @@ def get_value(name):
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         result = metrics['data'][name]
     except StandardError:
@@ -91,7 +91,7 @@ def get_delta(name):
     [curr_metrics, last_metrics] = get_metrics()
 
     # get delta
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         delta = (curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
         if delta < 0:

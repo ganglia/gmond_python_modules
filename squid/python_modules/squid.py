@@ -20,6 +20,7 @@ squid_stats_last = {}
 
 MIN_UPDATE_INTERVAL = 30          # Minimum update interval in seconds
 
+
 def collect_stats():
     #logging.debug('collect_stats()')
     global last_update
@@ -54,7 +55,7 @@ def collect_stats():
                 value = value.lstrip()
                 rawstats[key] = value
         else:
-            match = re.search("(\d+)\s+(.*)$",stat) # reversed "value key" line
+            match = re.search("(\d+)\s+(.*)$",stat)  # reversed "value key" line
             if match:
                 rawstats[match.group(2)] = match.group(1)
 
@@ -70,8 +71,8 @@ def collect_stats():
                         squid_stats[metric] = rawstat
                 else:
                     squid_stats[metric] = rawstat
-        if squid_stats.has_key(metric): # Strip trailing non-num text
-            if metric != 'cacheVersionId': # version is special case
+        if squid_stats.has_key(metric):  # Strip trailing non-num text
+            if metric != 'cacheVersionId':  # version is special case
                 match = re.match('([0-9.]+)',squid_stats[metric]);
                 squid_stats[metric] = float(match.group(1))
                 if stats_descriptions[metric]['type'] == 'integer':
@@ -92,6 +93,7 @@ def collect_stats():
     #logging.debug('collect_stats done')
     #logging.debug('squid_stats: ' + str(squid_stats))
 
+
 def get_stat(name):
     #logging.info("get_stat(%s)" % name)
     global squid_stats
@@ -103,7 +105,7 @@ def get_stat(name):
             label = name[6:]
         else:
             lable = name
-            
+
             #logging.debug("fetching %s" % label)
         try:
             #logging.info("got %4.2f" % squid_stats[label])
@@ -468,15 +470,16 @@ def metric_init(params):
                 'description': label,
                 'groups': 'squid',
                 }
-            
+
             d.update(stats_descriptions[label])
-            
+
             descriptors.append(d)
-            
+
         #else:
             #logging.error("skipped " + label)
-            
+
     return descriptors
+
 
 def metric_cleanup():
     #logging.shutdown()
@@ -493,4 +496,3 @@ if __name__ == '__main__':
             print 'value for %s is %d %s' % (d['name'],  v, d['units'])
         else:
             print 'value for %s is %4.2f %s' % (d['name'],  v, d['units'])
-

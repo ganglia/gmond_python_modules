@@ -74,6 +74,7 @@ devnames = []
 dev2pair = {}
 pair2dev = {}
 
+
 def build_dmblock_major_minor_tables():
 	"""Returns
 	1) a table of filenames that are all device mapper block special files
@@ -100,6 +101,7 @@ def build_dmblock_major_minor_tables():
 
 	return (names, name2pair, pair2name)
 
+
 def build_block_major_minor_tables():
 	"""Returns
 	1) a table of filenames that are all block special files
@@ -125,6 +127,7 @@ def build_block_major_minor_tables():
 
 	return (dnames, d2p, p2d)
 
+
 def get_devname(dev):
 	"""Returns
 	device mapper name converted to dev name"""
@@ -132,6 +135,7 @@ def get_devname(dev):
 	(maj,min) = dm2pair[dev]
 	name = pair2dev[(maj,min)]
 	return name
+
 
 def list_dmnames():
 	"""Returns
@@ -158,6 +162,7 @@ def list_dmnames():
 
 	return devlist
 
+
 def get_partitions():
 	logging.debug('getting partitions')
 	global PARTITIONS
@@ -167,13 +172,13 @@ def get_partitions():
 		logging.debug(' DEVICES has already been set')
 		out = DEVICES
 
-	else:	
+	else:
 		# Load partitions
 		awk_cmd = "awk 'NR > 1 && $0 !~ /" + IGNORE_DEV + "/ && $4 !~ /[0-9]$/ {ORS=\" \"; print $4}' "
 		p = subprocess.Popen(awk_cmd + PARTITIONS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = p.communicate()
 		logging.debug('  result: ' + out)
-		
+
 		if p.returncode:
 			logging.warning('failed getting partitions')
 			return p.returncode
@@ -182,7 +187,7 @@ def get_partitions():
 		if DEVICES != '':
 			# Explicit device list has been set
 			PARTITIONS.append(dev)
-		else:		
+		else:
 			# Load disk block size
 			f = open('/sys/block/' + dev + '/size', 'r')
 			c = f.read()
@@ -227,7 +232,7 @@ def update_stats():
 	logging.debug('updating stats')
 	global last_update, stats, last_val, cur_time
 	global MAX_UPDATE_TIME
-	
+
 	cur_time = time.time()
 
 	if cur_time - last_update < MAX_UPDATE_TIME:
@@ -239,7 +244,7 @@ def update_stats():
 	stats = {}
 
 	if not PARTITIONS:
-		part = get_partitions()	
+		part = get_partitions()
 		if part:
 			# Fail if return is non-zero
 			logging.warning('error getting partitions')
@@ -263,7 +268,7 @@ def update_stats():
 		# Get values from diskstats file
 		p = subprocess.Popen("awk -v dev=" + dev + " '$3 == dev' " + DISKSTATS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		out, err = p.communicate()
-		
+
 		vals = out.split()
 		logging.debug('  vals: ' + str(vals))
 
@@ -287,13 +292,13 @@ def update_stats():
 		get_percent_time(dev, 'percent_io_time', float(stats[dev]['io_time']))
 		get_delta(dev, 'weighted_io_time', float(vals[13]), 0.001)
 
-
 	logging.debug('success refreshing stats')
 	logging.debug('stats: ' + str(stats))
 	logging.debug('last_val: ' + str(last_val))
 
 	last_update = cur_time
 	return True
+
 
 def get_delta(dev, key, val, convert=1):
 	logging.debug(' get_delta for ' + dev +  '_' + key)
@@ -316,6 +321,7 @@ def get_delta(dev, key, val, convert=1):
 
 	last_val[dev][key] = int(val)
 
+
 def get_percent_time(dev, key, val):
 	logging.debug(' get_percent_time for ' + dev +  '_' + key)
 	global stats, last_val
@@ -327,6 +333,7 @@ def get_percent_time(dev, key, val):
 	else:
 		stats[dev][key] = 0
 
+
 def get_diff(dev, key, val, convert=1):
 	logging.debug(' get_diff for ' + dev + '_' + key)
 	global stats, last_val
@@ -337,6 +344,7 @@ def get_diff(dev, key, val, convert=1):
 		stats[dev][key] = 0
 
 	last_val[dev][key] = val
+
 
 def get_stat(name):
 	logging.debug(' getting stat: ' + name)
@@ -368,6 +376,7 @@ def get_stat(name):
 
 	else:
 		return 0
+
 
 def metric_init(params):
 	global descriptors, device_mapper
@@ -438,7 +447,7 @@ def metric_init(params):
 	update_stats()
 
 	for label in descriptions:
-		for dev in PARTITIONS: 
+		for dev in PARTITIONS:
 			if stats[dev].has_key(label):
 
 				d = {
@@ -454,7 +463,7 @@ def metric_init(params):
 				}
 
 				# Apply metric customizations from descriptions
-				d.update(descriptions[label])	
+				d.update(descriptions[label])
 
 				descriptors.append(d)
 			else:
@@ -467,6 +476,7 @@ def metric_init(params):
 	#update_stats()
 
 	return descriptors
+
 
 def metric_cleanup():
 	logging.shutdown()
@@ -501,18 +511,16 @@ if __name__ == '__main__':
 			v = d['call_back'](d['name'])
 			if not options.quiet:
 				print ' %s: %s %s [%s]' % (d['name'], v, d['units'], d['description'])
-	
+
 			if options.gmetric:
 				if d['value_type'] == 'uint':
 					value_type = 'uint32'
 				else:
 					value_type = d['value_type']
-	
+
 				cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
 					(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 				os.system(cmd)
-				
+
 		print 'Sleeping 15 seconds'
 		time.sleep(15)
-
-

@@ -21,6 +21,7 @@ METRICS = {
 }
 METRICS_CACHE_MAX = 5
 
+
 def get_metrics():
     global METRICS
 
@@ -68,11 +69,13 @@ def get_metrics():
 
     return METRICS
 
+
 def metric_of(name):
     curr_metrics = get_metrics()
     if name in curr_metrics['data']:
         return curr_metrics['data'][name]
     return 0
+
 
 def metric_init(lparams):
     global descriptors, PARAMS
@@ -88,7 +91,7 @@ def metric_init(lparams):
         'value_type': 'uint',
         'format': '%u',
         'units': 'XXX',
-        'slope': 'both', # zero|positive|negative|both
+        'slope': 'both',  # zero|positive|negative|both
         'description': 'XXX',
         'groups': PARAMS['type'],
     }
@@ -243,6 +246,7 @@ def metric_init(lparams):
             descriptors.append(_qd)
 
     return descriptors
+
 
 def metric_cleanup():
     pass

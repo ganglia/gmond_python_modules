@@ -40,6 +40,7 @@ METRICS = {
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
@@ -75,12 +76,13 @@ def get_metrics():
 
     return [METRICS, LAST_METRICS]
 
+
 def get_value(name):
     """Return a value for the requested metric"""
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         result = metrics['data'][name]
     except StandardError:
@@ -96,7 +98,7 @@ def get_delta(name):
     [curr_metrics, last_metrics] = get_metrics()
 
     # get delta
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         delta = float(curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
@@ -138,7 +140,7 @@ def metric_init(lparams):
         'value_type'  : 'float',
         'format'      : '%f',
         'units'       : 'XXX',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'conntrack',
         }
@@ -245,7 +247,7 @@ def metric_init(lparams):
                 "call_back"  : get_delta,
                 "units"      : "ops/s",
                 "description": "",
-                })) 
+                }))
 
     return descriptors
 

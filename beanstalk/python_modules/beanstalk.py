@@ -4,14 +4,18 @@ import beanstalkc
 
 HOST='localhost'
 PORT=14711
+
+
 def stat_handler(name):
     bean=beanstalkc.Connection(host=HOST,port=PORT)
     return bean.stats()[name]
-    
+
+
 def tube_stat_handler(name):
     bean=beanstalkc.Connection(host=HOST,port=PORT)
     return bean.stats_tube(name.split('_')[0])[name.split('_')[1]]
-    
+
+
 def metric_init(params):
     global descriptors
 
@@ -88,7 +92,7 @@ def metric_init(params):
             'description': 'Number of Beanstalkd Burries',
             'groups': 'beanstalkd'}
         ]
-        
+
     #now get all the tubes
     bean=beanstalkc.Connection(host=HOST,port=PORT)
     tubes=bean.tubes()
@@ -143,8 +147,9 @@ def metric_init(params):
             'format': '%u',
             'description': 'Current Number of Jobs Waiting ('+tube+')',
             'groups': 'beanstalkd'})
-    
+
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

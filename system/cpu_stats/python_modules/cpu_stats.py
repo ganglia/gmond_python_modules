@@ -27,13 +27,13 @@ softirq_pos = {
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
-
-
 stat_file = "/proc/stat"
 
 ###############################################################################
 #
 ###############################################################################
+
+
 def get_metrics():
     """Return all metrics"""
 
@@ -43,7 +43,7 @@ def get_metrics():
 
 	try:
 	    file = open(stat_file, 'r')
-    
+
 	except IOError:
 	    return 0
 
@@ -70,7 +70,7 @@ def get_value(name):
 
     NAME_PREFIX="cpu_"
 
-    name = name.replace(NAME_PREFIX,"") # remove prefix from name
+    name = name.replace(NAME_PREFIX,"")  # remove prefix from name
 
     try:
         result = metrics['data'][name][0]
@@ -88,7 +88,7 @@ def get_delta(name):
 
     NAME_PREFIX="cpu_"
 
-    name = name.replace(NAME_PREFIX,"") # remove prefix from name
+    name = name.replace(NAME_PREFIX,"")  # remove prefix from name
 
     if name == "procs_created":
       name = "processes"
@@ -99,9 +99,10 @@ def get_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0      
+      delta = 0.0
 
     return delta
+
 
 ##############################################################################
 # SoftIRQ has multiple values which are defined in a dictionary at the top
@@ -114,7 +115,7 @@ def get_softirq_delta(name):
 
     NAME_PREFIX="softirq_"
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
 
     index = softirq_pos[name]
 
@@ -124,10 +125,9 @@ def get_softirq_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0      
+      delta = 0.0
 
     return delta
-
 
 
 def create_desc(skel, prop):
@@ -135,6 +135,7 @@ def create_desc(skel, prop):
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -149,7 +150,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.0f',
         'units'       : 'XXX',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : '',
         'groups'      : 'cpu',
         }
@@ -255,15 +256,15 @@ def metric_init(params):
                 "call_back"   : get_softirq_delta
                 }))
 
-
     # We need a metric_map that maps metric_name to the index in /proc/meminfo
     metric_map = {}
-    
+
     for d in descriptors:
 	metric_name = d['name']
         metric_map[metric_name] = { "name": d['orig_name'], "units": d['units'] }
-        
+
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

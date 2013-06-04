@@ -16,7 +16,8 @@ stats_files = [ "/proc/net/netstat", "/proc/net/snmp" ]
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
-stats_pos = {} 
+stats_pos = {}
+
 
 def get_metrics():
     """Return all metrics"""
@@ -30,10 +31,10 @@ def get_metrics():
 	for file in stats_files:
 	    try:
 		file = open(file, 'r')
-	
+
 	    except IOError:
 		return 0
-    
+
 	    # convert to dict
 	    metrics = {}
 	    for line in file:
@@ -66,7 +67,7 @@ def get_value(name):
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
 
     try:
         result = metrics['data'][name]
@@ -92,7 +93,7 @@ def get_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0      
+      delta = 0.0
 
     return delta
 
@@ -111,6 +112,7 @@ def get_tcploss_percentage(name):
       pct = 0.0
 
     return pct
+
 
 def get_tcpattemptfail_percentage(name):
 
@@ -150,6 +152,7 @@ def create_desc(skel, prop):
         d[k] = v
     return d
 
+
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
 
@@ -162,7 +165,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.5f',
         'units'       : 'count/s',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'XXX',
         }
@@ -175,25 +178,25 @@ def metric_init(params):
     for file in stats_files:
 	try:
 	    file = open(file, 'r')
-    
+
 	except IOError:
 	    return 0
-	
+
 	# Find mapping
 	for line in file:
-	    # Lines with 
+	    # Lines with
 	    if not re.match("(.*): [0-9]", line):
 		count = 0
 		mapping = re.split("\s+", line)
 		metric_group = mapping[0].replace(":", "").lower()
 		stats_pos[metric_group] = dict()
 		for metric in mapping:
-		    # Skip first 
+		    # Skip first
 		    if count > 0 and metric != "":
 			lowercase_metric = metric.lower()
 			stats_pos[metric_group][count] = lowercase_metric
 		    count += 1
-    
+
 	file.close()
 
     for group in stats_pos:
@@ -220,7 +223,6 @@ def metric_init(params):
         'groups'      : 'tcpext'
 	}))
 
-
     descriptors.append(create_desc(Desc_Skel, {
 	"name"       : "tcp_retrans_percentage",
 	"call_back"  : get_retrans_percentage,
@@ -230,6 +232,7 @@ def metric_init(params):
 	}))
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

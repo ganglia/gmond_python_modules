@@ -14,12 +14,14 @@ import re
 descriptors = list()
 Desc_Skel   = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
 Debug = False
+
 
 def dprint(f, *v):
     if Debug:
         print >>sys.stderr, "DEBUG: "+f % v
+
 
 def floatable(str):
     try:
@@ -27,6 +29,7 @@ def floatable(str):
         return True
     except:
         return False
+
 
 class UpdateMetricThread(threading.Thread):
 
@@ -75,7 +78,7 @@ class UpdateMetricThread(threading.Thread):
 
     def update_metric(self):
         status_output = timeout_command(self.status, self.timeout)
-        status_output += timeout_command(self.memory_stats, self.timeout)[-1:] # to get last line of memory output
+        status_output += timeout_command(self.memory_stats, self.timeout)[-1:]  # to get last line of memory output
         dprint("%s", status_output)
         for line in status_output:
           for (name,regex) in self.status_regex.iteritems():
@@ -93,6 +96,7 @@ class UpdateMetricThread(threading.Thread):
             _Lock.release()
         return val
 
+
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, Debug
 
@@ -109,7 +113,7 @@ def metric_init(params):
         'value_type'  : 'uint',
         'format'      : '%u',
         'units'       : 'XXX',
-        'slope'       : 'XXX', # zero|positive|negative|both
+        'slope'       : 'XXX',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'passenger',
         }
@@ -168,17 +172,21 @@ def metric_init(params):
 
     return descriptors
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
 
+
 def metric_cleanup():
     _Worker_Thread.shutdown()
+
 
 def timeout_command(command, timeout):
     """call shell-command and either return its output or kill it

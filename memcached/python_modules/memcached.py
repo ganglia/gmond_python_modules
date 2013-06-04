@@ -12,12 +12,14 @@ import select
 descriptors = list()
 Desc_Skel   = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
 Debug = False
+
 
 def dprint(f, *v):
     if Debug:
         print >>sys.stderr, "DEBUG: "+f % v
+
 
 def floatable(str):
     try:
@@ -25,6 +27,7 @@ def floatable(str):
         return True
     except:
         return False
+
 
 class UpdateMetricThread(threading.Thread):
 
@@ -117,6 +120,7 @@ class UpdateMetricThread(threading.Thread):
             _Lock.release()
         return val
 
+
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, Debug
 
@@ -140,7 +144,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.0f',
         'units'       : 'XXX',
-        'slope'       : 'XXX', # zero|positive|negative|both
+        'slope'       : 'XXX',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : params["type"],
         }
@@ -301,8 +305,8 @@ def metric_init(params):
                     "description": "Number of items that have been deleted and not found",
                     }))
 
-
     return descriptors
+
 
 def create_desc(skel, prop):
     d = skel.copy()
@@ -310,8 +314,10 @@ def create_desc(skel, prop):
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
+
 
 def metric_cleanup():
     _Worker_Thread.shutdown()

@@ -19,7 +19,7 @@ buddyinfo_file = "/proc/buddyinfo"
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
-stats_pos = {} 
+stats_pos = {}
 
 stats_pos = {
   '0004k' : 4,
@@ -36,6 +36,7 @@ stats_pos = {
 }
 
 zones = []
+
 
 def get_node_zones():
     """Return all zones metrics"""
@@ -64,7 +65,7 @@ def get_metrics():
 
 	try:
 	    file = open(buddyinfo_file, 'r')
-    
+
 	except IOError:
 	    return 0
 
@@ -79,7 +80,6 @@ def get_metrics():
 		pos = stats_pos[item]
 		metric_name = "node" + node_id + "_" + zone + "_" + item
 		values[metric_name] = metrics[pos]
-		
 
 	file.close
         # update cache
@@ -88,7 +88,7 @@ def get_metrics():
             'time': time.time(),
             'data': values
         }
-	
+
     return [METRICS]
 
 
@@ -98,7 +98,7 @@ def get_value(name):
     metrics = get_metrics()[0]
 
     prefix_length = len(NAME_PREFIX) + 1
-    name = name[prefix_length:] # remove prefix from name
+    name = name[prefix_length:]  # remove prefix from name
     try:
         result = metrics['data'][name]
     except StandardError:
@@ -112,6 +112,7 @@ def create_desc(skel, prop):
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -127,7 +128,7 @@ def metric_init(params):
         'value_type'  : 'uint',
         'format'      : '%d',
         'units'       : 'segments',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'mem_fragmentation',
         }
@@ -140,6 +141,7 @@ def metric_init(params):
 		    }))
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

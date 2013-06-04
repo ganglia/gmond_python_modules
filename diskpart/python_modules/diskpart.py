@@ -10,7 +10,8 @@ descriptors = list()
 mount_points = list()
 Desc_Skel   = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
+
 
 class UpdateMetricThread(threading.Thread):
 
@@ -55,7 +56,6 @@ class UpdateMetricThread(threading.Thread):
             self.metric[ part+"-inode-total" ] = st.f_files
             self.metric[ part+"-inode-used"  ] = st.f_files - st.f_favail
 
-
     def metric_of(self, name):
         val = 0
         if name in self.metric:
@@ -64,12 +64,14 @@ class UpdateMetricThread(threading.Thread):
             _Lock.release()
         return val
 
+
 def is_remotefs(dev, type):
     if dev.find(":") >= 0:
         return True
     elif dev.startswith("//") and (type == "smbfs" or type == "cifs"):
         return True
     return False
+
 
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, mount_points
@@ -107,7 +109,7 @@ def metric_init(params):
         elif opt.startswith('ro'):
             continue
         elif not dev.startswith('/dev/') \
-          and not (mtp == "/" and fstype == "tmpfs"): # for netboot
+          and not (mtp == "/" and fstype == "tmpfs"):  # for netboot
             continue;
 
         if mtp == "/":
@@ -147,14 +149,17 @@ def metric_init(params):
 
     return descriptors
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
+
 
 def metric_cleanup():
     _Worker_Thread.shutdown()
@@ -175,4 +180,3 @@ if __name__ == '__main__':
     except:
         print sys.exc_info()[0]
         raise
-

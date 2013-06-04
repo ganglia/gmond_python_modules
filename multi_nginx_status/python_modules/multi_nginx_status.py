@@ -22,6 +22,7 @@ NIMETRICS = {
 LAST_NIMETRICS = {}
 NIMETRICS_CACHE_MAX = 10
 
+
 # status_request() makes the http request to the nginx status pages
 def status_request(srvname, port):
     url = 'http://' + srvname + ':' + port + '/nginx_status'
@@ -49,6 +50,7 @@ def status_request(srvname, port):
 
     return result
 
+
 # get_metrics() is the callback metric handler, is called repeatedly by gmond
 def get_metrics(name):
     global NIMETRICS,LAST_NIMETRICS
@@ -59,7 +61,7 @@ def get_metrics(name):
             srvname,port = NIPARAMS[para].split(':')
             newmetrics = status_request(srvname,port)
             metrics = dict(newmetrics, **metrics)
-                        
+
         LAST_NIMETRICS = dict(NIMETRICS)
         NIMETRICS = {
             'time': time.time(),
@@ -78,13 +80,15 @@ def get_metrics(name):
             return delta
 
     return NIMETRICS['data'][name]
-        
+
+
 # create_desc() builds the descriptors from passed skeleton and additional properties
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
 
 # called by metric_init() to setup the metrics
 def define_metrics(Desc_Skel, srvname, port):
@@ -135,6 +139,8 @@ def define_metrics(Desc_Skel, srvname, port):
                 }))
 
     return descriptors
+
+
 # Called once by gmond to setup the metrics.
 def metric_init(params):
     global descriptors, Desc_Skel
@@ -156,7 +162,7 @@ def metric_init(params):
         'description' : 'XXX',
         'groups'      : 'nginx',
         #'spoof_host'  : spoof_string
-        }  
+        }
 
     for para in params.keys():
         if para.startswith('server_'):

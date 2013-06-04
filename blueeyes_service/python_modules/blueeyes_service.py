@@ -75,8 +75,8 @@ def get_metrics():
         io = os.popen(PARAMS['stats_command'])
 
         # clean up
-        metrics_str = ''.join(io.readlines()).strip() # convert to string
-        metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str) # remove functions
+        metrics_str = ''.join(io.readlines()).strip()  # convert to string
+        metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str)  # remove functions
 
         # convert to flattened dict
         try:
@@ -99,7 +99,7 @@ def get_value(name):
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         result = metrics['data'][name]
     except StandardError:
@@ -115,7 +115,7 @@ def get_rate(name):
     [curr_metrics, last_metrics] = get_metrics()
 
     # get delta
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         delta = (curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
         if delta < 0:

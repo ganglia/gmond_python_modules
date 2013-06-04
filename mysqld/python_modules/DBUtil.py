@@ -29,42 +29,52 @@ pure python collections.defaultdict substitute
 try:
     from collections import defaultdict
 except:
+
     class defaultdict(dict):
+
         def __init__(self, default_factory=None, *a, **kw):
             if (default_factory is not None and
                 not hasattr(default_factory, '__call__')):
                 raise TypeError('first argument must be callable')
             dict.__init__(self, *a, **kw)
             self.default_factory = default_factory
+
         def __getitem__(self, key):
             try:
                 return dict.__getitem__(self, key)
             except KeyError:
                 return self.__missing__(key)
+
         def __missing__(self, key):
             if self.default_factory is None:
                 raise KeyError(key)
             self[key] = value = self.default_factory()
             return value
+
         def __reduce__(self):
             if self.default_factory is None:
                 args = tuple()
             else:
                 args = self.default_factory,
             return type(self), args, None, None, self.items()
+
         def copy(self):
             return self.__copy__()
+
         def __copy__(self):
             return type(self)(self.default_factory, self)
+
         def __deepcopy__(self, memo):
             import copy
             return type(self)(self.default_factory,
                               copy.deepcopy(self.items()))
+
         def __repr__(self):
             return 'defaultdict(%s, %s)' % (self.default_factory,
                                             dict.__repr__(self))
 
 import MySQLdb
+
 
 def longish(x):
 	if len(x):
@@ -74,7 +84,8 @@ def longish(x):
 			return longish(x[:-1])
 	else:
 		raise ValueError
-		
+
+
 def hexlongish(x):
 	if len(x):
 		try:
@@ -84,6 +95,7 @@ def hexlongish(x):
 	else:
 		raise ValueError
 
+
 def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 	def sumof(status):
 		def new(*idxs):
@@ -92,7 +104,7 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 
 	innodb_status = defaultdict(int)
 	innodb_status['active_transactions']
-	
+
 	for line in innodb_status_raw:
 		istatus = line.split()
 
@@ -190,13 +202,13 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 		elif "pending log writes" in line:
 			innodb_status['pending_log_writes'] = longish(istatus[0])
 			innodb_status['pending_chkp_writes'] = longish(istatus[4])
-		
+
 		elif "Log sequence number" in line:
 			if innodb_version >= 5.5:
 				innodb_status['log_bytes_written'] = longish(istatus[3])
 			else:
 				innodb_status['log_bytes_written'] = isum(3,4)
-		
+
 		elif "Log flushed up to" in line:
 			if innodb_version >= 5.5:
 				innodb_status['log_bytes_flushed'] = longish(istatus[4])
@@ -206,16 +218,16 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 		# BUFFER POOL AND MEMORY
 		elif "Buffer pool size" in line:
 			innodb_status['buffer_pool_pages_total'] = longish(istatus[3])
-		
+
 		elif "Free buffers" in line:
 			innodb_status['buffer_pool_pages_free'] = longish(istatus[2])
-		
+
 		elif "Database pages" in line:
 			innodb_status['buffer_pool_pages_data'] = longish(istatus[2])
-		
+
 		elif "Modified db pages" in line:
 			innodb_status['buffer_pool_pages_dirty'] = longish(istatus[3])
-		
+
 		elif "Pages read" in line and "ahead" not in line:
 				innodb_status['pages_read'] = longish(istatus[2])
 				innodb_status['pages_created'] = longish(istatus[4])
@@ -227,7 +239,7 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 			innodb_status['rows_updated'] = longish(istatus[6])
 			innodb_status['rows_deleted'] = longish(istatus[8])
 			innodb_status['rows_read'] = longish(istatus[10])
-		
+
 		elif "queries inside InnoDB" in line:
 			innodb_status['queries_inside'] = longish(istatus[0])
 			innodb_status['queries_queued'] = longish(istatus[4])
@@ -237,7 +249,7 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 	innodb_status['log_bytes_unflushed'] = innodb_status['log_bytes_written'] - innodb_status['log_bytes_flushed']
 
 	return innodb_status
-	
+
 if __name__ == '__main__':
 	from optparse import OptionParser
 
@@ -258,4 +270,3 @@ if __name__ == '__main__':
 		conn.close()
 	except MySQLdb.OperationalError, (errno, errmsg):
 		raise
-

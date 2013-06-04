@@ -26,6 +26,7 @@ NIMETRICS_CACHE_MAX = 10
 
 ipaddr = ''
 
+
 #Example of data structure:
 #{'RPA statistics': {'Site 1 RPA 1': {'Compression CPU usage': '0.00%',
 #                                       'Latency (ms)': 12,
@@ -34,7 +35,6 @@ ipaddr = ''
 #                                                                   'WAN': '432 bps'},
 #                                                   'Application (writes)': 0,
 #                                                   'Compression': 0}},
-
 def define_metrics(Desc_Skel, statsDict):
     for rpa in statsDict['RPA statistics']:
         #pprint.pprint(statsDict['RPA statistics'][rpa])
@@ -92,7 +92,7 @@ def define_metrics(Desc_Skel, statsDict):
                         "description" : group + ' WAN Traffic',
                         "groups"      : 'WAN Traffic',
                         }))
-            
+
             #Define CG Lag metrics
             for lagfields in statsDict['Group'][group]['Link stats'][repname]['Replication']['Lag']:
                 lagunit = ''
@@ -108,15 +108,17 @@ def define_metrics(Desc_Skel, statsDict):
                             "description" : group + ' Lag ' + lagunit,
                             "groups"      : 'Lag',
                             }))
-                
+
     return descriptors
+
 
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
-    
+
+
 def get_metrics(name):
     global NIMETRICS,ipaddr
     # if interval since last check > NIMETRICS_CACHE_MAX get metrics again
@@ -169,12 +171,12 @@ def get_metrics(name):
                         minindex = protimelist.index('min')
                         protectmins = protectmins + int(protimelist[int(minindex) -1])
                     metrics[group + '_Protection_Window'] = float(protectmins)
-                                                     
+
             #CG Lag and WAN stats are in the Link stats section
             for repname in rawmetrics['Group'][group]['Link stats']:
                 #Get CG WAN metrics (remove 'Mbps' from end + convert to float and then bits)
                 metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
-                
+
                 #Get CG Lag metrics
                 for lagfields in rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag']:
                     if 'Data' in lagfields:
@@ -190,7 +192,7 @@ def get_metrics(name):
                         elif 'GB' in unitstr:
                             amount = amount * 1024 * 1024 * 1024
                         metrics[group + '_Lag_' + lagfields] = amount
-                        
+
                     elif 'Time' in lagfields:
                         #Strip 'sec' from value, convert to float.
                         lagtime = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields][:-3])
@@ -198,7 +200,7 @@ def get_metrics(name):
                     else:
                         #Writes Lag
                         metrics[group + '_Lag_' + lagfields] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag'][lagfields])
-                        
+
         NIMETRICS = {
             'time': time.time(),
             'data': metrics
@@ -206,8 +208,7 @@ def get_metrics(name):
     else:
         metrics = NIMETRICS['data']
     return metrics[name]
-    
-    
+
 
 def metric_init(params):
     global descriptors, Desc_Skel, ipaddr
@@ -227,7 +228,7 @@ def metric_init(params):
         'description' : 'XXX',
         'groups'      : 'netiron',
         'spoof_host'  : spoof_string
-        }  
+        }
 
     sshcon = paramiko.SSHClient()
     sshcon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -245,7 +246,7 @@ def metric_init(params):
 if __name__ == '__main__':
     params = {
         'mgmtip' : '192.168.1.100',
-        
+
               }
     descriptors = metric_init(params)
     pprint.pprint(descriptors)
@@ -253,7 +254,7 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print 'value for %s is %u' % (d['name'],  v)        
+            print 'value for %s is %u' % (d['name'],  v)
         print 'Sleeping 5 seconds'
         time.sleep(5)
 #exit(0)
