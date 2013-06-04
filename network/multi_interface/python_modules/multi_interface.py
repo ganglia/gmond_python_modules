@@ -32,16 +32,18 @@ stats_tab = {
 # Where to get the stats from
 net_stats_file = "/proc/net/dev"
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
 
+
 def metric_init(params):
     global descriptors
     global INTERFACES
-    
+
 #    INTERFACES = params.get('interfaces')
     watch_interfaces = params.get('interfaces')
     excluded_interfaces = params.get('excluded_interfaces')
@@ -57,11 +59,10 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.4f',
         'units'       : '/s',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'network',
         }
-
 
     for dev in INTERFACES:
         descriptors.append(create_desc(Desc_Skel, {
@@ -84,7 +85,7 @@ def metric_init(params):
                     "units"       : "pkts/sec",
                     "description" : "receive packets dropped per sec",
                     }))
-    
+
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : "tx_bytes_" + dev,
                     "units"       : "bytes/sec",
@@ -108,18 +109,19 @@ def metric_init(params):
 
     return descriptors
 
+
 def get_interfaces(watch_interfaces, excluded_interfaces):
 	global INTERFACES
-        
+
         # check if particular interfaces have been specifieid. Watch only those
         if watch_interfaces != "":
             INTERFACES = watch_interfaces.split(" ")
-            
+
         else:
 
 	    if excluded_interfaces != "":
 		excluded_if_list = excluded_interfaces.split(" ")
-        
+
             f = open(net_stats_file, "r")
             for line in f:
                 # Find only lines with :
@@ -141,7 +143,7 @@ def get_metrics():
 
 	try:
 	    file = open(net_stats_file, 'r')
-    
+
 	except IOError:
 	    return 0
 
@@ -161,7 +163,8 @@ def get_metrics():
         }
 
     return [METRICS, LAST_METRICS]
-    
+
+
 def get_delta(name):
     """Return change over time for the requested metric"""
 
@@ -182,7 +185,7 @@ def get_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0      
+      delta = 0.0
 
     return delta
 

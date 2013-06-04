@@ -11,7 +11,8 @@ import MySQLdb
 descriptors = list()
 Desc_Skel   = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
+
 
 class UpdateMetricThread(threading.Thread):
 
@@ -71,7 +72,7 @@ class UpdateMetricThread(threading.Thread):
                     break
                 my_status[ row[0][0].lower() ] = int(row[0][1]) if row[0][1].isdigit() else row[0][1]
 
-            conn.query("show table status from oriri like 'health'") # fixme
+            conn.query("show table status from oriri like 'health'")  # fixme
             r = conn.store_result()
             row = r.fetch_row(1,1)
             my_status["innodb_free"] = float(row[0]["Data_free"])
@@ -131,6 +132,7 @@ class UpdateMetricThread(threading.Thread):
             _Lock.release()
         return val
 
+
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread
 
@@ -144,7 +146,7 @@ def metric_init(params):
         "time_max"    : 60,
         "value_type"  : "uint",
         "units"       : "XXX",
-        "slope"       : "XXX", # zero|positive|negative|both
+        "slope"       : "XXX",  # zero|positive|negative|both
         "format"      : "%d",
         "description" : "XXX",
         "groups"      : "mysql",
@@ -276,8 +278,8 @@ def metric_init(params):
                 "name"       : "my_tmp_table_on_memory",
                 "description": "tmp table on memory ratio", }));
 
-
     return descriptors
+
 
 def create_desc(skel, prop):
     d = skel.copy()
@@ -285,8 +287,10 @@ def create_desc(skel, prop):
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
+
 
 def metric_cleanup():
     _Worker_Thread.shutdown()

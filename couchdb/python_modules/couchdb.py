@@ -16,6 +16,7 @@ logging.basicConfig(level=logging.ERROR)
 
 _Worker_Thread = None
 
+
 class UpdateCouchdbThread(threading.Thread):
 
     def __init__(self, params):
@@ -144,6 +145,7 @@ class UpdateCouchdbThread(threading.Thread):
             logging.warning('failed to fetch ' + name)
             return 0
 
+
 def metric_init(params):
     logging.debug('init: ' + str(params))
     global _Worker_Thread
@@ -267,13 +269,16 @@ def metric_init(params):
 
     return descriptors
 
+
 def metric_of(name):
     global _Worker_Thread
     return _Worker_Thread.metric_of(name)
 
+
 def setting_of(name):
     global _Worker_Thread
     return _Worker_Thread.setting_of(name)
+
 
 def metric_cleanup():
     global _Worker_Thread

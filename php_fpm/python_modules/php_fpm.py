@@ -28,6 +28,7 @@ import urllib2
 
 logging.basicConfig(level=logging.ERROR)
 
+
 class FCGIApp(flup.client.fcgi_app.FCGIApp):
     ### HACK: reduce the timeout to 2 seconds
     def _getConnection(self):
@@ -155,6 +156,7 @@ class FCGIApp(flup.client.fcgi_app.FCGIApp):
         return [result]
 
 _Worker_Thread = None
+
 
 class UpdatePhpFpmThread(threading.Thread):
 
@@ -330,6 +332,7 @@ class UpdatePhpFpmThread(threading.Thread):
             logging.warning('failed to fetch ' + name)
             return 0
 
+
 def _create_descriptors(params):
     METRIC_DEFAULTS = {
         'time_max': 60,
@@ -399,6 +402,7 @@ def _create_descriptors(params):
 
     return descriptors
 
+
 def metric_init(params):
     logging.debug('init: ' + str(params))
     global _Worker_Thread
@@ -420,9 +424,11 @@ def metric_of(name):
     global _Worker_Thread
     return _Worker_Thread.metric_of(name)
 
+
 def setting_of(name):
     global _Worker_Thread
     return _Worker_Thread.setting_of(name)
+
 
 def metric_cleanup():
     global _Worker_Thread

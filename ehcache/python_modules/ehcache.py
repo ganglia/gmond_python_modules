@@ -39,10 +39,11 @@ NAME = PORT
 MAX_UPDATE_TIME = 15
 JMXSH = '/usr/share/java/jmxsh.jar'
 
+
 def update_stats():
 	logging.debug('updating stats')
 	global last_update, stats, last_val
-	
+
 	cur_time = time.time()
 
 	if cur_time - last_update < MAX_UPDATE_TIME:
@@ -59,7 +60,7 @@ def update_stats():
 		sh += 'puts "' + name + '_miss_count: [jmx_get -m ' + _mbean + mbean_name + ' CacheMissCount]"\n'
 
 	#logging.debug(sh)
-	
+
 	try:
 		# run jmxsh.jar with the temp file as a script
 		cmd = "java -jar " + JMXSH + " -q"
@@ -105,6 +106,7 @@ def update_stats():
 	last_update = cur_time
 	return True
 
+
 def get_stat(name):
 	logging.debug('getting stat: ' + name)
 
@@ -125,6 +127,7 @@ def get_stat(name):
 	else:
 		return 0
 
+
 def metric_init(params):
 	global descriptors
 	global METRICS,HOST,PORT,NAME
@@ -135,7 +138,7 @@ def metric_init(params):
 		HOST = params.pop('host')
 		PORT = params.pop('port')
 		NAME = params.pop('name')
-		
+
 	except:
 		logging.warning('Incorrect parameters')
 
@@ -176,6 +179,7 @@ def metric_init(params):
 
 	return descriptors
 
+
 def metric_cleanup():
 	logging.shutdown()
 	# pass
@@ -204,7 +208,7 @@ if __name__ == '__main__':
 	for name in _param:
 		params[name] = _val[i]
 		i += 1
-	
+
 	metric_init(params)
 
 	if options.test:
@@ -227,4 +231,3 @@ if __name__ == '__main__':
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
 				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 			os.system(cmd)
-

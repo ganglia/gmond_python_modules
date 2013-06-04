@@ -1,0 +1,5 @@
+[pep8]
+# E203 whitespace before ':'
+# W191 indentation contains tabs
+ignore = E203,W191
+exclude=./gpu/nvidia/nvidia-ml-py-3.295.00

@@ -57,10 +57,11 @@ MAX_UPDATE_TIME = 15
 
 #SCOREBOARD_KEY = ('_', 'S', 'R', 'W', 'K', 'D', 'C', 'L', 'G', 'I', '.')
 
+
 def update_stats():
 	logging.debug('updating stats')
 	global last_update, httpd_stats, httpd_stats_last
-	
+
 	cur_time = time.time()
 
 	if cur_time - last_update < MAX_UPDATE_TIME:
@@ -148,6 +149,7 @@ def update_stats():
 
 	return True
 
+
 def update_server_stats():
 	logging.debug('updating server stats')
 	global last_update_server, server_stats
@@ -227,11 +229,11 @@ def update_server_stats():
 			if len(line) == 2:
 				server_stats[key] = int(line[1])
 
-
 	logging.debug('success refreshing server stats')
 	logging.debug('server_stats: ' + str(server_stats))
 
 	return True
+
 
 def get_stat(name):
 	logging.debug('getting stat: ' + name)
@@ -252,6 +254,7 @@ def get_stat(name):
 	else:
 		return 0
 
+
 def get_server_stat(name):
 	logging.debug('getting server stat: ' + name)
 
@@ -271,19 +274,20 @@ def get_server_stat(name):
 	else:
 		return 0
 
+
 def metric_init(params):
 	global descriptors
 
 	global STATUS_URL, APACHE_CONF, APACHE_CTL, APACHE_BIN, APACHE_USER
 	global REPORT_EXTENDED, REPORT_PREFORK
 
-	STATUS_URL	= params.get('status_url')
-	APACHE_CONF	= params.get('apache_conf')
-	APACHE_CTL	= params.get('apache_ctl').replace('/','\/')
-	APACHE_BIN	= params.get('apache_bin').replace('/','\/')
-	APACHE_USER	= params.get('apache_user')
+	STATUS_URL  = params.get('status_url')
+	APACHE_CONF = params.get('apache_conf')
+	APACHE_CTL  = params.get('apache_ctl').replace('/','\/')
+	APACHE_BIN  = params.get('apache_bin').replace('/','\/')
+	APACHE_USER = params.get('apache_user')
 	REPORT_EXTENDED = str(params.get('get_extended', True)) == 'True'
-	REPORT_PREFORK	 = str(params.get('get_prefork', True)) == 'True'
+	REPORT_PREFORK  = str(params.get('get_prefork', True)) == 'True'
 
 	logging.debug('init: ' + str(params))
 
@@ -402,6 +406,7 @@ def metric_init(params):
 
 	return descriptors
 
+
 def metric_cleanup():
 	logging.shutdown()
 	# pass
@@ -416,7 +421,7 @@ if __name__ == '__main__':
 	parser.add_option('-a', '--apache-conf', dest='apache_conf', default='/etc/httpd/conf/httpd.conf', help='path to httpd.conf')
 	parser.add_option('-t', '--apache-ctl', dest='apache_ctl', default='/usr/sbin/apachectl', help='path to apachectl')
 	parser.add_option('-d', '--apache-bin', dest='apache_bin', default='/usr/sbin/httpd', help='path to httpd')
-	parser.add_option('-u', '--apache-user', dest='apache_user', default='apache', help='username that runs httpd')        
+	parser.add_option('-u', '--apache-user', dest='apache_user', default='apache', help='username that runs httpd')
 	parser.add_option('-e', '--extended', dest='get_extended', action='store_true', default=False)
 	parser.add_option('-p', '--prefork', dest='get_prefork', action='store_true', default=False)
 	parser.add_option('-b', '--gmetric-bin', dest='gmetric_bin', default='/usr/bin/gmetric', help='path to gmetric binary')
@@ -450,4 +455,3 @@ if __name__ == '__main__':
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
 				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 			os.system(cmd)
-

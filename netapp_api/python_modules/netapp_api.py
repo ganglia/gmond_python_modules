@@ -24,12 +24,13 @@ LAST_FASMETRICS = dict(FASMETRICS)
 #This is the minimum interval between querying the RPA for metrics
 FASMETRICS_CACHE_MAX = 10
 
+
 def get_metrics(name):
     global FASMETRICS, LAST_FASMETRICS, FASMETRICS_CACHE_MAX, params
     max_records = 10
     metrics = {}
     if (time.time() - FASMETRICS['time']) > FASMETRICS_CACHE_MAX:
-        
+
         for filer in filerdict.keys():
             s = NaServer(filerdict[filer]['ipaddr'], 1, 3)
             out = s.set_transport_type('HTTPS')
@@ -37,7 +38,7 @@ def get_metrics(name):
                 r = out.results_reason()
                 print ("Connection to filer failed: " + r + "\n")
                 sys.exit(2)
-            
+
             out = s.set_style('LOGIN')
             if (out and out.results_errno() != 0) :
                 r = out.results_reason()
@@ -66,7 +67,7 @@ def get_metrics(name):
             if(out.results_status() == "failed"):
                 print(out.results_reason() + "\n")
                 sys.exit(2)
-    
+
             iter_tag = out.child_get_string("tag")
             num_records = 1
 
@@ -83,9 +84,9 @@ def get_metrics(name):
                     sys.exit(2)
 
                 num_records = out.child_get_int("records")
-	
+
                 if(num_records > 0) :
-                    instances_list = out.child_get("instances")            
+                    instances_list = out.child_get("instances")
                     instances = instances_list.children_get()
 
                     for inst in instances:
@@ -94,9 +95,9 @@ def get_metrics(name):
                         counters = counters_list.children_get()
 
                         for counter in counters:
-                            counter_name = unicodedata.normalize('NFKD',counter.child_get_string("name")).encode('ascii','ignore')         
+                            counter_name = unicodedata.normalize('NFKD',counter.child_get_string("name")).encode('ascii','ignore')
                             counter_value = counter.child_get_string("value")
-                            counter_unit = counter.child_get_string("unit")           
+                            counter_unit = counter.child_get_string("unit")
                             metrics[filername + '_vol_' + inst_name + '_' + counter_name] = float(counter_value)
         # update cache
         LAST_FASMETRICS = dict(FASMETRICS)
@@ -105,8 +106,7 @@ def get_metrics(name):
             'data': metrics
             }
 
-
-    else: 
+    else:
         metrics = FASMETRICS['data']
     #print name
     #calculate change in values and return
@@ -122,7 +122,7 @@ def get_metrics(name):
         return delta
 
     elif 'avg_latency' in name:
-        try: 
+        try:
             #T1 and T2
             #(T2_lat - T1_lat) / (T2_ops - T1_ops)
             #Find the metric name of the base counter
@@ -143,7 +143,7 @@ def get_metrics(name):
         return delta
 
     elif 'read_latency' in name:
-        try: 
+        try:
             read_ops_name = name.replace('read_latency', 'read_ops')
             return float((FASMETRICS['data'][name] - LAST_FASMETRICS['data'][name]) / (FASMETRICS['data'][read_ops_name] -LAST_FASMETRICS['data'][read_ops_name])) / 100
         except StandardError:
@@ -159,15 +159,13 @@ def get_metrics(name):
         return delta
 
     elif 'write_latency' in name:
-        try: 
+        try:
             write_ops_name = name.replace('write_latency', 'write_ops')
             return float((FASMETRICS['data'][name] - LAST_FASMETRICS['data'][name]) / (FASMETRICS['data'][write_ops_name] -LAST_FASMETRICS['data'][write_ops_name])) / 100
         except StandardError:
             return 0
-            
 
-    return 0    
-        
+    return 0
 
 
 def create_desc(skel, prop):
@@ -175,7 +173,8 @@ def create_desc(skel, prop):
     for k,v in prop.iteritems():
         d[k] = v
     return d
-    
+
+
 def define_metrics(Desc_Skel,params):
     max_records = 10
     for filer in params.keys():
@@ -185,7 +184,7 @@ def define_metrics(Desc_Skel,params):
             r = out.results_reason()
             print ("Connection to filer failed: " + r + "\n")
             sys.exit(2)
-            
+
         out = s.set_style('LOGIN')
         if (out and out.results_errno() != 0) :
             r = out.results_reason()
@@ -214,7 +213,7 @@ def define_metrics(Desc_Skel,params):
         if(out.results_status() == "failed"):
             print(out.results_reason() + "\n")
             sys.exit(2)
-    
+
         iter_tag = out.child_get_string("tag")
         num_records = 1
         filername = params[filer]['name']
@@ -230,9 +229,9 @@ def define_metrics(Desc_Skel,params):
                 sys.exit(2)
 
             num_records = out.child_get_int("records")
-	
+
             if(num_records > 0) :
-                instances_list = out.child_get("instances")            
+                instances_list = out.child_get("instances")
                 instances = instances_list.children_get()
 
                 for inst in instances:
@@ -293,8 +292,9 @@ def define_metrics(Desc_Skel,params):
                                         "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
                                         "groups"      : "latency"
                                         }))
-                        
+
     return descriptors
+
 
 def metric_init(params):
     global descriptors,filerdict
@@ -321,7 +321,7 @@ def metric_init(params):
         'description' : 'XXX',
         'groups'      : 'netiron',
         'spoof_host'  : 'XXX',
-        }  
+        }
 
     # Run define_metrics
     descriptors = define_metrics(Desc_Skel,params)
@@ -346,6 +346,6 @@ if __name__ == '__main__':
         for d in descriptors:
             v = d['call_back'](d['name'])
             #print v
-            print 'value for %s is %.2f' % (d['name'],  v)        
+            print 'value for %s is %.2f' % (d['name'],  v)
         print 'Sleeping 5 seconds'
         time.sleep(5)

@@ -12,12 +12,14 @@ import re
 descriptors = list()
 Desc_Skel   = {}
 _Worker_Thread = None
-_Lock = threading.Lock() # synchronization lock
+_Lock = threading.Lock()  # synchronization lock
 Debug = False
+
 
 def dprint(f, *v):
     if Debug:
         print >>sys.stderr, "DEBUG: "+f % v
+
 
 class UpdateMetricThread(threading.Thread):
 
@@ -74,6 +76,7 @@ class UpdateMetricThread(threading.Thread):
             _Lock.release()
         return val
 
+
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, Debug
 
@@ -88,7 +91,7 @@ def metric_init(params):
         'value_type'  : 'uint',
         'format'      : '%d',
         'units'       : 'XXX',
-        'slope'       : 'XXX', # zero|positive|negative|both
+        'slope'       : 'XXX',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'kumofs',
         }
@@ -133,14 +136,17 @@ def metric_init(params):
 
     return descriptors
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
 
+
 def metric_of(name):
     return _Worker_Thread.metric_of(name)
+
 
 def metric_cleanup():
     _Worker_Thread.shutdown()

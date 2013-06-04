@@ -14,9 +14,11 @@ Debug = False
 last_mps_timestamp = float(0)
 last_mps_value = 0
 
+
 def dprint(f, *v):
     if Debug:
         print >>sys.stderr, "DEBUG: "+f % v
+
 
 def GetOverallMessagesPerSecond(name):
     dprint("%s", name)
@@ -50,6 +52,7 @@ def GetOverallMessagesPerSecond(name):
 
     return float(value_diff / elapsed)
 
+
 def run_cmd(arglist):
     '''Run a command and capture output.'''
 
@@ -61,11 +64,12 @@ def run_cmd(arglist):
 
     return (p.returncode, output)
 
+
 def metric_init(params):
     '''Create the metric definition dictionary object for each metric.'''
 
     global descriptors
-    
+
     d1 = {
         'name': 'scribe_overall_messages_per_second',
         'call_back': GetOverallMessagesPerSecond,
@@ -79,7 +83,8 @@ def metric_init(params):
         }
 
     descriptors = [d1]
-    return descriptors    
+    return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''
@@ -87,10 +92,10 @@ def metric_cleanup():
 
 if __name__ == '__main__':
     metric_init({})
-    
+
     # setup last timestamp as 10 seconds ago
     last_mps_timestamp = time.time() - 10
-    
+
     for d in descriptors:
         v = d['call_back'](d['name'])
         print '%s: %s' % (d['name'],  v)

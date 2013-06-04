@@ -33,6 +33,7 @@ oidDict = {
     'ifOutErrors'    : (1,3,6,1,2,1,2,2,1,20),
     }
 
+
 def get_metrics():
     """Return all metrics"""
 
@@ -57,6 +58,7 @@ def get_metrics():
 
     return [NIMETRICS, LAST_NIMETRICS]
 
+
 def get_delta(name):
     """Return change over time for the requested metric"""
 
@@ -73,9 +75,10 @@ def get_delta(name):
 
     return delta
 
+
 # Separate routine to perform SNMP queries and returns table (dict)
 def runSnmp(oidDict,ip):
-    
+
     # cmdgen only takes tuples, oid strings don't work
 
 #    'ifIndex'       : (1,3,6,1,2,1,2,2,1,1),
@@ -113,18 +116,19 @@ def runSnmp(oidDict,ip):
         else:
             return(varBindTable)
 
-def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based on the alias name
+
+def buildDict(oidDict,t,switch):  # passed a list of tuples, build's a dict based on the alias name
     builtdict = {}
-    
+
     for line in t:
         #        if t[t.index(line)][2][1] != '':
-        string = str(t[t.index(line)][1][1]) # this is the ifDescr 
+        string = str(t[t.index(line)][1][1])  # this is the ifDescr
         #print string
         match = re.search(r'FC port', string)
         if match and t[t.index(line)][0][1] != '':
             #alias = str(t[t.index(line)][0][1])
             index = str(t[t.index(line)][0][1])
-            temp = str(t[t.index(line)][1][1]) #(use ifDescr)
+            temp = str(t[t.index(line)][1][1])  # (use ifDescr)
             #lowercase the name, change spaces + '/' to '_'
             name = ((temp.lower()).replace(' ','_')).replace('/','_')
             inoct = str(t[t.index(line)][2][1])
@@ -139,9 +143,10 @@ def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based
             builtdict[switch+'_'+name+'_inerrors'] = int(inerrors)
             outerrors = str(t[t.index(line)][6][1])
             builtdict[switch+'_'+name+'_outerrors'] = int(outerrors)
-                         
+
     #pprint.pprint(builtdict)
     return builtdict
+
 
 # define_metrics will run an snmp query on an ipaddr, find interfaces, build descriptors and set spoof_host
 # define_metrics is called from metric_init
@@ -202,8 +207,8 @@ def define_metrics(Desc_Skel, ipaddr, switch):
                         "spoof_host"  : spoof_string,
                         }))
 
-
     return descriptors
+
 
 def metric_init(params):
     global descriptors, Desc_Skel, _Worker_Thread, Debug, newdict
@@ -225,9 +230,9 @@ def metric_init(params):
         'slope'       : 'both',
         'description' : 'XXX',
         'groups'      : 'switch',
-        }  
+        }
 
-    # Find all the switch's passed in params    
+    # Find all the switch's passed in params
     for para in params.keys():
          if para.startswith('switch_'):
              #Get ipaddr + name of switchs from params
@@ -236,6 +241,7 @@ def metric_init(params):
              descriptors = define_metrics(Desc_Skel, ipaddr, name)
     #Return the descriptors back to gmond
     return descriptors
+
 
 def create_desc(skel, prop):
     d = skel.copy()
@@ -259,7 +265,7 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print 'value for %s is %u' % (d['name'],  v)        
+            print 'value for %s is %u' % (d['name'],  v)
         print 'Sleeping 5 seconds'
         time.sleep(5)
 #exit(0)

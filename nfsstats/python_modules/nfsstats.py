@@ -8,6 +8,7 @@ import syslog
 import sys
 import string
 
+
 def test_proc3( p_file ):
 
     """
@@ -102,6 +103,7 @@ configtable = [
     }
 ]
 
+
 #  Ganglia will call metric_init(), which should return a dictionary for each thing that it
 #  should monitor, including the name of the callback function to get the current value.
 def metric_init(params):
@@ -143,7 +145,6 @@ def metric_init(params):
 		file_str = configtable[i]['names'][name]['file']
             else:
 		file_str = configtable[i]['file']
-		
 
             descriptors.append({
                 'name': configtable[i]['prefix'] + name,
@@ -161,7 +162,7 @@ def metric_init(params):
             })
             #  And get current value cached as previous value, for future comparisons.
             (ts, value) =  get_value(configtable[i]['prefix'] + name)
-            old_values[configtable[i]['prefix'] + name] = { 
+            old_values[configtable[i]['prefix'] + name] = {
                 'time':ts,
                 'value':value
             }
@@ -169,9 +170,11 @@ def metric_init(params):
     #  Pass ganglia the complete list of dictionaries.
     return descriptors
 
+
 #  Ganglia will call metric_cleanup() when it exits.
 def metric_cleanup():
     pass
+
 
 #  metric_init() registered this as the callback function.
 def call_back(name):
@@ -179,8 +182,8 @@ def call_back(name):
 
     #  Get new value
     (new_time, new_value) = get_value(name)
- 
-    #  Calculate rate of change 
+
+    #  Calculate rate of change
     try:
         rate = (new_value - old_values[name]['value'])/(new_time - old_values[name]['time'])
     except ZeroDivisionError:
@@ -190,6 +193,7 @@ def call_back(name):
     old_values[name]['value'] = new_value
     old_values[name]['time'] = new_time
     return rate
+
 
 def get_value(name):
     global descriptors
@@ -213,10 +217,11 @@ def get_value(name):
             sum_value = sum_value + int(f)
 
         m_value = sum_value
-    
+
     #  Return time and value.
     ts = time.time()
     return (ts, int(m_value))
+
 
 def debug(level, text):
     global verboselevel

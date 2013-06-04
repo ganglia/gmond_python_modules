@@ -124,6 +124,7 @@ PAGE_SIZE=os.sysconf('SC_PAGE_SIZE')
 
 PROCESSES = {}
 
+
 def readCpu(pid):
 	try:
 		stat = file('/proc/' + pid + '/stat', 'rt').readline().split()
@@ -136,6 +137,7 @@ def readCpu(pid):
 	except:
 		logging.warning('failed to get (' + str(pid) + ') stats')
 		return 0
+
 
 def get_pgid(proc):
 	logging.debug('getting pgid for process: ' + proc)
@@ -183,6 +185,7 @@ def get_pgid(proc):
 	else:
 		return ERROR
 
+
 def get_pgroup(ppid, pgid):
 	'''Return a list of pids having the same pgid, with the first in the list being the parent pid.'''
 	logging.debug('getting pids for ppid/pgid: ' + ppid + '/' + pgid)
@@ -206,6 +209,7 @@ def get_pgroup(ppid, pgid):
 	except:
 		logging.warning('failed getting pids')
 
+
 def get_rss(pids):
 	logging.debug('getting rss for pids')
 
@@ -224,6 +228,7 @@ def get_rss(pids):
 	rss *= PAGE_SIZE
 	return rss
 
+
 def test(params):
 	global PROCESSES, MAX_UPDATE_TIME
 
@@ -235,7 +240,7 @@ def test(params):
 
 	for proc,val in PROCESSES.items():
 		print('')
-		print(' Testing ' + proc + ': ' + val) 
+		print(' Testing ' + proc + ': ' + val)
 
 		try:
 			(ppid, pgid) = get_pgid(proc)
@@ -254,10 +259,11 @@ def test(params):
 
 	logging.debug('success testing')
 
+
 def update_stats():
 	logging.debug('updating stats')
 	global last_update, stats, last_val
-	
+
 	cur_time = time.time()
 
 	if cur_time - last_update < MAX_UPDATE_TIME:
@@ -294,7 +300,7 @@ def update_stats():
 		proc_time = 0
 		for p in pids:
 			proc_time += readCpu(p)
-		
+
 		logging.debug(' proc_time: ' + str(proc_time) + ' cpu_time: ' + str(cpu_time))
 
 		# do we have an old value to calculate with?
@@ -311,14 +317,15 @@ def update_stats():
 		last_val[proc]['proc_time'] = proc_time
 
 		#####
-		# Update Mem utilization	
+		# Update Mem utilization
 		rss = get_rss(pids)
 		stats[proc]['mem'] = rss
-	
+
 	logging.debug('success refreshing stats')
 	logging.debug('stats: ' + str(stats))
 
 	return True
+
 
 def get_stat(name):
 	logging.debug('getting stat: ' + name)
@@ -349,6 +356,7 @@ def get_stat(name):
 	else:
 		return 0
 
+
 def metric_init(params):
 	global descriptors
 	global PROCESSES
@@ -358,7 +366,7 @@ def metric_init(params):
 	PROCESSES = params
 
 	#for proc,regex in PROCESSES.items():
-		
+
 	update_stats()
 
 	descriptions = dict(
@@ -402,6 +410,7 @@ def metric_init(params):
 
 	return descriptors
 
+
 def display_proc_stat(pid):
 	try:
 		stat = file('/proc/' + pid + '/stat', 'rt').readline().split()
@@ -426,12 +435,13 @@ def display_proc_stat(pid):
 		print('failed to get /proc/' + pid + '/stat')
 		print(traceback.print_exc(file=sys.stdout))
 
+
 def display_proc_statm(pid):
 	try:
 		statm = file('/proc/' + pid + '/statm', 'rt').readline().split()
 
 		fields = [
-			'size', 'rss', 'share', 'trs', 'drs', 'lrs' ,'dt' 
+			'size', 'rss', 'share', 'trs', 'drs', 'lrs' ,'dt'
 		]
 
 		# Display them
@@ -443,6 +453,7 @@ def display_proc_statm(pid):
 	except:
 		print('failed to get /proc/' + pid + '/statm')
 		print(traceback.print_exc(file=sys.stdout))
+
 
 def metric_cleanup():
 	logging.shutdown()
@@ -480,7 +491,7 @@ if __name__ == '__main__':
 	for proc in _procs:
 		params[proc] = _val[i]
 		i += 1
-	
+
 	if options.test:
 		test(params)
 		update_stats()
@@ -505,5 +516,3 @@ if __name__ == '__main__':
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
 				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 			os.system(cmd)
-
-

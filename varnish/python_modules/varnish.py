@@ -40,6 +40,7 @@ METRICS = {
 LAST_METRICS = copy.deepcopy(METRICS)
 METRICS_CACHE_MAX = 5
 
+
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
@@ -75,12 +76,13 @@ def get_metrics():
 
     return [METRICS, LAST_METRICS]
 
+
 def get_value(name):
     """Return a value for the requested metric"""
 
     metrics = get_metrics()[0]
 
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         result = metrics['data'][name]
     except StandardError:
@@ -96,7 +98,7 @@ def get_delta(name):
     [curr_metrics, last_metrics] = get_metrics()
 
     # get delta
-    name = name[len(NAME_PREFIX):] # remove prefix from name
+    name = name[len(NAME_PREFIX):]  # remove prefix from name
     try:
         delta = float(curr_metrics['data'][name] - last_metrics['data'][name])/(curr_metrics['time'] - last_metrics['time'])
         if delta < 0:
@@ -138,7 +140,7 @@ def metric_init(lparams):
         'value_type'  : 'float',
         'format'      : '%f',
         'units'       : 'XXX',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'varnish',
         }
@@ -825,198 +827,195 @@ def metric_init(lparams):
                 }))
 
     ##############################################################################
-    
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'backend_retry',
                 "call_back"  : get_delta,
                 "units"      : "retries/s",
                 "description": "Backend conn. retry",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'dir_dns_cache_full',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "DNS director full dnscache",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'dir_dns_failed',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "DNS director failed lookups",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'dir_dns_hit',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "DNS director cached lookups hit",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'dir_dns_lookups',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "DNS director lookups",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'esi_warnings',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "ESI parse warnings (unlock)",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'fetch_1xx',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "Fetch no body (1xx)",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'fetch_204',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "Fetch no body (204)",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'fetch_304',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "Fetch no body (304)",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N total active bans",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_add',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N new bans added",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_retire',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N old bans deleted",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_obj_test',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N objects tested",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_re_test',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N regexps tested against",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_dups',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N duplicate bans removed",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_add',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N new bans added",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_dups',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N duplicate bans removed",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_obj_test',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N objects tested",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_re_test',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N regexps tested against",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_ban_retire',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N old bans deleted",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_gunzip',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "Gunzip operations",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_gzip',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "Gzip operations",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_vbc',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N struct vbc",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_waitinglist',
                 "call_back"  : get_delta,
                 "units"      : "/s",
                 "description": "N struct waitinglist",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_wrk_lqueue',
                 "call_back"  : get_value,
                 "units"      : "",
                 "description": "work request queue length",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'n_wrk_queued',
                 "call_back"  : get_value,
                 "units"      : "req",
                 "description": "N queued work requests",
                 }))
-    
+
     descriptors.append( create_desc(Desc_Skel, {
                 "name"       : NAME_PREFIX + 'vmods',
                 "call_back"  : get_value,
                 "units"      : "vmods",
                 "description": "Loaded VMODs",
                 }))
-
-
 
     return descriptors
 

@@ -3,7 +3,8 @@ import sys
 
 entropy_file = "/proc/sys/kernel/random/entropy_avail"
 
-def metrics_handler(name):  
+
+def metrics_handler(name):
     try:
         f = open(entropy_file, 'r')
 
@@ -14,6 +15,7 @@ def metrics_handler(name):
         line = l
 
     return int(line)
+
 
 def metric_init(params):
     global descriptors, node_id
@@ -31,6 +33,7 @@ def metric_init(params):
     descriptors = [dict]
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

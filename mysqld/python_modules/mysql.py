@@ -65,6 +65,7 @@ REPORT_SLAVE  = True
 
 MAX_UPDATE_TIME = 15
 
+
 def update_stats(get_innodb=True, get_master=True, get_slave=True):
 	"""
 
@@ -115,14 +116,14 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		for (k,v) in cursor:
 			global_status[k.lower()] = v
 		cursor.close()
-		
+
 		cursor = conn.cursor(MySQLdb.cursors.Cursor)
 		cursor.execute("SELECT PLUGIN_STATUS, PLUGIN_VERSION FROM `information_schema`.Plugins WHERE PLUGIN_NAME LIKE '%innodb%' AND PLUGIN_TYPE LIKE 'STORAGE ENGINE';")
-		
+
 		have_innodb = False
 		innodb_version = 1.0
 		row = cursor.fetchone()
-		
+
 		if row[0] == "ACTIVE":
 			have_innodb = True
 			innodb_version = row[1]
@@ -328,9 +329,9 @@ def update_stats(get_innodb=True, get_master=True, get_slave=True):
 		mysql_stats['slave_relay_log_pos'] = slave_status['relay_log_pos']
 		mysql_stats['slave_relay_log_space'] = slave_status['relay_log_space']
 
-
 	logging.debug('success updating stats')
 	logging.debug('mysql_stats: ' + str(mysql_stats))
+
 
 def get_stat(name):
 	logging.info("getting stat: %s" % name)
@@ -357,6 +358,7 @@ def get_stat(name):
 			return 0
 	else:
 		return 0
+
 
 def metric_init(params):
 	global descriptors
@@ -396,121 +398,121 @@ def metric_init(params):
 			'description': 'The number of connections that were aborted because the client died without closing the connection properly',
 			'value_type': 'float',
 			'units': 'clients',
-		}, 
+		},
 
 		aborted_connects = {
 			'description': 'The number of failed attempts to connect to the MySQL server',
 			'value_type': 'float',
 			'units': 'conns',
-		}, 
+		},
 
 		binlog_cache_disk_use = {
 			'description': 'The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction',
 			'value_type': 'float',
 			'units': 'txns',
-		}, 
+		},
 
 		binlog_cache_use = {
 			'description': ' The number of transactions that used the temporary binary log cache',
 			'value_type': 'float',
 			'units': 'txns',
-		}, 
+		},
 
 		bytes_received = {
 			'description': 'The number of bytes received from all clients',
 			'value_type': 'float',
 			'units': 'bytes',
-		}, 
+		},
 
 		bytes_sent = {
 			'description': ' The number of bytes sent to all clients',
 			'value_type': 'float',
 			'units': 'bytes',
-		}, 
+		},
 
 		com_delete = {
 			'description': 'The number of DELETE statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_delete_multi = {
 			'description': 'The number of multi-table DELETE statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_insert = {
 			'description': 'The number of INSERT statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_insert_select = {
 			'description': 'The number of INSERT ... SELECT statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_load = {
 			'description': 'The number of LOAD statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_replace = {
 			'description': 'The number of REPLACE statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_replace_select = {
 			'description': 'The number of REPLACE ... SELECT statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_select = {
 			'description': 'The number of SELECT statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_update = {
 			'description': 'The number of UPDATE statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		com_update_multi = {
 			'description': 'The number of multi-table UPDATE statements',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		connections = {
 			'description': 'The number of connection attempts (successful or not) to the MySQL server',
 			'value_type': 'float',
 			'units': 'conns',
-		}, 
+		},
 
 		created_tmp_disk_tables = {
 			'description': 'The number of temporary tables on disk created automatically by the server while executing statements',
 			'value_type': 'float',
 			'units': 'tables',
-		}, 
+		},
 
 		created_tmp_files = {
 			'description': 'The number of temporary files mysqld has created',
 			'value_type': 'float',
 			'units': 'files',
-		}, 
+		},
 
 		created_tmp_tables = {
 			'description': 'The number of in-memory temporary tables created automatically by the server while executing statement',
 			'value_type': 'float',
 			'units': 'tables',
-		}, 
+		},
 
 		#TODO in graphs: key_read_cache_miss_rate = key_reads / key_read_requests
 
@@ -518,224 +520,224 @@ def metric_init(params):
 			'description': 'The number of requests to read a key block from the cache',
 			'value_type': 'float',
 			'units': 'reqs',
-		}, 
+		},
 
 		key_reads = {
 			'description': 'The number of physical reads of a key block from disk',
 			'value_type': 'float',
 			'units': 'reads',
-		}, 
+		},
 
 		key_write_requests = {
 			'description': 'The number of requests to write a key block to the cache',
 			'value_type': 'float',
 			'units': 'reqs',
-		}, 
+		},
 
 		key_writes = {
 			'description': 'The number of physical writes of a key block to disk',
 			'value_type': 'float',
 			'units': 'writes',
-		}, 
+		},
 
 		max_used_connections = {
 			'description': 'The maximum number of connections that have been in use simultaneously since the server started',
 			'units': 'conns',
 			'slope': 'both',
-		}, 
+		},
 
 		open_files = {
 			'description': 'The number of files that are open',
 			'units': 'files',
 			'slope': 'both',
-		}, 
+		},
 
 		open_tables = {
 			'description': 'The number of tables that are open',
 			'units': 'tables',
 			'slope': 'both',
-		}, 
+		},
 
-		# If Opened_tables is big, your table_cache value is probably too small. 
+		# If Opened_tables is big, your table_cache value is probably too small.
 		opened_tables = {
 			'description': 'The number of tables that have been opened',
 			'value_type': 'float',
 			'units': 'tables',
-		}, 
+		},
 
 		qcache_free_blocks = {
 			'description': 'The number of free memory blocks in the query cache',
 			'units': 'blocks',
 			'slope': 'both',
-		}, 
+		},
 
 		qcache_free_memory = {
 			'description': 'The amount of free memory for the query cache',
 			'units': 'bytes',
 			'slope': 'both',
-		}, 
+		},
 
 		qcache_hits = {
 			'description': 'The number of query cache hits',
 			'value_type': 'float',
 			'units': 'hits',
-		}, 
+		},
 
 		qcache_inserts = {
 			'description': 'The number of queries added to the query cache',
 			'value_type': 'float',
 			'units': 'queries',
-		}, 
+		},
 
 		qcache_lowmem_prunes = {
 			'description': 'The number of queries that were deleted from the query cache because of low memory',
 			'value_type': 'float',
 			'units': 'queries',
-		}, 
+		},
 
 		qcache_not_cached = {
 			'description': 'The number of non-cached queries (not cacheable, or not cached due to the query_cache_type setting)',
 			'value_type': 'float',
 			'units': 'queries',
-		}, 
+		},
 
 		qcache_queries_in_cache = {
 			'description': 'The number of queries registered in the query cache',
 			'value_type': 'float',
 			'units': 'queries',
-		}, 
+		},
 
 		qcache_total_blocks = {
 			'description': 'The total number of blocks in the query cache',
 			'units': 'blocks',
-		}, 
+		},
 
 		questions = {
 			'description': 'The number of statements that clients have sent to the server',
 			'value_type': 'float',
 			'units': 'stmts',
-		}, 
+		},
 
 		# If this value is not 0, you should carefully check the indexes of your tables.
 		select_full_join = {
 			'description': 'The number of joins that perform table scans because they do not use indexes',
 			'value_type': 'float',
 			'units': 'joins',
-		}, 
+		},
 
 		select_full_range_join = {
 			'description': 'The number of joins that used a range search on a reference table',
 			'value_type': 'float',
 			'units': 'joins',
-		}, 
+		},
 
 		select_range = {
 			'description': 'The number of joins that used ranges on the first table',
 			'value_type': 'float',
 			'units': 'joins',
-		}, 
+		},
 
 		# If this is not 0, you should carefully check the indexes of your tables.
 		select_range_check = {
 			'description': 'The number of joins without keys that check for key usage after each row',
 			'value_type': 'float',
 			'units': 'joins',
-		}, 
+		},
 
 		select_scan = {
 			'description': 'The number of joins that did a full scan of the first table',
 			'value_type': 'float',
 			'units': 'joins',
-		}, 
+		},
 
 		slave_open_temp_tables = {
 			'description': 'The number of temporary tables that the slave SQL thread currently has open',
 			'value_type': 'float',
 			'units': 'tables',
 			'slope': 'both',
-		}, 
+		},
 
 		slave_retried_transactions = {
 			'description': 'The total number of times since startup that the replication slave SQL thread has retried transactions',
 			'value_type': 'float',
 			'units': 'count',
-		}, 
+		},
 
 		slow_launch_threads = {
 			'description': 'The number of threads that have taken more than slow_launch_time seconds to create',
 			'value_type': 'float',
 			'units': 'threads',
-		}, 
+		},
 
 		slow_queries = {
 			'description': 'The number of queries that have taken more than long_query_time seconds',
 			'value_type': 'float',
 			'units': 'queries',
-		}, 
+		},
 
 		sort_range = {
 			'description': 'The number of sorts that were done using ranges',
 			'value_type': 'float',
 			'units': 'sorts',
-		}, 
+		},
 
 		sort_rows = {
 			'description': 'The number of sorted rows',
 			'value_type': 'float',
 			'units': 'rows',
-		}, 
+		},
 
 		sort_scan = {
 			'description': 'The number of sorts that were done by scanning the table',
 			'value_type': 'float',
 			'units': 'sorts',
-		}, 
+		},
 
 		table_locks_immediate = {
 			'description': 'The number of times that a request for a table lock could be granted immediately',
 			'value_type': 'float',
 			'units': 'count',
-		}, 
+		},
 
 		# If this is high and you have performance problems, you should first optimize your queries, and then either split your table or tables or use replication.
 		table_locks_waited = {
 			'description': 'The number of times that a request for a table lock could not be granted immediately and a wait was needed',
 			'value_type': 'float',
 			'units': 'count',
-		}, 
+		},
 
 		threads_cached = {
 			'description': 'The number of threads in the thread cache',
 			'units': 'threads',
 			'slope': 'both',
-		}, 
+		},
 
 		threads_connected = {
 			'description': 'The number of currently open connections',
 			'units': 'threads',
 			'slope': 'both',
-		}, 
+		},
 
 		#TODO in graphs: The cache miss rate can be calculated as Threads_created/Connections
 
-		# Threads_created is big, you may want to increase the thread_cache_size value. 
+		# Threads_created is big, you may want to increase the thread_cache_size value.
 		threads_created = {
 			'description': 'The number of threads created to handle connections',
 			'value_type': 'float',
 			'units': 'threads',
-		}, 
+		},
 
 		threads_running = {
 			'description': 'The number of threads that are not sleeping',
 			'units': 'threads',
 			'slope': 'both',
-		}, 
+		},
 
 		uptime = {
 			'description': 'The number of seconds that the server has been up',
 			'units': 'secs',
 			'slope': 'both',
-		}, 
+		},
 
 		version = {
 			'description': "MySQL Version",
@@ -1117,6 +1119,7 @@ def metric_init(params):
 	#logging.debug(str(descriptors))
 	return descriptors
 
+
 def metric_cleanup():
 	logging.shutdown()
 	# pass
@@ -1167,4 +1170,3 @@ if __name__ == '__main__':
 			cmd = "%s --conf=%s --value='%s' --units='%s' --type='%s' --name='%s' --slope='%s'" % \
 				(options.gmetric_bin, options.gmond_conf, v, d['units'], value_type, d['name'], d['slope'])
 			os.system(cmd)
-

@@ -53,14 +53,18 @@ def build_descriptor(name, call_back, time_max, value_type, units, slope, format
         print "Failed to build descriptor :", name, ":", str(err)
         pass
 
+
 def get_gpu_num():
     return int(nvmlDeviceGetCount())
+
 
 def gpu_num_handler(name):
     return get_gpu_num()
 
+
 def gpu_driver_version_handler(name):
     return nvmlSystemGetDriverVersion()
+
 
 def gpu_device_handler(name):
     d = find_descriptor(name)
@@ -136,6 +140,7 @@ def gpu_device_handler(name):
         print "Handler for %s not implemented, please fix in gpu_device_handler()" % metric
         os._exit(1)
 
+
 def metric_init(params):
     global descriptors
 
@@ -150,7 +155,7 @@ def metric_init(params):
 
     build_descriptor('gpu_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of GPUs', 'gpu')
     build_descriptor('gpu_driver', gpu_driver_version_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU Driver Version', 'gpu')
- 
+
     for i in range(get_gpu_num()):
         build_descriptor('gpu%s_type' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Type' % i, 'gpu')
         build_descriptor('gpu%s_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
@@ -180,6 +185,7 @@ def metric_init(params):
         build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
 
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

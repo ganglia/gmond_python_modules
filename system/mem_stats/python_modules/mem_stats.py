@@ -16,7 +16,8 @@ import re
 
 meminfo_file = "/proc/meminfo"
 
-def metrics_handler(name):  
+
+def metrics_handler(name):
     try:
         file = open(meminfo_file, 'r')
 
@@ -33,14 +34,16 @@ def metrics_handler(name):
 		value = float(parts[1]) * 1024
 	    else:
                 value = parts[1]
-	
+
     return float(value)
+
 
 def create_desc(skel, prop):
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
 
 def metric_init(params):
     global descriptors, metric_map, Desc_Skel
@@ -55,7 +58,7 @@ def metric_init(params):
         'value_type'  : 'float',
         'format'      : '%.0f',
         'units'       : 'XXX',
-        'slope'       : 'both', # zero|positive|negative|both
+        'slope'       : 'both',  # zero|positive|negative|both
         'description' : 'XXX',
         'groups'      : 'memory',
         }
@@ -349,12 +352,13 @@ def metric_init(params):
 
     # We need a metric_map that maps metric_name to the index in /proc/meminfo
     metric_map = {}
-    
+
     for d in descriptors:
 	metric_name = d['name']
         metric_map[metric_name] = { "name": d['orig_name'], "units": d['units'] }
-        
+
     return descriptors
+
 
 def metric_cleanup():
     '''Clean up the metric module.'''

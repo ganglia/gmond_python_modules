@@ -134,6 +134,7 @@ def hypervisor_getter(worker):
     global _hypervisor_name
     return _hypervisor_name
 
+
 def metric_init(params):
     global __worker__
 
@@ -207,6 +208,7 @@ def metric_init(params):
     return [instances, version, compute, hypervisor,
             run_services, reg_services]
 
+
 def metric_cleanup():
     """Clean up the metric module."""
     __worker__.shutdown()
@@ -223,4 +225,3 @@ if __name__ == '__main__':
         os._exit(1)
     finally:
         metric_cleanup()
-
