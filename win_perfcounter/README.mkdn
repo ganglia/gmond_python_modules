@@ -1,0 +1,32 @@
+win_perfcounter
+===============
+
+python module for ganglia 3.1.
+
+WARNING: This module is just proof-of-concept, it does not work.
+
+"win_perfcounter" uses ctypes and Windows API's Performance Data Helper functions in order to get perfomance counter data.
+
+http://msdn.microsoft.com/en-us/library/windows/desktop/aa373214%28v=vs.85%29.aspx
+
+Module is self-contained and does not require any third-party Python packages such as PyWin32 or WMI.
+
+What was done:
+- Implementation were tested on Windows Server 2008 R2 Standard 64 bit
+- Gmond/Cygwin 3.1.7 build for Windows was downloaded from http://tapir.sajinet.com.pe/ganglia/ganglia-3.1.7-bin.zip
+- Since Gmond build were linked with Python 2.5 module were developed for v2.5
+- Cygwin Python 2.5 was downloaded from http://mirror.mcs.anl.gov/cygwin/release/python/python-2.5.5-1.tar.bz2
+- Windows Stats were used as baseline (https://bitbucket.org/mixmastamyk/winstats)
+- Windows Stats did not work in Cygwin environment, so ctypes was monkey patched in order to do that
+- ctypes monkey patch approach was taken from pyglet library (https://github.com/adamlwgriffiths/Pyglet/blob/master/pyglet/__init__.py#L221)
+- gmond are able to load this module on Windows server
+- Python module are able to read perfomance data from two different counters
+
+TODO:
+- metric_init method should return descriptors structure
+- basically we have to implement all the glue code between win_perfcounter.pyconf and gmond API
+- write a set of tests
+
+## AUTHOR
+
+Alexey Diyan <alexey.diyan@gmail.com>
