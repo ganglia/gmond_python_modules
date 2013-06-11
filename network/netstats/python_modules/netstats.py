@@ -217,7 +217,7 @@ def metric_init(params):
 	"call_back"  : get_tcpattemptfail_percentage,
 	"description": "TCP attemptfail percentage, tcpattemptfail / insegs + outsegs",
 	"units"      : "pct",
-        'groups'      : 'tcpext'
+        'groups'      : 'tcp'
 	}))
 
 
