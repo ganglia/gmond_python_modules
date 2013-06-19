@@ -92,6 +92,7 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 
 	innodb_status = defaultdict(int)
 	innodb_status['active_transactions']
+	individual_buffer_pool_info = False
 	
 	for line in innodb_status_raw:
 		istatus = line.split()
@@ -204,19 +205,27 @@ def parse_innodb_status(innodb_status_raw, innodb_version="1.0"):
 				innodb_status['log_bytes_flushed'] = isum(4,5)
 
 		# BUFFER POOL AND MEMORY
-		elif "Buffer pool size" in line:
+		elif "INDIVIDUAL BUFFER POOL INFO" in line:
+			# individual pools section.  We only want to record the totals 
+			# rather than each individual pool clobbering the totals
+			individual_buffer_pool_info = True
+
+		elif "Buffer pool size, bytes" in line and not individual_buffer_pool_info:
+			innodb_status['buffer_pool_pages_bytes'] = longish(istatus[4])
+
+		elif "Buffer pool size" in line and not individual_buffer_pool_info:
 			innodb_status['buffer_pool_pages_total'] = longish(istatus[3])
 		
-		elif "Free buffers" in line:
+		elif "Free buffers" in line and not individual_buffer_pool_info:
 			innodb_status['buffer_pool_pages_free'] = longish(istatus[2])
 		
-		elif "Database pages" in line:
+		elif "Database pages" in line and not individual_buffer_pool_info:
 			innodb_status['buffer_pool_pages_data'] = longish(istatus[2])
 		
-		elif "Modified db pages" in line:
+		elif "Modified db pages" in line and not individual_buffer_pool_info:
 			innodb_status['buffer_pool_pages_dirty'] = longish(istatus[3])
 		
-		elif "Pages read" in line and "ahead" not in line:
+		elif "Pages read" in line and "ahead" not in line and not individual_buffer_pool_info:
 				innodb_status['pages_read'] = longish(istatus[2])
 				innodb_status['pages_created'] = longish(istatus[4])
 				innodb_status['pages_written'] = longish(istatus[6])

@@ -999,6 +999,13 @@ def metric_init(params):
 				'units': 'writes',
 			},
 
+			innodb_buffer_pool_pages_bytes = {
+				'description': "The total size of buffer pool, in bytes",
+				'value_type':'uint',
+				'units': 'bytes',
+				'slope': 'both',
+			},
+
 			innodb_buffer_pool_pages_total = {
 				'description': "The total size of buffer pool, in pages",
 				'value_type':'uint',

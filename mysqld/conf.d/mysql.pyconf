@@ -182,6 +182,10 @@ collection_group {
   }
 
   metric {
+    name = "mysql_innodb_buffer_pool_pages_bytes"
+  }
+
+  metric {
     name = "mysql_innodb_buffer_pool_pages_total"
   }
 
