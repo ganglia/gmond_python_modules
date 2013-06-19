@@ -108,6 +108,10 @@ def metric_init(params):
 
     return descriptors
 
+def metric_cleanup():
+    '''Clean up the metric module.'''
+    pass
+    
 def get_interfaces(watch_interfaces, excluded_interfaces):
 	global INTERFACES
         
