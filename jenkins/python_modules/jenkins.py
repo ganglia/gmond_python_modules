@@ -11,6 +11,7 @@ import time
 import traceback
 import urllib2
 import json
+import base64
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -26,6 +27,8 @@ class UpdateJenkinsThread(threading.Thread):
     self.settings = {}
     self.refresh_rate = 60
     self.base_url = params['base_url']
+    self.username = params['username']
+    self.apitoken = params['apitoken']
     self._metrics_lock = threading.Lock()
     self._settings_lock = threading.Lock()
 
@@ -47,12 +50,21 @@ class UpdateJenkinsThread(threading.Thread):
     self.running = False
 
   @staticmethod
-  def _get_jenkins_statistics(url):
+  def _get_jenkins_statistics(url, username, apitoken):
 
     url += '/api/json'
     url += '?tree=jobs[color],overallLoad[busyExecutors[min[latest]],queueLength[min[latest]],totalExecutors[min[latest]]]'
 
-    c = urllib2.urlopen(url, None, 2)
+
+    if username and apitoken:
+      url += '&token=' + apitoken
+      request = urllib2.Request(url)
+      base64string = base64.encodestring('%s:%s' % (username, apitoken)).replace('\n','')
+      request.add_header("Authorization", "Basic %s" % base64string)
+      c = urllib2.urlopen(request, None, 2)
+    else:
+      c = urllib2.urlopen(url, None, 2)
+
     json_data = c.read()
     c.close()
 
@@ -81,7 +93,7 @@ class UpdateJenkinsThread(threading.Thread):
 
     try:
       logging.debug(' opening URL: ' + str(self.base_url))
-      data = UpdateJenkinsThread._get_jenkins_statistics(self.base_url)
+      data = UpdateJenkinsThread._get_jenkins_statistics(self.base_url, self.username, self.apitoken)
     except:
       logging.warning('error refreshing metrics')
       logging.warning(traceback.print_exc(file=sys.stdout))
@@ -225,11 +237,15 @@ if __name__ == '__main__':
     parser.add_option('-u', '--URL', dest='base_url', default='http://127.0.0.1:8080', help='Base-URL for jenkins api (default: http://127.0.0.1:8080)')
     parser.add_option('-q', '--quiet', dest='quiet', action='store_true', default=False)
     parser.add_option('-d', '--debug', dest='debug', action='store_true', default=False)
+    parser.add_option('-n', '--username', dest='username', default='', help='Your Jenkins username (default: empty)')
+    parser.add_option('-a', '--apitoken', dest='apitoken', default='', help='Your API token (default: empty)')
 
     (options, args) = parser.parse_args()
 
     descriptors = metric_init({
       'base_url': options.base_url,
+      'username': options.username,
+      'apitoken': options.apitoken,
     })
 
     if options.debug:
