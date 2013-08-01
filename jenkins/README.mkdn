@@ -18,6 +18,8 @@ python module for ganglia 3.1.
 
 ## Parameters
  * base_url (The URL to query for Jenkins statistics. Default: 'http://127.0.0.1:8080'
+ * username (Your Jenkins username. Default: ''
+ * apitoken (Your personal Jenkins API token. Default: ''
 
 ## Notes
  * This has been tested with:
@@ -27,3 +29,7 @@ python module for ganglia 3.1.
 ## AUTHORS
 
 Andreas Lappe <nd@kaeufli.ch>
+
+## CONTRIBUTORS
+
+Nils Juenemann <nils.juenemann@bitplaces.com>

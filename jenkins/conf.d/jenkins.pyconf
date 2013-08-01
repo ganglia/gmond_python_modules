@@ -8,6 +8,12 @@ modules {
     param base_url {
       value = 'http://127.0.0.1:8080'
     }
+    param username {
+      value = ''
+    }
+    param apitoken {
+      value = ''
+    }
   }
 }
 
