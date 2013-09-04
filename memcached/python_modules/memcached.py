@@ -215,6 +215,12 @@ def metric_init(params):
                 "description": "Number of valid items removed from cache to free memory for new items",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_evictions_rate",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Rate of valid items removed from cache to free memory for new items",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_get_hits",
                 "units"      : "items",
                 "slope"      : "positive",
