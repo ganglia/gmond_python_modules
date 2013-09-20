@@ -1,0 +1,22 @@
+modules {
+  module {
+    name     = "ganglia_celery"
+    language = "python"
+    # Don't forget the trailing slash on the URL
+    param url {
+        value = "http://localhost:10000/api/worker/"
+    }
+
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 60
+
+  metric {
+    name_match = "celery_(.+)"
+    value_threshold = 0.0
+  }
+
+}
