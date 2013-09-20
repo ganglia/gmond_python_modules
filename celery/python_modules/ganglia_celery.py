@@ -39,10 +39,12 @@ def get_metrics():
 	    stats = res.read()
 	    metrics2 = json.loads(stats)
             metrics = metrics2[0]
+            metrics['status'] = "up"
 
         except StandardError, e:
             print e
             metrics = dict()
+            metrics['status'] = "down"
 
 	# update last metrics
         LAST_METRICS = copy.deepcopy(METRICS)
@@ -97,6 +99,24 @@ def get_value(name):
 
     return value
 
+def get_string(name):
+    """Return change over time for the requested metric"""
+
+    # get metrics
+    [curr_metrics, last_metrics] = get_metrics()
+
+    metric_name_list = name.split("_")[1:]
+    metric_name = "_".join(metric_name_list)
+    
+    try:
+      value = curr_metrics['data'][metric_name]
+    except KeyError:
+      if Debug:
+         print "Key " + name + " can't be found."
+      value = "down"      
+
+    return value
+
 
 
 def metric_init(params):
@@ -140,6 +160,17 @@ def metric_init(params):
 	"description": "Number of processed jobs",
 	"call_back"  : get_delta
     }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+	"name"       : params["metrics_prefix"] + "_status",
+	"units"      : "",
+	'value_type' : 'string',
+	'format'     : '%s',
+	'slope'      : 'zero',
+	"description": "Celery Service up/down",
+	"call_back"  : get_string
+    }))
+
 	
     return descriptors
 
