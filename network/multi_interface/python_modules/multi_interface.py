@@ -113,27 +113,31 @@ def metric_cleanup():
     pass
     
 def get_interfaces(watch_interfaces, excluded_interfaces):
-	global INTERFACES
+   global INTERFACES
+   if_excluded = 0
         
-        # check if particular interfaces have been specifieid. Watch only those
-        if watch_interfaces != "":
-            INTERFACES = watch_interfaces.split(" ")
-            
-        else:
+   # check if particular interfaces have been specifieid. Watch only those
+   if watch_interfaces != "":
+      INTERFACES = watch_interfaces.split(" ")      
+   else:
+      if excluded_interfaces != "":
+         excluded_if_list = excluded_interfaces.split(" ")
+      f = open(net_stats_file, "r")
+      for line in f:
+         # Find only lines with :
+         if re.search(":", line):
+            a = line.split(":")
+            dev_name = a[0].lstrip()
+                    
+            # Determine if interface is excluded by name or regex
+            for ex in excluded_if_list:
+               if re.match(ex,dev_name):
+                  if_excluded = 1
 
-	    if excluded_interfaces != "":
-		excluded_if_list = excluded_interfaces.split(" ")
-        
-            f = open(net_stats_file, "r")
-            for line in f:
-                # Find only lines with :
-                if re.search(":", line):
-                    a = line.split(":")
-                    dev_name = a[0].lstrip()
-		    if dev_name not in excluded_if_list:
-                        INTERFACES.append(dev_name)
-
-	return 0
+            if not if_excluded:
+               INTERFACES.append(dev_name)
+            if_excluded = 0
+   return 0
 
 
 def get_metrics():
