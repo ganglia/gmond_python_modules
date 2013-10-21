@@ -1,0 +1,18 @@
+hwmon
+=====
+
+Python module for ganglia 3.1.
+
+This module collects system temperature data (and anything else) 
+from the devices in `/sys/class/hwmon`.
+
+Install
+=======
+
+1. Copy `hwmon.py` to your python modules directory (often `/usr/lib/ganglia/python_modules`).
+2. Copy `hwmon.pyconf` to your ganglia config directory (often `/etc/ganglia/conf.d`).
+3. Restart gmond.
+
+## AUTHOR
+
+Author: Adam Compton <comptona@gmail.com>

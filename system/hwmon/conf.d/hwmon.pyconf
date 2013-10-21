@@ -1,0 +1,14 @@
+modules {
+  module {
+    name = "hwmon"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 50
+  metric {
+    name_match = "hwmon_(.+)"
+  }
+}
