@@ -6,6 +6,10 @@
 ###    more information on these values, look in the Linux kernel
 ###    documentation for "I/O statistics fields".
 ###
+###    By default, the script would monitor any entry listed under
+###    /proc/diskstats that is not containing a number. Override it by passing
+###    a list of devices in the 'devices' parameter.
+###
 ###    This script has the option of explicitly setting which devices
 ###    to check using the "devices" option in your configuration. If
 ###    you set this value, it will invalidate the MIN_DISK_SIZE and
@@ -58,7 +62,9 @@ BYTES_PER_SECTOR = 512
 
 # 5 GB
 MIN_DISK_SIZE = 5242880
-DEVICES = ''
+# Set to None to trigger disk discovery under /proc/diskstats
+# Pass a 'devices' parameter to explicitly list disks to monitor
+DEVICES = None
 IGNORE_DEV = 'dm-|loop|drbd'
 
 PARTITIONS_FILE = '/proc/partitions'
@@ -162,7 +168,7 @@ def get_partitions():
 	logging.debug('getting partitions')
 	global PARTITIONS
 
-	if DEVICES != '':
+	if DEVICES is not None:
 		# Explicit device list has been set
 		logging.debug(' DEVICES has already been set')
 		out = DEVICES
@@ -179,7 +185,7 @@ def get_partitions():
 			return p.returncode
 
 	for dev in out.split():
-		if DEVICES != '':
+		if DEVICES is not None:
 			# Explicit device list has been set
 			PARTITIONS.append(dev)
 		else:		
