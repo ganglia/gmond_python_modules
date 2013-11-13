@@ -484,7 +484,7 @@ if __name__ == '__main__':
 
 	logging.debug('running from cmd line')
 	parser = OptionParser()
-	parser.add_option('-d', '--devices', dest='devices', default='', help='devices to explicitly check')
+	parser.add_option('-d', '--devices', dest='devices', default=None, help='devices to explicitly check')
 	parser.add_option('-b', '--gmetric-bin', dest='gmetric_bin', default='/usr/bin/gmetric', help='path to gmetric binary')
 	parser.add_option('-c', '--gmond-conf', dest='gmond_conf', default='/etc/ganglia/gmond.conf', help='path to gmond.conf')
 	parser.add_option('-g', '--gmetric', dest='gmetric', action='store_true', default=False, help='submit via gmetric')
