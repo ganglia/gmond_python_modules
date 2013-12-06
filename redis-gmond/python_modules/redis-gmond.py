@@ -11,7 +11,12 @@ def metric_handler(name):
     if 15 < time.time() - metric_handler.timestamp:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((metric_handler.host, metric_handler.port))
-        s.send("INFO\r\n")
+        if metric_handler.auth is not None:
+            s.send("*2\r\n$4\r\nAUTH\r\n$%d\r\n%s\r\n" % (len(metric_handler.auth), metric_handler.auth));
+            result = s.recv(100)
+            if not 'OK' in result:
+                return 0
+        s.send("*1\r\n$4\r\nINFO\r\n")
         #logging.debug("sent INFO")
         info = s.recv(4096)
         #logging.debug("rcvd INFO")
@@ -70,6 +75,7 @@ def metric_handler(name):
 def metric_init(params={}):
     metric_handler.host = params.get("host", "127.0.0.1")
     metric_handler.port = int(params.get("port", 6379))
+    metric_handler.auth = params.get("auth", None)
     metric_handler.timestamp = 0
     metric_handler.prev_total_commands = 0
     metric_handler.prev_total_connections = 0

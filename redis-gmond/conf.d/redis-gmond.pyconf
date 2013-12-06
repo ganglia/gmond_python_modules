@@ -4,6 +4,7 @@ modules {
     language = "python"
     param host { value = "127.0.0.1" }
     param port { value = 6379 }
+    /* param auth { value = "passwordhere" } */
   }
 }
 collection_group {
