@@ -35,6 +35,15 @@ value for tx_drops_eth1 is 0.0000
 
 You can run the multi_interface.py script by hand to see all of the metrics.
 
+In addition this script can be used to override "default" bytes_in, bytes_out, pkts_in and pkts_out
+metrics. To do that you will need to 
+
+* set send_aggregate_bytes_packets to True in multi_interface.pyconf
+* Uncomment bytes_in, bytes_out metrics to be sent in in multi_interface.pyconf
+* Comment out those same metrics you uncommented in step above in gmond.conf so they don't override 
+ each other
+
+
 Install 
 =============== 
 
