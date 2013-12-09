@@ -12,7 +12,7 @@ def metric_handler(name):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((metric_handler.host, metric_handler.port))
         if metric_handler.auth is not None:
-            s.send("*2\r\n$4\r\nAUTH\r\n$%d\r\n%s\r\n" % (len(metric_handler.auth), metric_handler.auth));
+            s.send("*2\r\n$4\r\nAUTH\r\n$%d\r\n%s\r\n" % (len(metric_handler.auth), metric_handler.auth))
             result = s.recv(100)
             if not 'OK' in result:
                 return 0
@@ -22,9 +22,9 @@ def metric_handler(name):
         #logging.debug("rcvd INFO")
         if "$" != info[0]:
             return 0
-        len = int(info[1:info.find("\n")])
-        if 4096 < len:
-            info += s.recv(len - 4096)
+        msglen = int(info[1:info.find("\n")])
+        if 4096 < msglen:
+            info += s.recv(msglen - 4096)
         metric_handler.info = {}
         try:
           for line in info.splitlines()[1:]:
