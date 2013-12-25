@@ -127,7 +127,7 @@ def update_result(result, url):
     diff = now - last_update
     if diff > 20:
         print '[elasticsearch] ' + str(diff) + ' seconds passed - Fetching ' + url
-        result = json.load(urllib.urlopen(url, None, 2))
+        result = json.load(urllib.urlopen(url))
         last_update = now
 
     return result
@@ -220,7 +220,7 @@ def metric_init(params):
         url_indices = '{0}{1}/_stats'.format(host, index)
         print('[elasticsearch] Fetching ' + url_indices)
 
-        r_indices = json.load(urllib.urlopen(url_indices, None, 2))
+        r_indices = json.load(urllib.urlopen(url_indices))
         descriptors += get_indices_descriptors(index,
                                                Desc_Skel,
                                                r_indices,
