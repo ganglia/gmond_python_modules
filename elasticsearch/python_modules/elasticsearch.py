@@ -199,7 +199,7 @@ def metric_init(params):
 
     # First iteration - Grab statistics
     print('[elasticsearch] Fetching ' + url_cluster)
-    result = json.load(urllib.urlopen(url_cluster, None, 2))
+    result = json.load(urllib.urlopen(url_cluster))
 
     metric_group = params.get('metric_group', 'elasticsearch')
 
