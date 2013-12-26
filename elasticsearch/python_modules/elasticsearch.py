@@ -6,17 +6,16 @@ try:
 except ImportError:
     import json
 
+import logging
 import time
 import urllib
 from functools import partial
 
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s")
+logging.debug('starting up')
 
 # short name to full path for stats
 keyToPath = dict()
-
-# Initial time modification stamp - Used to determine
-# when JSON is updated
-last_update = time.time()
 
 # INDICES METRICS #
 
@@ -120,16 +119,8 @@ def dig_it_up(obj, path):
 
 
 def update_result(result, url):
-    global last_update
-
-    # If time delta is > 20 seconds, then update the JSON results
-    now = time.time()
-    diff = now - last_update
-    if diff > 20:
-        print '[elasticsearch] ' + str(diff) + ' seconds passed - Fetching ' + url
-        result = json.load(urllib.urlopen(url))
-        last_update = now
-
+    logging.debug('[elasticsearch] Fetching ' + url)
+    result = json.load(urllib.urlopen(url))
     return result
 
 
@@ -191,14 +182,14 @@ def get_indices_descriptors(index, skel, result, url):
 def metric_init(params):
     descriptors = []
 
-    print('[elasticsearch] Received the following parameters')
-    print(params)
+    logging.debug('[elasticsearch] Received the following parameters')
+    logging.debug(params)
 
     host = params.get('host', 'http://localhost:9200/')
     url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
 
     # First iteration - Grab statistics
-    print('[elasticsearch] Fetching ' + url_cluster)
+    logging.debug('[elasticsearch] Fetching ' + url_cluster)
     result = json.load(urllib.urlopen(url_cluster))
 
     metric_group = params.get('metric_group', 'elasticsearch')
@@ -218,7 +209,7 @@ def metric_init(params):
     indices = params.get('indices', '*').split()
     for index in indices:
         url_indices = '{0}{1}/_stats'.format(host, index)
-        print('[elasticsearch] Fetching ' + url_indices)
+        logging.debug('[elasticsearch] Fetching ' + url_indices)
 
         r_indices = json.load(urllib.urlopen(url_indices))
         descriptors += get_indices_descriptors(index,
@@ -728,4 +719,4 @@ if __name__ == '__main__':
     descriptors = metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %s' % (d['name'], str(v))
+        logging.debug('value for %s is %s' % (d['name'], str(v)))
