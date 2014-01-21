@@ -342,6 +342,12 @@ def get_diff(dev, key, val, convert=1):
 	else:
 		stats[dev][key] = 0
 
+        # If for some reason we have a negative diff we should assume counters reset
+        # and should set it back to 0
+	if stats[dev][key] < 0:
+	  stats[dev][key] = 0
+
+
 	last_val[dev][key] = val
 
 def get_stat(name):
