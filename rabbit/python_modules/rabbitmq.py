@@ -1,14 +1,19 @@
 #!/usr/bin/python2.4
 import sys
 import os
-import simplejson as json
+import json
 import urllib2
 import time
 from string import Template
 import itertools
 import threading
 
-global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath 
+global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
+
+
+JSON_PATH_SEPARATOR = "?"
+METRIC_TOKEN_SEPARATOR = "___"
+ 
 INTERVAL = 10
 descriptors = list()
 username, password = "guest", "guest"
@@ -25,16 +30,16 @@ compiled_results = {"nodes" : None, "queues" : None, "connections" : None}
 STATS = ['nodes', 'queues']
 
 # QUEUE METRICS #
-keyToPath['rmq_messages_ready'] = "%s.messages_ready"
-keyToPath['rmq_messages_unacknowledged'] = "%s.messages_unacknowledged"
-keyToPath['rmq_backing_queue_ack_egress_rate'] = "%s.backing_queue_status.avg_ack_egress_rate"
-keyToPath['rmq_backing_queue_ack_ingress_rate'] = "%s.backing_queue_status.avg_ack_ingress_rate" 
-keyToPath['rmq_backing_queue_egress_rate'] = "%s.backing_queue_status.avg_egress_rate"
-keyToPath['rmq_backing_queue_ingress_rate'] = "%s.backing_queue_status.avg_ingress_rate"
-keyToPath['rmq_backing_queue_mirror_senders'] = "%s.backing_queue_status.mirror_senders"
-keyToPath['rmq_memory'] = "%s.memory"
-keyToPath['rmq_consumers'] = "%s.consumers"
-keyToPath['rmq_messages'] = "%s.messages"
+keyToPath['rmq_messages_ready'] = "%s{0}messages_ready".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_messages_unacknowledged'] = "%s{0}messages_unacknowledged".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_backing_queue_ack_egress_rate'] = "%s{0}backing_queue_status{0}avg_ack_egress_rate".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_backing_queue_ack_ingress_rate'] = "%s{0}backing_queue_status{0}avg_ack_ingress_rate".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_backing_queue_egress_rate'] = "%s{0}backing_queue_status{0}avg_egress_rate".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_backing_queue_ingress_rate'] = "%s{0}backing_queue_status{0}avg_ingress_rate".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_backing_queue_mirror_senders'] = "%s{0}backing_queue_status{0}mirror_senders".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_memory'] = "%s{0}memory".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_consumers'] = "%s{0}consumers".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_messages'] = "%s{0}messages".format(JSON_PATH_SEPARATOR)
 
 QUEUE_METRICS = ['rmq_messages_ready',
 		'rmq_messages_unacknowledged',
@@ -48,18 +53,18 @@ QUEUE_METRICS = ['rmq_messages_ready',
 		'rmq_messages']
 
 # NODE METRICS #
-keyToPath['rmq_disk_free'] = "%s.disk_free"
-keyToPath['rmq_disk_free_alarm'] = "%s.disk_free_alarm"
-keyToPath['rmq_fd_used'] = "%s.fd_used"
-keyToPath['rmq_fd_used'] = "%s.fd_used"
-keyToPath['rmq_mem_used'] = "%s.mem_used"
-keyToPath['rmq_proc_used'] = "%s.proc_used"
-keyToPath['rmq_sockets_used'] = "%s.sockets_used"
-keyToPath['rmq_mem_alarm'] = "%s.mem_alarm" #Boolean
-keyToPath['rmq_mem_binary'] = "%s.mem_binary"
-keyToPath['rmq_mem_code'] = "%s.mem_code"
-keyToPath['rmq_mem_proc_used'] = "%s.mem_proc_used"
-keyToPath['rmq_running'] = "%s.running" #Boolean
+keyToPath['rmq_disk_free'] = "%s{0}disk_free".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_disk_free_alarm'] = "%s{0}disk_free_alarm".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_fd_used'] = "%s{0}fd_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_fd_used'] = "%s{0}fd_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_mem_used'] = "%s{0}mem_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_proc_used'] = "%s{0}proc_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_sockets_used'] = "%s{0}sockets_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_mem_alarm'] = "%s{0}mem_alarm".format(JSON_PATH_SEPARATOR) #Boolean
+keyToPath['rmq_mem_binary'] = "%s{0}mem_binary".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_mem_code'] = "%s{0}mem_code".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_mem_proc_used'] = "%s{0}mem_proc_used".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_running'] = "%s{0}running".format(JSON_PATH_SEPARATOR) #Boolean
 
 NODE_METRICS = ['rmq_disk_free', 'rmq_mem_used', 'rmq_disk_free_alarm', 'rmq_running', 'rmq_proc_used', 'rmq_mem_proc_used', 'rmq_fd_used', 'rmq_mem_alarm', 'rmq_mem_code', 'rmq_mem_binary', 'rmq_sockets_used']
 	
@@ -71,7 +76,9 @@ def metric_cleanup():
 
 def dig_it_up(obj,path):
     try:
-	path = path.split('.')
+	path = path.split(JSON_PATH_SEPARATOR)
+        print "obj is", obj
+        print "path is", path
         return reduce(lambda x,y:x[y],path,obj)
     except:
         print "Exception"
@@ -109,6 +116,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
 
     return compiled_results
 
+
 def validatedResult(value):
     if not isInstance(value, bool):
         return float(value)
@@ -131,14 +139,18 @@ def getQueueStat(name):
     
     #handle queue names with . in them
     print name
-    split_name, vhost = name.split("#")
-    split_name = split_name.split(".")
-    stat_name = split_name[0]
-    queue_name = ".".join(split_name[1:])
+    stat_name, queue_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
     
+    print "vhost is ", vhost
+    print "stat_name is ", stat_name
+    print "queue_name is ", queue_name
+    vhost = vhost.replace('-', '/') #decoding vhost from metric name
     # Run refreshStats to get the result object
     result = compiled_results[('queues', vhost)]
     
+    print "keyToPath[stat_name]", keyToPath[stat_name]
+    tmp_res = keyToPath[stat_name] % queue_name
+    print "tmp_res is ", tmp_res
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
     print name, value
 
@@ -153,8 +165,9 @@ def getQueueStat(name):
 def getNodeStat(name):
     refreshStats(stats = STATS, vhosts = vhosts)
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
-    stat_name = name.split(".")[0]
-    node_name, vhost = name.split(".")[1].split("#")
+    stat_name, node_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
+    vhost = vhost.replace('-', '/') #decoding vhost from metric name
+
     result = compiled_results[('nodes', '/')]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
@@ -233,7 +246,7 @@ def metric_init(params):
         for vhost, metric in product(vhosts, QUEUE_METRICS):
             queues = list_queues(vhost)
             for queue in queues:
-                name = "%s.%s#%s" % (metric, queue, vhost)   
+                name = "{1}{0}{2}{0}{3}".format(METRIC_TOKEN_SEPARATOR, metric, queue, vhost.replace('/', '-'))
 		print name
 		d1 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getQueueStat,
@@ -248,10 +261,10 @@ def metric_init(params):
     
     def buildNodeDescriptors():
         for metric in NODE_METRICS:
-	    for node in list_nodes():
-		name = '%s.%s#%s' % (metric, node, '/')
-		print name
-		d2 = create_desc({'name': name.encode('ascii','ignore'),
+            for node in list_nodes():
+                name = "{1}{0}{2}{0}-".format(METRIC_TOKEN_SEPARATOR, metric, node)
+                print name
+                d2 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getNodeStat,
                     'value_type': 'float',
 		    'units': 'N',
@@ -260,7 +273,7 @@ def metric_init(params):
 		    'description': 'Node_Metric',
 		    'groups' : 'rabbitmq,node'}) 
                 print d2
-		descriptors.append(d2)
+                descriptors.append(d2)
 
     buildQueueDescriptors()
     buildNodeDescriptors()
@@ -275,10 +288,12 @@ def metric_cleanup():
 if __name__ == "__main__":
     url = 'http://%s:%s@localhost:15672/api/$stats' % (username, password)
     url_template = Template(url)
+    print "url_template is ", url_template
+### in config files we use '/' in vhosts names but we should convert '/' to '-' when calculating a metric
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
     metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
-    print '***'*10
-    getQueueStat('rmq_backing_queue_ack_egress_rate.nfl_client#/')
-    getNodeStat('rmq_disk_free.rmqone@inrmq01d1#/') 
-    getNodeStat('rmq_mem_used.rmqone@inrmq01d1#/')
+    print '***'*20
+    getQueueStat('rmq_messages_ready___hello___-')
+#    getNodeStat('rmq_disk_free.rmqone@inrmq01d1#/') 
+#    getNodeStat('rmq_mem_used.rmqone@inrmq01d1#/')
