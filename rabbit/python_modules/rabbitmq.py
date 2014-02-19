@@ -41,6 +41,13 @@ keyToPath['rmq_memory'] = "%s{0}memory".format(JSON_PATH_SEPARATOR)
 keyToPath['rmq_consumers'] = "%s{0}consumers".format(JSON_PATH_SEPARATOR)
 keyToPath['rmq_messages'] = "%s{0}messages".format(JSON_PATH_SEPARATOR)
 
+RATE_METRICS = [
+    'rmq_backing_queue_ack_egress_rate',
+    'rmq_backing_queue_ack_ingress_rate',
+    'rmq_backing_queue_egress_rate',
+    'rmq_backing_queue_ingress_rate'
+]
+
 QUEUE_METRICS = ['rmq_messages_ready',
 		'rmq_messages_unacknowledged',
 		'rmq_backing_queue_ack_egress_rate',
@@ -77,8 +84,6 @@ def metric_cleanup():
 def dig_it_up(obj,path):
     try:
 	path = path.split(JSON_PATH_SEPARATOR)
-        print "obj is", obj
-        print "path is", path
         return reduce(lambda x,y:x[y],path,obj)
     except:
         print "Exception"
@@ -141,18 +146,14 @@ def getQueueStat(name):
     print name
     stat_name, queue_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
     
-    print "vhost is ", vhost
-    print "stat_name is ", stat_name
-    print "queue_name is ", queue_name
     vhost = vhost.replace('-', '/') #decoding vhost from metric name
     # Run refreshStats to get the result object
     result = compiled_results[('queues', vhost)]
     
-    print "keyToPath[stat_name]", keyToPath[stat_name]
-    tmp_res = keyToPath[stat_name] % queue_name
-    print "tmp_res is ", tmp_res
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
-    print name, value
+    
+    if zero_rates_when_idle and stat_name in RATE_METRICS  and 'idle_since' in result[queue_name].keys():
+        value = 0
 
     #Convert Booleans
     if value is True:
@@ -189,20 +190,31 @@ def product(*args, **kwds):
         result = [x+[y] for x in result for y in pool]
     for prod in result:
         yield tuple(prod)
+
+def str2bool(string):
+    if string.lower() in ("yes", "true"):
+        return True
+    if string.lower() in ("no", "false"):
+        return False
+    raise Exception("Invalid value of the 'zero_rates_when_idle' param, use one of the ('true', 'yes', 'false', 'no')")
     
 def metric_init(params):
     ''' Create the metric definition object '''
-    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS, vhosts
+    global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS, vhosts, zero_rates_when_idle
     print 'received the following params:'
     #Set this globally so we can refresh stats
     if 'host' not in params:
         params['host'], params['vhost'],params['username'],params['password'],params['port'] = "localhost", "/", "guest", "guest", "15672"
+    if 'zero_rates_when_idle' not in params:
+        params['zero_rates_when_idle'] = "false"
 
     # Set the vhosts as a list split from params
     vhosts = params['vhost'].split(',')
     username, password = params['username'], params['password']
     host = params['host']
     port = params['port']
+
+    zero_rates_when_idle = str2bool(params['zero_rates_when_idle'])
     
     url = 'http://%s:%s/api/$stats/$vhost' % (host,port)
     base_url = 'http://%s:%s/api' % (host,port)
@@ -290,10 +302,10 @@ if __name__ == "__main__":
     url_template = Template(url)
     print "url_template is ", url_template
 ### in config files we use '/' in vhosts names but we should convert '/' to '-' when calculating a metric
-    parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq"}
+    parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq", "zero_rates_when_idle": "yes"}
     metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*20
-    getQueueStat('rmq_messages_ready___hello___-')
-#    getNodeStat('rmq_disk_free.rmqone@inrmq01d1#/') 
-#    getNodeStat('rmq_mem_used.rmqone@inrmq01d1#/')
+	getQueueStat('rmq_backing_queue_ack_egress_rate___nfl_client___-')
+    getNodeStat('rmq_disk_free___rmqone@inrmq01d1___-')
+    getNodeStat('rmq_mem_used___rmqone@inrmq01d1___-')

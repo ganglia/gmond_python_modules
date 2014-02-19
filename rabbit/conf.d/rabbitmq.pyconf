@@ -28,6 +28,10 @@ modules {
     param metric_group {
       value = "rmq"
     }
+    
+    param zero_rates_when_idle {
+      value = "True"
+    }
 
   }
 }
