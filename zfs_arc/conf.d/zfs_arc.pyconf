@@ -1,0 +1,187 @@
+modules {
+  module {
+    name     = "zfs_arc"
+    language = "python"
+    # Determines how to get stats
+    # * linux: spl's kstat over /proc facility
+    param os {
+        value = "linux"
+    }
+    # This module calculates all metrics (including derived) rates at
+    # onces and then serves them out of a cache. This determines the
+    # minimum TTL.
+    param min_poll_seconds {
+        value = 5
+    }
+    # Where to log information from this module (syslog facility)
+    param syslog_facility {
+        value = "user"
+    }
+    # log level, WARNING is not expected to produce any output
+    param log_level {
+        value = "WARNING"
+    }
+    # Ideally some sort of unsigned integer would be used for
+    # measurements of bytes of memory.  gmond/modpython on a
+    # particular architecture does not necessarily support 64bit (let
+    # along zfs's 128bit) integers.  If true this flag reports all
+    # metrics as doubles.
+    param force_double {
+        value = True
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 60
+
+  metric {
+    name  = "zfs_arc_hits"
+    title = "ARC reads per second"
+  }
+  metric {
+    name = "zfs_arc_miss"
+    title = "ARC misses per second"
+  }
+  metric {
+    name = "zfs_arc_read"
+    title = "Total ARC accesses per second"
+  }
+  metric {
+    name = "zfs_arc_hit_percent"
+    title = "ARC Hit percentage"
+  }
+  metric {
+    name = "zfs_arc_miss_percent"
+    title = "ARC miss percentage"
+  }
+  metric {
+    name = "zfs_arc_dhit"
+    title = "Demand Data hits per second"
+  }
+  metric {
+    name = "zfs_arc_dmis"
+    title = "Demand Data misses per second"
+  }
+  metric {
+    name = "zfs_arc_dh_percent"
+    title = "Demand Data hit percentage"
+  }
+  metric {
+    name = "zfs_arc_dm_percent"
+    title = "Demand Data miss percentage"
+  }
+  metric {
+    name = "zfs_arc_phit"
+    title = "Prefetch hits per second"
+  }
+  metric {
+    name = "zfs_arc_pmis"
+    title = "Prefetch misses per second"
+  }
+  metric {
+    name = "zfs_arc_ph_percent"
+    title = "Prefetch hits percentage"
+  }
+  metric {
+    name = "zfs_arc_pm_percent"
+    title = "Prefetch miss percentage"
+  }
+  metric {
+    name = "zfs_arc_mhit"
+    title = "Metadata hits per second"
+  }
+  metric {
+    name = "zfs_arc_mmis"
+    title = "Metadata misses per second"
+  }
+  metric {
+    name = "zfs_arc_mread"
+    title = "Metadata accesses per second"
+  }
+  metric {
+    name = "zfs_arc_mh_percent"
+    title = "Metadata hit percentage"
+  }
+  metric {
+    name = "zfs_arc_mm_percent"
+    title = "Metadata miss percentage"
+  }
+  metric {
+    name = "zfs_arc_size"
+    title = "ARC Size"
+  }
+  metric {
+    name = "zfs_arc_c"
+    title = "ARC Target Size"
+  }
+  metric {
+    name = "zfs_arc_mfu"
+    title = "MFU List hits per second"
+  }
+  metric {
+    name = "zfs_arc_mru"
+    title = "MRU List hits per second"
+  }
+  metric {
+    name = "zfs_arc_mfug"
+    title = "MFU Ghost List hits per second"
+  }
+  metric {
+    name = "zfs_arc_mrug"
+    title = "MRU Ghost List hits per second"
+  }
+  metric {
+    name = "zfs_arc_eskip"
+    title = "evict_skip per second"
+  }
+  metric {
+    name = "zfs_arc_mtxmis"
+    title = "mutex_miss per second"
+  }
+  metric {
+    name = "zfs_arc_rmis"
+    title = "recycle_miss per second"
+  }
+  metric {
+    name = "zfs_arc_dread"
+    title = "Demand data accesses per second"
+  }
+  metric {
+    name = "zfs_arc_pread"
+    title = "Prefetch accesses per second"
+  }
+  metric {
+    name = "zfs_arc_l2hits"
+    title = "L2ARC hits per second"
+  }
+  metric {
+    name = "zfs_arc_l2miss"
+    title = "L2ARC misses per second"
+  }
+  metric {
+    name = "zfs_arc_l2read"
+    title = "Total L2ARC accesses per second"
+  }
+  metric {
+    name = "zfs_arc_l2hit_percent"
+    title = "L2ARC access hit percentage"
+  }
+  metric {
+    name = "zfs_arc_l2miss_percent"
+    title = "L2ARC access miss percentage"
+  }
+  metric {
+    name = "zfs_arc_l2asize"
+    title = "Actual compressed size of the L2ARC"
+  }
+  metric {
+    name = "zfs_arc_l2size"
+    title = "Size of the L2ARC"
+  }
+  metric {
+    name = "zfs_arc_l2bytes"
+    title = "bytes read per second from the L2ARC"
+  }
+}
