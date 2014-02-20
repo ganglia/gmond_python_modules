@@ -1,0 +1,166 @@
+modules {
+   module {
+     name = "postgres"
+     language = "python"
+     param host {
+       value = "hostname_goes_here"
+     }
+     param port {
+       value = "port_goes_here"
+     }
+     param dbname {
+       value = "database_goes_here"
+     }
+     param username {
+       value = "username_goes_here"
+     }
+     param password {
+       value = "password_goes_here"
+     }
+   }
+}
+
+collection_group {
+   collect_every = 120
+   time_threshold = 120
+   metric {
+     name = "Pypg_idle_sessions"
+     title = "Postgres Idle Sessions"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_idle_in_transaction_sessions"
+     title = "Postgres Idle In Transaction Sessions"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_active_sessions"
+     title = "Postgres Active Sessions"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_hours_since_last_vacuum"
+     title = "Postgres Hours Since Last Vacuum"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_hours_since_last_analyze"
+     title = "Postgres Hours Since Last Analyze"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_waiting_sessions"
+     title = "Postgres Waiting Sessions blocked" 
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_locks_accessexclusive"
+     title = "Postgres AccessExclusive Locks read write blocking"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_locks_otherexclusive"
+     title = "Postgres Exclusive Locks write blocking"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_locks_shared"
+     title = "Postgres Shared Locks NON blocking"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_longest_xact"
+     title = "Postgres Longest Transaction in Minutes"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_longest_query"
+     title = "Postgres Longest Active Query in Minutes"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_transactions"
+     title = "Postgres Transactions"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_inserts"
+     title = "Postgres Inserts"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_updates"
+     title = "Postgres Updates"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_deletes"
+     title = "Postgres Deletes"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_reads"
+     title = "Postgres Reads"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_blks_diskread"
+     title = "Postgres Blocks Read From Disk"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_blks_memread"
+     title = "Postgres Blocks Read From Memory Buffer Cache"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_tup_seqscan"
+     title = "Postgres Tuples Read From Table Sequence Scans"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_tup_idxfetch"
+     title = "Postgres Tuples Fetched From Indexes"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_checkpoints_timed"
+     title = "Postgres Scheduled Checkpoints"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_checkpoints_req"
+     title = "Postgres Unscheduled Checkpoints"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_checkpoint_write_time"
+     title = "Postgres Time to Write Checkpoints to Disk"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_checkpoint_sync_time"
+     title = "Postgres Time to Sync Checkpoints to Disk"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_buffers_checkpoint"
+     title = "Postgres Buffers Written During Checkpoint"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_buffers_clean"
+     title = "Postgres Buffers Written By Background Writer"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_buffers_backend"
+     title = "Postgres Buffers Written Directly By Backend"
+     value_threshold = 0
+   }
+   metric {
+     name = "Pypg_bgwriter_buffers_alloc"
+     title = "Postgres Number Of Buffers Allocated"
+     value_threshold = 0
+   }
+}
