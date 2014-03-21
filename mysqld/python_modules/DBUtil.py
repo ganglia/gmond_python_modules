@@ -66,15 +66,27 @@ except:
 
 import MySQLdb
 
+def is_hex(s):
+    try:
+        int(s, 16)
+        return True
+    except ValueError:
+        return False
+
 def longish(x):
-	if len(x):
-		try:
-			return long(x)
-		except ValueError:
-			return longish(x[:-1])
-	else:
-		raise ValueError
-		
+        if len(x):
+                try:
+                        return long(x)
+                except ValueError:
+                        if(x.endswith(',')):
+                           return longish(x[:-1])
+                        if(is_hex(x.lower()) == True):
+                           return hexlongish(x)
+                        #print "X==(%s)(%s)(%s)" %(x, x[:-1],hexlongish(x)), sys.exc_info()[0]
+                        return longish(x[:-1])
+        else:
+                raise ValueError
+
 def hexlongish(x):
 	if len(x):
 		try:
