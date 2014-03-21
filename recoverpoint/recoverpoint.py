@@ -9,6 +9,7 @@ import yaml
 import warnings
 import pprint
 import time
+import threading
 import re
 
 with warnings.catch_warnings():
@@ -23,6 +24,7 @@ NIMETRICS = {
 #This is the minimum interval between querying the RPA for metrics.
 #Each ssh query takes 1.6s so we limit the interval between getting metrics to this interval.
 NIMETRICS_CACHE_MAX = 10
+RAWDATA = ""
 
 ipaddr = ''
 
@@ -116,20 +118,27 @@ def create_desc(skel, prop):
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
+
+def run_ssh_thread(foo,bar):
+    global RAWDATA
+    sshcon = paramiko.SSHClient()
+    sshcon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
+    stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
+    RAWDATA = stdout.read()
+    
+
     
 def get_metrics(name):
     global NIMETRICS,ipaddr
     # if interval since last check > NIMETRICS_CACHE_MAX get metrics again
     metrics = {}
     if (time.time() - NIMETRICS['time']) > NIMETRICS_CACHE_MAX:
-
-        sshcon = paramiko.SSHClient()
-        sshcon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
-        stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
-        rawdata = stdout.read()
+        threading.Thread(run_ssh_thread(1,1))
+        rawdata = RAWDATA
         #Group stats don't leave a space after the colon in some places
-        rawmetrics = yaml.safe_load(rawdata.replace(':N',': N'))
+        rawmetrics = yaml.safe_load(rawdata.replace(':N',': N').replace("Compression","\n      Compression"))
         #Get RPA metrics
         for rpa in rawmetrics['RPA statistics']:
             for metric in rawmetrics['RPA statistics'][rpa]:
@@ -210,7 +219,7 @@ def get_metrics(name):
     
 
 def metric_init(params):
-    global descriptors, Desc_Skel, ipaddr
+    global descriptors, Desc_Skel, ipaddr, RAWDATA
     print '[recoverpoint] Recieved the following parameters'
     print params
     ipaddr = params['mgmtip']
@@ -234,8 +243,10 @@ def metric_init(params):
     sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
     stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
     rawdata = stdout.read()
+    RAWDATA = rawdata
+#    f = 
     #Group stats don't leave a space after the colon in some places
-    statsDict = yaml.safe_load(rawdata.replace(':N',': N'))
+    statsDict = yaml.safe_load(rawdata.replace(':N',': N').replace("Compression","\n      Compression"))
     sshcon.close()
     descriptors = define_metrics(Desc_Skel, statsDict)
 
@@ -244,7 +255,7 @@ def metric_init(params):
 # For CLI Debuging:
 if __name__ == '__main__':
     params = {
-        'mgmtip' : '192.168.1.100',
+        'mgmtip' : '10.10.9.170',
         
               }
     descriptors = metric_init(params)

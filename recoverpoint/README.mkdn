@@ -18,6 +18,9 @@ Currently gathers:
   * Save the recoverpoint.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.  Update the username/passwords if necessary.
   * Restart gmond and a "recoverpoint" host should appear in ganglia.
 
+## UPDATE
+  * 21/03/2014 - Now performs SSH queries asynchronously as a separate thread.  (This should stop it slowing and breaking gmond)
+
 ## AUTHOR
 
 Author: Evan Fraser &lt;evan.fraser@trademe.co.nz&gt;
