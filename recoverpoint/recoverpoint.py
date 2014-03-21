@@ -255,7 +255,7 @@ def metric_init(params):
 # For CLI Debuging:
 if __name__ == '__main__':
     params = {
-        'mgmtip' : '10.10.9.170',
+        'mgmtip' : '192.168.1.100',
         
               }
     descriptors = metric_init(params)
