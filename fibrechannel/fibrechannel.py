@@ -4,11 +4,13 @@
 # Author: Evan Fraser evan.fraser@trademe.co.nz
 # Date: August 2012
 # Copyright: GPL
+# Updated 21/03/2014 to do SNMP calls threaded.
 
 import sys
 import os
 import re
 import time
+import threading
 import pprint
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 NIPARAMS = {}
@@ -18,7 +20,8 @@ NIMETRICS = {
     'data' : {}
 }
 LAST_NIMETRICS = dict(NIMETRICS)
-NIMETRICS_CACHE_MAX = 5
+NIMETRICS_CACHE_MAX = 10
+SNMPTABLE = {}
 
 descriptors = list()
 
@@ -33,10 +36,11 @@ oidDict = {
     'ifOutErrors'    : (1,3,6,1,2,1,2,2,1,20),
     }
 
+
 def get_metrics():
     """Return all metrics"""
 
-    global NIMETRICS, LAST_NIMETRICS
+    global NIMETRICS, LAST_NIMETRICS, SNMPTABLE
 
     # if interval since last check > NIMETRICS_CACHE_MAX get metrics again
     if (time.time() - NIMETRICS['time']) > NIMETRICS_CACHE_MAX:
@@ -44,7 +48,9 @@ def get_metrics():
         for para in NIPARAMS.keys():
             if para.startswith('switch_'):
                 ipaddr,name = NIPARAMS[para].split(':')
-                snmpTable = runSnmp(oidDict,ipaddr)
+                #snmpTable = runSnmp(oidDict,ipaddr)
+                threading.Thread(runSnmp(oidDict,ipaddr))
+                snmpTable = SNMPTABLE[ipaddr]
                 newmetrics = buildDict(oidDict,snmpTable,name)
                 metrics = dict(newmetrics, **metrics)
 
@@ -75,7 +81,7 @@ def get_delta(name):
 
 # Separate routine to perform SNMP queries and returns table (dict)
 def runSnmp(oidDict,ip):
-    
+    global SNMPTABLE
     # cmdgen only takes tuples, oid strings don't work
 
 #    'ifIndex'       : (1,3,6,1,2,1,2,2,1,1),
@@ -111,7 +117,8 @@ def runSnmp(oidDict,ip):
                 errorStatus.prettyPrint(), errorIndex and varBindTable[-1][int(errorIndex)-1] or '?'
                 )
         else:
-            return(varBindTable)
+            #return(varBindTable)
+            SNMPTABLE[ip] = varBindTable
 
 def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based on the alias name
     builtdict = {}
@@ -146,7 +153,11 @@ def buildDict(oidDict,t,switch): # passed a list of tuples, build's a dict based
 # define_metrics will run an snmp query on an ipaddr, find interfaces, build descriptors and set spoof_host
 # define_metrics is called from metric_init
 def define_metrics(Desc_Skel, ipaddr, switch):
-    snmpTable = runSnmp(oidDict,ipaddr)
+    global SNMPTABLE
+    snmpThread = threading.Thread(runSnmp(oidDict,ipaddr))
+    snmpTable = SNMPTABLE[ipaddr]
+
+    #snmpTable = runSnmp(oidDict,ipaddr)
     aliasdict = buildDict(oidDict,snmpTable,switch)
     spoof_string = ipaddr + ':' + switch
     #print newdict

@@ -3,6 +3,7 @@ This is gmond python module that allows SNMP polling of Fibrechannel switches to
 
   * It works for Brocade FC switches, and probably for any other SNMP enabled switch.
   * It requires pysnmp (available in debian repositorys)
+  * Now executes SNMP queries as a separate thread
   * Handles polling multiple switches from a single gmond.
   * Spoofs the switch hostname, so each switch shows up separately in ganglia
 
