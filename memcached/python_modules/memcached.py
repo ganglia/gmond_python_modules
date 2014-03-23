@@ -52,7 +52,10 @@ class UpdateMetricThread(threading.Thread):
         self.shuttingdown = True
         if not self.running:
             return
-        self.join()
+        try:
+            self.join()
+        except:
+            pass
 
     def run(self):
         self.running = True
@@ -115,6 +118,9 @@ class UpdateMetricThread(threading.Thread):
             _Lock.acquire()
             val = self.metric[name]
             _Lock.release()
+        # Value should never be negative. If it is counters wrapper due to e.g. memcached restart
+        if val < 0:
+            val = 0
         return val
 
 def metric_init(params):
@@ -209,16 +215,34 @@ def metric_init(params):
                 "description": "Number of open connections",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_decr_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been decremented and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_decr_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been decremented and not found",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been deleted and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_delete_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been deleted and not found",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_evictions",
                 "units"      : "items",
                 "slope"      : "both",
                 "description": "Number of valid items removed from cache to free memory for new items",
-                }))
-    descriptors.append(create_desc(Desc_Skel, {
-                "name"       : mp+"_evictions_rate",
-                "units"      : "items",
-                "slope"      : "both",
-                "description": "Evictions per second",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_get_hits",
@@ -243,6 +267,18 @@ def metric_init(params):
                 "units"      : "items",
                 "slope"      : "both",
                 "description": "Misses per second",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_incr_hits",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of keys that have been incremented and found present ",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_incr_misses",
+                "units"      : "items",
+                "slope"      : "positive",
+                "description": "Number of items that have been incremented and not found",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_cmd_get_rate",
