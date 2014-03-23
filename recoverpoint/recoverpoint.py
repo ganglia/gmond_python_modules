@@ -3,6 +3,7 @@
 # Desc: Ganglia Python module for gathering EMC recoverpoint statistics via SSH
 # Author: Evan Fraser (evan.fraser@trademe.co.nz)
 # Date: 01/08/2012
+# Compatibility note: Compatible with Recoverpoint version 3.5
 
 
 import yaml
@@ -153,9 +154,18 @@ def get_metrics(name):
         for group in rawmetrics['Group']:
             #CG SAN and Journal lag are under the policies
             for policyname in rawmetrics['Group'][group]['Copy stats']:
-                #Get CG SAN metrics (remove 'Mbps' from end + convert to float and then bits)
+                #Get CG SAN metrics (Work out the unit from end + convert to float and then bits)
                 if 'SAN traffic' in rawmetrics['Group'][group]['Copy stats'][policyname]:
-                    metrics[group + '_SAN_Traffic'] = float(rawmetrics['Group'][group]['Copy stats'][policyname]['SAN traffic']['Current throughput'][:-4]) * 1024 * 1024
+                    cg_san_str = rawmetrics['Group'][group]['Copy stats'][policyname]['SAN traffic']['Current throughput']
+                    cg_san_bw = float(cg_san_str[:-4])
+                    cg_san_unit = cg_san_str[-4:]
+                    if 'Mbps' in cg_san_unit:
+                        cg_san_bw = cg_san_bw * 1024 * 1024
+                    else:
+                        cg_san_bw = cg_san_bw * 1024
+                    metrics[group + '_SAN_Traffic'] = cg_san_bw
+
+
                 elif 'Journal' in rawmetrics['Group'][group]['Copy stats'][policyname]:
                     datastr = rawmetrics['Group'][group]['Copy stats'][policyname]['Journal']['Journal lag']
                     amount = float(datastr[:-2])

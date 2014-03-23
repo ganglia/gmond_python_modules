@@ -8,6 +8,9 @@ Currently gathers:
   * Per Consistency Group Write, Data, Time and Journal Lags, as well as WAN and SAN traffic.
   * Per Consistency Group Protection Window metrics.
 
+## Compatibility
+  * Compatible with Recoverpoint 3.5
+
 ## DEPENDS
   * python YAML
   * paramiko modules
@@ -20,6 +23,7 @@ Currently gathers:
 
 ## UPDATE
   * 21/03/2014 - Now performs SSH queries asynchronously as a separate thread.  (This should stop it slowing and breaking gmond)
+  * 24/03/2014 - Corrected a bug in reporting SAN traffic when SAN traffic is sometimes reported by recoverpoint in units less than Mbit/s
 
 ## AUTHOR
 
