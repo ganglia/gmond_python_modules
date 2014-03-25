@@ -191,9 +191,18 @@ def get_metrics(name):
                                                      
             #CG Lag and WAN stats are in the Link stats section
             for repname in rawmetrics['Group'][group]['Link stats']:
-                #Get CG WAN metrics (remove 'Mbps' from end + convert to float and then bits)
-                metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
-                
+                #Get CG WAN metrics (Work out the unit from end + convert to float and then bits) 
+                ##(remove 'Mbps' from end + convert to float and then bits)
+                #metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
+                cg_wan_str = rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic']
+                cg_wan_bw = float(cg_wan_str[:-4])
+                cg_wan_unit = cg_wan_str[-4:]
+                if 'Mbps' in cg_wan_unit:
+                    cg_wan_bw = cg_wan_bw * 1024 * 1024
+                else:
+                    cg_wan_bw = cg_wan_bw * 1024
+                metrics[group + '_WAN_Traffic'] = cg_wan_bw
+
                 #Get CG Lag metrics
                 for lagfields in rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag']:
                     if 'Data' in lagfields:
