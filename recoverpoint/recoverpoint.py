@@ -3,12 +3,14 @@
 # Desc: Ganglia Python module for gathering EMC recoverpoint statistics via SSH
 # Author: Evan Fraser (evan.fraser@trademe.co.nz)
 # Date: 01/08/2012
+# Compatibility note: Compatible with Recoverpoint version 3.5
 
 
 import yaml
 import warnings
 import pprint
 import time
+import threading
 import re
 
 with warnings.catch_warnings():
@@ -23,6 +25,7 @@ NIMETRICS = {
 #This is the minimum interval between querying the RPA for metrics.
 #Each ssh query takes 1.6s so we limit the interval between getting metrics to this interval.
 NIMETRICS_CACHE_MAX = 10
+RAWDATA = ""
 
 ipaddr = ''
 
@@ -116,20 +119,27 @@ def create_desc(skel, prop):
     for k,v in prop.iteritems():
         d[k] = v
     return d
+
+
+def run_ssh_thread(foo,bar):
+    global RAWDATA
+    sshcon = paramiko.SSHClient()
+    sshcon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
+    stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
+    RAWDATA = stdout.read()
+    
+
     
 def get_metrics(name):
     global NIMETRICS,ipaddr
     # if interval since last check > NIMETRICS_CACHE_MAX get metrics again
     metrics = {}
     if (time.time() - NIMETRICS['time']) > NIMETRICS_CACHE_MAX:
-
-        sshcon = paramiko.SSHClient()
-        sshcon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
-        stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
-        rawdata = stdout.read()
+        threading.Thread(run_ssh_thread(1,1))
+        rawdata = RAWDATA
         #Group stats don't leave a space after the colon in some places
-        rawmetrics = yaml.safe_load(rawdata.replace(':N',': N'))
+        rawmetrics = yaml.safe_load(rawdata.replace(':N',': N').replace("Compression","\n      Compression"))
         #Get RPA metrics
         for rpa in rawmetrics['RPA statistics']:
             for metric in rawmetrics['RPA statistics'][rpa]:
@@ -144,9 +154,18 @@ def get_metrics(name):
         for group in rawmetrics['Group']:
             #CG SAN and Journal lag are under the policies
             for policyname in rawmetrics['Group'][group]['Copy stats']:
-                #Get CG SAN metrics (remove 'Mbps' from end + convert to float and then bits)
+                #Get CG SAN metrics (Work out the unit from end + convert to float and then bits)
                 if 'SAN traffic' in rawmetrics['Group'][group]['Copy stats'][policyname]:
-                    metrics[group + '_SAN_Traffic'] = float(rawmetrics['Group'][group]['Copy stats'][policyname]['SAN traffic']['Current throughput'][:-4]) * 1024 * 1024
+                    cg_san_str = rawmetrics['Group'][group]['Copy stats'][policyname]['SAN traffic']['Current throughput']
+                    cg_san_bw = float(cg_san_str[:-4])
+                    cg_san_unit = cg_san_str[-4:]
+                    if 'Mbps' in cg_san_unit:
+                        cg_san_bw = cg_san_bw * 1024 * 1024
+                    else:
+                        cg_san_bw = cg_san_bw * 1024
+                    metrics[group + '_SAN_Traffic'] = cg_san_bw
+
+
                 elif 'Journal' in rawmetrics['Group'][group]['Copy stats'][policyname]:
                     datastr = rawmetrics['Group'][group]['Copy stats'][policyname]['Journal']['Journal lag']
                     amount = float(datastr[:-2])
@@ -172,9 +191,18 @@ def get_metrics(name):
                                                      
             #CG Lag and WAN stats are in the Link stats section
             for repname in rawmetrics['Group'][group]['Link stats']:
-                #Get CG WAN metrics (remove 'Mbps' from end + convert to float and then bits)
-                metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
-                
+                #Get CG WAN metrics (Work out the unit from end + convert to float and then bits) 
+                ##(remove 'Mbps' from end + convert to float and then bits)
+                #metrics[group + '_WAN_Traffic'] = float(rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic'][:-4]) * 1024 * 1024
+                cg_wan_str = rawmetrics['Group'][group]['Link stats'][repname]['Replication']['WAN traffic']
+                cg_wan_bw = float(cg_wan_str[:-4])
+                cg_wan_unit = cg_wan_str[-4:]
+                if 'Mbps' in cg_wan_unit:
+                    cg_wan_bw = cg_wan_bw * 1024 * 1024
+                else:
+                    cg_wan_bw = cg_wan_bw * 1024
+                metrics[group + '_WAN_Traffic'] = cg_wan_bw
+
                 #Get CG Lag metrics
                 for lagfields in rawmetrics['Group'][group]['Link stats'][repname]['Replication']['Lag']:
                     if 'Data' in lagfields:
@@ -210,7 +238,7 @@ def get_metrics(name):
     
 
 def metric_init(params):
-    global descriptors, Desc_Skel, ipaddr
+    global descriptors, Desc_Skel, ipaddr, RAWDATA
     print '[recoverpoint] Recieved the following parameters'
     print params
     ipaddr = params['mgmtip']
@@ -234,8 +262,10 @@ def metric_init(params):
     sshcon.connect(ipaddr, username='monitor',password='monitor',look_for_keys='False')
     stdin, stdout, sterr = sshcon.exec_command("get_system_statistics;get_group_statistics")
     rawdata = stdout.read()
+    RAWDATA = rawdata
+#    f = 
     #Group stats don't leave a space after the colon in some places
-    statsDict = yaml.safe_load(rawdata.replace(':N',': N'))
+    statsDict = yaml.safe_load(rawdata.replace(':N',': N').replace("Compression","\n      Compression"))
     sshcon.close()
     descriptors = define_metrics(Desc_Skel, statsDict)
 

@@ -8,6 +8,9 @@ Currently gathers:
   * Per Consistency Group Write, Data, Time and Journal Lags, as well as WAN and SAN traffic.
   * Per Consistency Group Protection Window metrics.
 
+## Compatibility
+  * Compatible with Recoverpoint 3.5
+
 ## DEPENDS
   * python YAML
   * paramiko modules
@@ -17,6 +20,10 @@ Currently gathers:
   * Save the recoverpoint.pyconf into /etc/ganglia/conf.d directory and update the management IP and sitenames (the sitenames have been lowercase'd)
   * Save the recoverpoint.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.  Update the username/passwords if necessary.
   * Restart gmond and a "recoverpoint" host should appear in ganglia.
+
+## UPDATE
+  * 21/03/2014 - Now performs SSH queries asynchronously as a separate thread.  (This should stop it slowing and breaking gmond)
+  * 24/03/2014 - Corrected a bug in reporting SAN traffic when SAN traffic is sometimes reported by recoverpoint in units less than Mbit/s
 
 ## AUTHOR
 
