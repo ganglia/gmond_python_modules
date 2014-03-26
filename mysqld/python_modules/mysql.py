@@ -378,8 +378,8 @@ def metric_init(params):
 		host = params.get('host', 'localhost'),
 		user = params.get('user'),
 		passwd = params.get('passwd'),
-		port = params.get('port', 3306),
-		connect_timeout = params.get('timeout', 30),
+		port = int(params.get('port', 3306)),
+		connect_timeout = int(params.get('timeout', 30)),
 	)
 	if params.get('unix_socket', '') != '':
 		mysql_conn_opts['unix_socket'] = params.get('unix_socket')
