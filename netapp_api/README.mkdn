@@ -1,18 +1,22 @@
 NetApp Filer API metrics
 ========================
 
-This is a GMOND Python Module that gathers metrics from NetApp appliances via the Netapp Data ONTAP APIs.
+These are GMOND Python Modules that gathers metrics from NetApp appliances via the Netapp Data ONTAP APIs.
+There are two modules, one for 7-mode filers, and one for Clusters running Clustered ONTAP.
+
 The API allows counter access to many more metrics than available through SNMP.
 
-This module currently gathers per volume Read/Write/Average IOPs and Latency and handles multiple filers.
+This module currently gathers per volume Read/Write/Average IOPs and Latency and handles multiple filers/clusters
+
 
 ## DEPENDS
-  * Netapp Managemability SDK 5.0 (download from now.netapp.com to /opt/netapp)
+  * For the 7-mode module: Netapp Manageability SDK 5.0 (download from now.netapp.com to /opt/netapp)
+  * For the c-mode module: Netapp Manageability SDK 5.2 (download from now.netapp.com to /opt/netapp/sdk)
 
 ## USAGE
-  * Save the netapp_api.pyconf into /etc/ganglia/conf.d
-  * Save the netapp_api.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.
-  * Update the Username, password, IP and filer name. 
+  * Save the netapp_api.pyconf or netapp_api_cmode.pyconf into /etc/ganglia/conf.d
+  * Save the netapp_api.py or netapp_api_cmode.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.
+  * Update the Username, password, IP and name for the Filers/clusters. 
   * Restart gmond and the volume latency & iop metrics should appear in ganglia.
 
 ## AUTHOR
