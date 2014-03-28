@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#Name: netapp_api.py
+#Name: netapp_api_cmode.py
 #Desc: Uses Netapp Data Ontap API to get per volume latency & iops metrics.  Download the managemability SDK from now.netapp.com
 #Author: Evan Fraser <evan.fraser@trademe.co.nz>
 #Date: 13/08/2012
