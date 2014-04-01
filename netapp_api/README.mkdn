@@ -3,11 +3,15 @@ NetApp Filer API metrics
 
 These are GMOND Python Modules that gathers metrics from NetApp appliances via the Netapp Data ONTAP APIs.
 There are two modules, one for 7-mode filers, and one for Clusters running Clustered ONTAP.
+The c-mode module now polls clusters as separate threads.  This speeds up polling and gmond reliability.
 
 The API allows counter access to many more metrics than available through SNMP.
 
 This module currently gathers per volume Read/Write/Average IOPs and Latency and handles multiple filers/clusters
 
+## Changelog
+  * 02/04/2014 c-mode script now gathers volume file and space metrics
+  * 26/03/2014 c-mode script now does cluster api calls as separate threads
 
 ## DEPENDS
   * For the 7-mode module: Netapp Manageability SDK 5.0 (download from now.netapp.com to /opt/netapp)
