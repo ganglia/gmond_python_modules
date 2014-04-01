@@ -15,4 +15,11 @@ collection_group {
     metric {
         name_match = "(.+)ops"
         }
+    metric {
+        name_match = "(.+)files_(.+)"
+        }
+    metric {
+        name_match = "(.+)size_(.+)"
+        }
+
 }

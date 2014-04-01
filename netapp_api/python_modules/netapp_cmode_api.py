@@ -4,6 +4,7 @@
 #Author: Evan Fraser <evan.fraser@trademe.co.nz>
 #Date: 13/08/2012
 #Updated 26/03/2014: Now polls each filer as a separate thread and now only supports Clustered ONTAP 8.2+
+#Updated 02/04/2014: Now has volume space and inode metrics
 
 import sys
 import time
@@ -35,25 +36,11 @@ class GetMetricsThread(threading.Thread):
         self.FilerName = FilerName
         self.instances = None
         self.ClusterName = filerdict[self.FilerName]['name']
+        self.volume_capacity_obj = None
         super(GetMetricsThread, self).__init__()
-    
-    def run(self):
-        self.filer_metrics = {}
-        metric = self.MetricName
-        filer = self.FilerName
-        s = NaServer(filerdict[filer]['ipaddr'], 1, 3)
-        out = s.set_transport_type('HTTPS')
-        if (out and out.results_errno() != 0) :
-            r = out.results_reason()
-            print ("Connection to filer failed: " + r + "\n")
-            sys.exit(2)
-            
-        out = s.set_style('LOGIN')
-        if (out and out.results_errno() != 0) :
-            r = out.results_reason()
-            print ("Connection to filer failed: " + r + "\n")
-            sys.exit(2)
-        out = s.set_admin_user(filerdict[filer]['user'], filerdict[filer]['password'])
+
+    def volume_perf_metrics(self, s):
+        # In class function to get volume perf metrics
 
         #In C-mode, perf-object-get-instances-iter-start doesn't exist
         # Also need to get list of instance names to provide to the perf-object-get-instances now.
@@ -101,10 +88,68 @@ class GetMetricsThread(threading.Thread):
         instances = instances_list.children_get()
         self.instances = instances
 
+    def volume_capacity_metrics(self, s):
+        # Function to perform API queries to get volume capacity metrics.
+        na_server_obj = s
+        #Limit the volume attributes we retrieve to the inode and space metrics
+        api = NaElement("volume-get-iter")
+
+        xi = NaElement("desired-attributes")
+        api.child_add(xi)
+        api.child_add_string("max-records", "999")
+
+
+        xi1 = NaElement("volume-attributes")
+        xi.child_add(xi1)
+
+
+        xi2 = NaElement("volume-id-attributes")
+        xi1.child_add(xi2)
+
+        xi3 = NaElement("volume-space-attributes")
+        xi1.child_add(xi3)
+
+        xi4 = NaElement("volume-inode-attributes")
+        xi1.child_add(xi4)
+
+        out = na_server_obj.invoke_elem(api)
+        if(out.results_status() == "failed"):
+            print("Invoke failed: " + out.results_reason() + "\n")
+            sys.exit(2)
+
+        vol_list = out.child_get("attributes-list")
+        volumes = vol_list.children_get()
+
+        self.volume_capacity_obj = volumes
+
+        return
+        
+    def run(self):
+        self.filer_metrics = {}
+        metric = self.MetricName
+        filer = self.FilerName
+        s = NaServer(filerdict[filer]['ipaddr'], 1, 3)
+        out = s.set_transport_type('HTTPS')
+        if (out and out.results_errno() != 0) :
+            r = out.results_reason()
+            print ("Connection to filer failed: " + r + "\n")
+            sys.exit(2)
+            
+        out = s.set_style('LOGIN')
+        if (out and out.results_errno() != 0) :
+            r = out.results_reason()
+            print ("Connection to filer failed: " + r + "\n")
+            sys.exit(2)
+        out = s.set_admin_user(filerdict[filer]['user'], filerdict[filer]['password'])
+
+        #Get the volume performance metrics
+        self.volume_perf_metrics(s)
+        self.volume_capacity_metrics(s)
+
     #Function within the class for updating the metrics
     def update_metrics(self):
         clustername = self.ClusterName
-        print clustername
+
         for inst in self.instances:
             inst_name = unicodedata.normalize('NFKD',inst.child_get_string("name")).encode('ascii','ignore')
             counters_list = inst.child_get("counters")
@@ -115,6 +160,30 @@ class GetMetricsThread(threading.Thread):
                 counter_value = counter.child_get_string("value")
                 counter_unit = counter.child_get_string("unit")           
                 self.filer_metrics[clustername + '_vol_' + inst_name + '_' + counter_name] = float(counter_value)
+
+        for vol in self.volume_capacity_obj:
+
+            vol_id = vol.child_get("volume-id-attributes")
+            vol_name = unicodedata.normalize('NFKD',vol_id.child_get_string("name")).encode('ascii','ignore')
+            vserver_name = unicodedata.normalize('NFKD',vol_id.child_get_string("owning-vserver-name")).encode('ascii','ignore')
+
+            vol_inode = vol.child_get("volume-inode-attributes")
+            vol_files_used = unicodedata.normalize('NFKD',vol_inode.child_get_string("files-used")).encode('ascii','ignore')
+            vol_files_total = unicodedata.normalize('NFKD',vol_inode.child_get_string("files-total")).encode('ascii','ignore')
+            vol_files_used_percent = float(vol_files_used) / float(vol_files_total) * 100
+
+            vol_space = vol.child_get("volume-space-attributes")
+            vol_size_used = unicodedata.normalize('NFKD',vol_space.child_get_string("size-used")).encode('ascii','ignore')
+            vol_size_total = unicodedata.normalize('NFKD',vol_space.child_get_string("size-total")).encode('ascii','ignore')
+            vol_size_used_percent = float(vol_size_used) / float(vol_size_total) * 100
+
+            self.filer_metrics[clustername + '_vol_' +vserver_name + '_' + vol_name + '_' + 'files_used'] = float(vol_files_used)
+            self.filer_metrics[clustername + '_vol_' +vserver_name + '_' + vol_name + '_' + 'files_total'] = float(vol_files_total)
+            self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'files_used_percent'] = vol_files_used_percent
+            self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used'] = float(vol_size_used)
+            self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_total'] = float(vol_size_total)
+            self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used_percent'] = vol_size_used_percent
+
 
     #Function within the class for defining the metrics for ganglia
     def define_metrics(self,Desc_Skel,params):
@@ -130,7 +199,7 @@ class GetMetricsThread(threading.Thread):
                 counter_name = unicodedata.normalize('NFKD',counter.child_get_string("name")).encode('ascii','ignore')
                 counter_value = counter.child_get_string("value")
                 counter_unit = counter.child_get_string("unit")
-                print counter_name
+
                 if 'total_ops' in counter_name:
                     descriptors.append(create_desc(Desc_Skel, {
                                 "name"        : clustername + '_vol_' + inst_name + '_' + counter_name,
@@ -180,6 +249,56 @@ class GetMetricsThread(threading.Thread):
                                 "groups"      : "latency"
                                 }))
 
+
+        for vol in self.volume_capacity_obj:
+
+            vol_id = vol.child_get("volume-id-attributes")
+            vol_name = unicodedata.normalize('NFKD',vol_id.child_get_string("name")).encode('ascii','ignore')
+            vserver_name = unicodedata.normalize('NFKD',vol_id.child_get_string("owning-vserver-name")).encode('ascii','ignore')
+            
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'files_used',
+                        "units"       : 'inodes',
+                        "description" : "volume files used",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "inodes"
+                        }))
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'files_total',
+                        "units"       : 'inodes',
+                        "description" : "volume files total",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "inodes"
+                        }))
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'files_used_percent',
+                        "units"       : 'percent',
+                        "description" : "volume inodes percent used",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "inodes"
+                        }))
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used',
+                        "units"       : 'Bytes',
+                        "description" : "volume bytes used",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "capacity"
+                        }))
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_total',
+                        "units"       : 'Bytes',
+                        "description" : "volume size in bytes",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "capacity"
+                        }))
+            descriptors.append(create_desc(Desc_Skel, {
+                        "name"        : clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used_percent',
+                        "units"       : 'percent',
+                        "description" : "volume capacity percent used",
+                        "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                        "groups"      : "capacity"
+                        }))
+            
         
 def get_metrics(name):
     global FASMETRICS, LAST_FASMETRICS, FASMETRICS_CACHE_MAX, params
@@ -266,7 +385,35 @@ def get_metrics(name):
             return float((FASMETRICS['data'][name] - LAST_FASMETRICS['data'][name]) / (FASMETRICS['data'][write_ops_name] -LAST_FASMETRICS['data'][write_ops_name])) / 1000
         except StandardError:
             return 0
+
+    elif 'files_used' in name:
+        try:
+            result = float(FASMETRICS['data'][name])
+        except StandardError:
+            result = 0
             
+        return result
+    elif 'files_total' in name:
+        try:
+            result = float(FASMETRICS['data'][name])
+        except StandardError:
+            result = 0
+            
+        return result
+            
+    elif 'size_used' in name:
+         try:
+             result = float(FASMETRICS['data'][name])
+         except StandardError:
+             result = 0
+         return result
+
+    elif 'size_total' in name:
+         try:
+             result = float(FASMETRICS['data'][name])
+         except StandardError:
+             result = 0
+         return result
 
     return 0    
         
@@ -283,8 +430,9 @@ def create_desc(skel, prop):
 
 def define_metrics(Desc_Skel,params):
     global descriptors
-    ObjectTypeList = ["lif:vserver"]
-    max_records = 10
+    #ObjectTypeList = ["lif:vserver"]
+    ObjectTypeList = ["volume"]
+
     threads = []
     for filer in params.keys():
         #call define_metrics_thread as separate threads for each filer
@@ -309,12 +457,12 @@ def metric_init(params):
             'user' : 'username',
             'password' : 'password',
               },
-        'filer2' : {
-            'name' : 'cluster2.localdomain',
-            'ipaddr' : '192.168.1.100',
-            'user' : 'username',
-            'password' : 'password',
-              },
+         'filer2' : {
+             'name' : 'cluster2.localdomain',
+             'ipaddr' : '192.168.2.100',
+             'user' : 'username',
+             'password' : 'password',
+               },
         }
 
     filerdict = dict(params)
