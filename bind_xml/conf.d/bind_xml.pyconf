@@ -1,0 +1,36 @@
+modules {
+  module {
+    name     = "bind_xml"
+    language = "python"
+    param host {
+        value = "localhost"
+    }
+    param port {
+        value = 8053
+    }
+
+    # This module calculates all metrics (including derived) rates at
+    # onces and then serves them out of a cache. This determines the
+    # minimum TTL.
+    param min_poll_seconds {
+        value = 20
+    }
+    # Where to log information from this module (syslog facility)
+    param syslog_facility {
+        value = "user"
+    }
+    # log level, WARNING is not expected to produce any output
+    param log_level {
+        value = "WARNING"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 60
+
+    metric {
+        name_match = "bind_(.+)"
+    }
+}
