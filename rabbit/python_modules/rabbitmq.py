@@ -6,6 +6,7 @@ import logging
 import logging.handlers
 import optparse
 import os
+import pprint
 import sys
 import threading
 import time
@@ -347,6 +348,9 @@ def parse_args(argv):
     parser.add_option('--vhosts',
                       action='store', dest='vhosts', default='/',
                       help='csv of vhosts')
+    parser.add_option('--list-only',
+                      action='store_true', dest='list_only', default='defualt',
+                      help='List known queues etc instead of printing values in a loop')
     parser.add_option('--log',
                       action='store', dest='log', default='stderr', choices=['stderr', 'syslog', 'both'],
                       help='log to stderr and/or syslog')
@@ -374,6 +378,14 @@ def main(argv):
     descriptors = metric_init(parameters)
     result = refreshStats(stats = parameters['stats'], vhosts = parameters['vhosts'])
     print '***'*20
+    if opts.list_only is True:
+        print 'nodes:'
+        pprint.pprint(list_nodes())
+        print 'queues:'
+        for vhost in parameters['vhosts']:
+            print 'vhost: %s' % vhost
+            pprint.pprint(list_queues(vhost))
+        return
     try:
         while True:
             for d in descriptors:
