@@ -1,12 +1,15 @@
 #!/usr/bin/python2.4
-import sys
-import os
-import json
-import urllib2
-import time
-from string import Template
+
 import itertools
+import json
+import optparse
+import os
+import sys
 import threading
+import time
+import urllib2
+
+from string import Template
 
 global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
 
@@ -295,17 +298,44 @@ def metric_init(params):
 
 def metric_cleanup():
     pass
-  
 
-if __name__ == "__main__":
-    url = 'http://%s:%s@localhost:15672/api/$stats' % (username, password)
-    url_template = Template(url)
-    print "url_template is ", url_template
+
+def parse_args(argv):
+    parser = optparse.OptionParser()
+    parser.add_option('--admin-host',
+                      action='store', dest='admin_host', default='localhost',
+                      help='')
+    parser.add_option('--admin-port',
+                      action='store', dest='admin_port', default=15672,
+                      help='')
+
+    return parser.parse_args(argv)
+
+
+def main(argv):
+    """ used for testing """
+    (opts, args) = parse_args(argv)
 ### in config files we use '/' in vhosts names but we should convert '/' to '-' when calculating a metric
-    parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq", "zero_rates_when_idle": "yes"}
-    metric_init(parameters)
+    parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq",
+                  "zero_rates_when_idle": "yes",
+                  "host": opts.admin_host, "port": opts.admin_port}
+    descriptors = metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*20
-    getQueueStat('rmq_backing_queue_ack_egress_rate___nfl_client___-')
-    getNodeStat('rmq_disk_free___rmqone@inrmq01d1___-')
-    getNodeStat('rmq_mem_used___rmqone@inrmq01d1___-')
+    try:
+        while True:
+            for d in descriptors:
+                v = d['call_back'](d['name'])
+                if v is None:
+                    print 'got None for %s' % d['name']
+                else:
+                    print 'value for %s is %r' % (d['name'], v)
+            time.sleep(5)
+            print '----------------------------'
+    except KeyboardInterrupt:
+        print 'KeyboardInterrupt, shutting down...'
+        metric_cleanup()
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
