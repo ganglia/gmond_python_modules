@@ -344,6 +344,9 @@ def parse_args(argv):
     parser.add_option('--stats',
                       action='store', dest='stats', default='nodes',
                       help='csv of which stats to emit, choies: nodes, queues')
+    parser.add_option('--vhosts',
+                      action='store', dest='vhosts', default='/',
+                      help='csv of vhosts')
     parser.add_option('--log',
                       action='store', dest='log', default='stderr', choices=['stderr', 'syslog', 'both'],
                       help='log to stderr and/or syslog')
@@ -366,9 +369,10 @@ def main(argv):
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq",
                   "zero_rates_when_idle": "yes",
                   "host": opts.admin_host, "port": opts.admin_port,
-                  "stats": opts.stats.split(',')}
+                  "stats": opts.stats.split(','),
+                  "vhosts": opts.vhosts.split(',')}
     descriptors = metric_init(parameters)
-    result = refreshStats(stats = parameters['stats'], vhosts = ('/'))
+    result = refreshStats(stats = parameters['stats'], vhosts = parameters['vhosts'])
     print '***'*20
     try:
         while True:
