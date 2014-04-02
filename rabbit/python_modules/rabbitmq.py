@@ -342,7 +342,7 @@ def parse_args(argv):
                       action='store', dest='admin_port', default=15672,
                       help='')
     parser.add_option('--stats',
-                      action='store', dest='stats', default='nodes',
+                      action='store', dest='stats', default='nodes,queues',
                       help='csv of which stats to emit, choies: nodes, queues')
     parser.add_option('--vhosts',
                       action='store', dest='vhosts', default='/',
