@@ -12,6 +12,13 @@ modules {
       value = "localhost"
     }
 
+    # CSV of which type of stats to emit
+    # * nodes: per broker details about mem, sockets, etc
+    # * queues: per queue stats, may result in many metrics on brokers with many queues
+    param stats {
+      value = "nodes,queues"
+    }
+
     param vhost {
       value = "/,vhost1,vhost2"
     }

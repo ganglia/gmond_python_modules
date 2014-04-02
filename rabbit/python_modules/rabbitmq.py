@@ -223,6 +223,7 @@ def metric_init(params):
     username, password = params['username'], params['password']
     host = params['host']
     port = params['port']
+    STATS = params['stats']
 
     zero_rates_when_idle = str2bool(params['zero_rates_when_idle'])
     
@@ -296,8 +297,10 @@ def metric_init(params):
                 log.debug(d2)
                 descriptors.append(d2)
 
-    buildQueueDescriptors()
-    buildNodeDescriptors()
+    if 'queues' in STATS:
+        buildQueueDescriptors()
+    if 'nodes' in STATS:
+        buildNodeDescriptors()
     # buildTestNodeStat()
 	
     return descriptors
@@ -338,6 +341,9 @@ def parse_args(argv):
     parser.add_option('--admin-port',
                       action='store', dest='admin_port', default=15672,
                       help='')
+    parser.add_option('--stats',
+                      action='store', dest='stats', default='nodes',
+                      help='csv of which stats to emit, choies: nodes, queues')
     parser.add_option('--log',
                       action='store', dest='log', default='stderr', choices=['stderr', 'syslog', 'both'],
                       help='log to stderr and/or syslog')
@@ -359,9 +365,10 @@ def main(argv):
 ### in config files we use '/' in vhosts names but we should convert '/' to '-' when calculating a metric
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq",
                   "zero_rates_when_idle": "yes",
-                  "host": opts.admin_host, "port": opts.admin_port}
+                  "host": opts.admin_host, "port": opts.admin_port,
+                  "stats": opts.stats.split(',')}
     descriptors = metric_init(parameters)
-    result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
+    result = refreshStats(stats = parameters['stats'], vhosts = ('/'))
     print '***'*20
     try:
         while True:
