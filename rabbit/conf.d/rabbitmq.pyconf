@@ -32,7 +32,14 @@ modules {
     param zero_rates_when_idle {
       value = "True"
     }
-
+    # Where to log information from this module (syslog facility)
+    param syslog_facility {
+        value = "user"
+    }
+    # log level, WARNING is not expected to produce any output
+    param log_level {
+        value = "WARNING"
+    }
   }
 }
 

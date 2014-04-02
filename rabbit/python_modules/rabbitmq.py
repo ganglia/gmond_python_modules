@@ -2,6 +2,8 @@
 
 import itertools
 import json
+import logging
+import logging.handlers
 import optparse
 import os
 import sys
@@ -88,8 +90,10 @@ def dig_it_up(obj,path):
     try:
 	path = path.split(JSON_PATH_SEPARATOR)
         return reduce(lambda x,y:x[y],path,obj)
-    except:
-        print "Exception"
+    except Exception, e:
+        # not WARN because the False return is used for control flow
+        # (zero assumed)
+        log.debug('dig_it_up Exception %r  path: %s' % (e, path))
         return False
 
 def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
@@ -105,7 +109,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
         diff = now - last_update
 
     if diff >= INTERVAL or not last_update:
-	print "Fetching Results after %d seconds" % INTERVAL
+	log.debug("Fetching Results after %d seconds" % INTERVAL)
 	last_update = now
         for stat in stats:
             for vhost in vhosts:
@@ -113,7 +117,7 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
                     vhost = '/'
 		result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
-                print urlstring
+                log.debug('urlspring: %s' % urlstring)
                 result = json.load(urllib2.urlopen(urlstring))
 		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
 		if stat in ("queues", "nodes", "exchanges"):
@@ -146,7 +150,8 @@ def getQueueStat(name):
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
     
     #handle queue names with . in them
-    print name
+                 
+    log.debug(name)
     stat_name, queue_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
     
     vhost = vhost.replace('-', '/') #decoding vhost from metric name
@@ -175,7 +180,7 @@ def getNodeStat(name):
     result = compiled_results[('nodes', '/')]
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
-    print name,value
+    log.debug('name: %r value: %r' % (name, value))
     #Convert Booleans
     if value is True:
         value = 1
@@ -204,7 +209,9 @@ def str2bool(string):
 def metric_init(params):
     ''' Create the metric definition object '''
     global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS, vhosts, zero_rates_when_idle
-    print 'received the following params:'
+    if log is None:
+       setup_logging('syslog', params['syslog_facility'], params['log_level'])
+    log.info('received the following params: %r' % params)
     #Set this globally so we can refresh stats
     if 'host' not in params:
         params['host'], params['vhost'],params['username'],params['password'],params['port'] = "localhost", "/", "guest", "guest", "15672"
@@ -228,7 +235,6 @@ def metric_init(params):
     opener.open(base_url)
     urllib2.install_opener(opener)
     url_template = Template(url)
-    print params
 
     refreshStats(stats = STATS, vhosts = vhosts)
 
@@ -262,7 +268,7 @@ def metric_init(params):
             queues = list_queues(vhost)
             for queue in queues:
                 name = "{1}{0}{2}{0}{3}".format(METRIC_TOKEN_SEPARATOR, metric, queue, vhost.replace('/', '-'))
-		print name
+                log.debug(name)
 		d1 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getQueueStat,
                     'value_type': 'float',
@@ -271,14 +277,14 @@ def metric_init(params):
 		    'format': '%f',
 		    'description': 'Queue_Metric',
 		    'groups' : 'rabbitmq,queue'})
-		print d1
+		log.debug(d1)
 		descriptors.append(d1)
     
     def buildNodeDescriptors():
         for metric in NODE_METRICS:
             for node in list_nodes():
                 name = "{1}{0}{2}{0}-".format(METRIC_TOKEN_SEPARATOR, metric, node)
-                print name
+                log.debug(name)
                 d2 = create_desc({'name': name.encode('ascii','ignore'),
 		    'call_back': getNodeStat,
                     'value_type': 'float',
@@ -287,7 +293,7 @@ def metric_init(params):
 		    'format': '%f',
 		    'description': 'Node_Metric',
 		    'groups' : 'rabbitmq,node'}) 
-                print d2
+                log.debug(d2)
                 descriptors.append(d2)
 
     buildQueueDescriptors()
@@ -300,6 +306,30 @@ def metric_cleanup():
     pass
 
 
+def setup_logging(handlers, facility, level):
+    global log
+
+    log = logging.getLogger('gmond_python_rabbitmq')
+    formatter = logging.Formatter(' | '.join(['%(asctime)s', '%(name)s',  '%(levelname)s', '%(message)s']))
+    if handlers in ['syslog', 'both']:
+        sh = logging.handlers.SysLogHandler(address='/dev/log', facility=facility)
+        sh.setFormatter(formatter)
+        log.addHandler(sh)
+    if handlers in ['stderr', 'both']:
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        log.addHandler(ch)
+    lmap = {
+        'CRITICAL': logging.CRITICAL,
+        'ERROR': logging.ERROR,
+        'WARNING': logging.WARNING,
+        'INFO': logging.INFO,
+        'DEBUG': logging.DEBUG,
+        'NOTSET': logging.NOTSET
+        }
+    log.setLevel(lmap[level])
+
+
 def parse_args(argv):
     parser = optparse.OptionParser()
     parser.add_option('--admin-host',
@@ -308,6 +338,16 @@ def parse_args(argv):
     parser.add_option('--admin-port',
                       action='store', dest='admin_port', default=15672,
                       help='')
+    parser.add_option('--log',
+                      action='store', dest='log', default='stderr', choices=['stderr', 'syslog', 'both'],
+                      help='log to stderr and/or syslog')
+    parser.add_option('--log-level',
+                      action='store', dest='log_level', default='WARNING',
+                      choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'],
+                      help='log to stderr and/or syslog')
+    parser.add_option('--log-facility',
+                      action='store', dest='log_facility', default='user',
+                      help='facility to use when using syslog')
 
     return parser.parse_args(argv)
 
@@ -315,6 +355,7 @@ def parse_args(argv):
 def main(argv):
     """ used for testing """
     (opts, args) = parse_args(argv)
+    setup_logging(opts.log, opts.log_facility, opts.log_level)
 ### in config files we use '/' in vhosts names but we should convert '/' to '-' when calculating a metric
     parameters = {"vhost":"/", "username":"guest","password":"guest", "metric_group":"rabbitmq",
                   "zero_rates_when_idle": "yes",
@@ -333,7 +374,7 @@ def main(argv):
             time.sleep(5)
             print '----------------------------'
     except KeyboardInterrupt:
-        print 'KeyboardInterrupt, shutting down...'
+        log.debug('KeyboardInterrupt, shutting down...')
         metric_cleanup()
 
 if __name__ == "__main__":
