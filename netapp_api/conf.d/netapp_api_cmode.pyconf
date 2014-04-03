@@ -21,5 +21,8 @@ collection_group {
     metric {
         name_match = "(.+)size_(.+)"
         }
+    metric {
+        name_match = "(.+)quota_used"
+        }
 
 }

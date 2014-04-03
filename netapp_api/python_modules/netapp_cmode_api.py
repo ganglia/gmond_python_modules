@@ -4,7 +4,8 @@
 #Author: Evan Fraser <evan.fraser@trademe.co.nz>
 #Date: 13/08/2012
 #Updated 26/03/2014: Now polls each filer as a separate thread and now only supports Clustered ONTAP 8.2+
-#Updated 02/04/2014: Now has volume space and inode metrics
+#Updated 02/04/2014: Now retrieves per volume space and file(inode) metrics
+#Updated 03/04/2014: Now retrieves qtree quota usage metrics
 
 import sys
 import time
@@ -37,7 +38,9 @@ class GetMetricsThread(threading.Thread):
         self.instances = None
         self.ClusterName = filerdict[self.FilerName]['name']
         self.volume_capacity_obj = None
+        self.quota_obj = None
         super(GetMetricsThread, self).__init__()
+
 
     def volume_perf_metrics(self, s):
         # In class function to get volume perf metrics
@@ -87,6 +90,29 @@ class GetMetricsThread(threading.Thread):
         instances_list = out.child_get("instances")            
         instances = instances_list.children_get()
         self.instances = instances
+
+    def quota_metrics(self, s):
+        na_server_obj = s
+
+        api = NaElement("quota-report-iter")
+        api.child_add_string("max-records", "999")
+
+        out = na_server_obj.invoke_elem(api)
+        if(out.results_status() == "failed"):
+            print("Invoke failed: " + out.results_reason() + "\n")
+            sys.exit(2)
+        #pprint(out)
+        num_records = out.child_get_string("num-records")
+
+        quota_list = out.child_get("attributes-list")
+        
+        #Check if quota_list returned is empty, if so, skip quota metrics for this cluster
+        if quota_list is None:
+            return
+        quotas = quota_list.children_get()
+        self.quota_obj = quotas
+
+        return
 
     def volume_capacity_metrics(self, s):
         # Function to perform API queries to get volume capacity metrics.
@@ -145,6 +171,7 @@ class GetMetricsThread(threading.Thread):
         #Get the volume performance metrics
         self.volume_perf_metrics(s)
         self.volume_capacity_metrics(s)
+        self.quota_metrics(s)
 
     #Function within the class for updating the metrics
     def update_metrics(self):
@@ -183,6 +210,17 @@ class GetMetricsThread(threading.Thread):
             self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used'] = float(vol_size_used)
             self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_total'] = float(vol_size_total)
             self.filer_metrics[clustername + '_vol_' + vserver_name + '_' + vol_name + '_' + 'size_used_percent'] = vol_size_used_percent
+
+        
+        #Only do quota metrics if cluster actually has quotas enabled
+        if self.quota_obj is not None:
+
+            for q in self.quota_obj:
+                q_qtree_name = unicodedata.normalize('NFKD',unicode(q.child_get_string("tree"))).encode('ascii','ignore').replace(" ", "_")
+                q_quota_used = unicodedata.normalize('NFKD',q.child_get_string("disk-used")).encode('ascii','ignore')
+                q_vserver_name = unicodedata.normalize('NFKD',q.child_get_string("vserver")).encode('ascii','ignore')
+                q_volume_name = unicodedata.normalize('NFKD',q.child_get_string("volume")).encode('ascii','ignore')
+                self.filer_metrics[clustername + '_vol_' + q_vserver_name + '_' + q_volume_name + '_' + q_qtree_name + '_' + 'quota_used'] = float(q_quota_used)
 
 
     #Function within the class for defining the metrics for ganglia
@@ -299,7 +337,22 @@ class GetMetricsThread(threading.Thread):
                         "groups"      : "capacity"
                         }))
             
-        
+        if self.quota_obj is not None:
+            for q in self.quota_obj:
+                q_qtree_name = unicodedata.normalize('NFKD',unicode(q.child_get_string("tree"))).encode('ascii','ignore').replace(" ", "_")
+                #q_quota_used = float(q.child_get_string("disk-used"))
+                q_vserver_name = unicodedata.normalize('NFKD',q.child_get_string("vserver")).encode('ascii','ignore')
+                q_volume_name = unicodedata.normalize('NFKD',q.child_get_string("volume")).encode('ascii','ignore')
+                descriptors.append(create_desc(Desc_Skel, {
+                            "name"        : clustername + '_vol_' + q_vserver_name + '_' + q_volume_name + '_' + q_qtree_name + '_' + 'quota_used',
+                            "units"       : 'Bytes',
+                            "description" : "quota space used",
+                            "spoof_host"  : params[filer]['ipaddr'] + ':' + params[filer]['name'],
+                            "groups"      : "quotas"
+                            }))
+
+            #print q_qtree_name + " ",q_quota_used, " ", q_vserver_name, " ", q_volume_name
+
 def get_metrics(name):
     global FASMETRICS, LAST_FASMETRICS, FASMETRICS_CACHE_MAX, params
     max_records = 10
@@ -414,6 +467,12 @@ def get_metrics(name):
          except StandardError:
              result = 0
          return result
+    elif 'quota_used' in name:
+         try:
+             result = float(FASMETRICS['data'][name]) * 1024
+         except StandardError:
+             result = 0
+         return result
 
     return 0    
         
@@ -457,12 +516,12 @@ def metric_init(params):
             'user' : 'username',
             'password' : 'password',
               },
-         'filer2' : {
-             'name' : 'cluster2.localdomain',
-             'ipaddr' : '192.168.2.100',
-             'user' : 'username',
-             'password' : 'password',
-               },
+        'filer2' : {
+            'name' : 'cluster2.localdomain',
+            'ipaddr' : '192.168.1.200',
+            'user' : 'username',
+            'password' : 'password',
+              },
         }
 
     filerdict = dict(params)

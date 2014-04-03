@@ -10,6 +10,7 @@ The API allows counter access to many more metrics than available through SNMP.
 This module currently gathers per volume Read/Write/Average IOPs and Latency and handles multiple filers/clusters
 
 ## Changelog
+  * 03/04/2014 c-mode script now retrieves qtree quota metrics
   * 02/04/2014 c-mode script now gathers volume file and space metrics
   * 26/03/2014 c-mode script now does cluster api calls as separate threads
 
