@@ -27,7 +27,7 @@ stats = {}
 keyToPath = {}
 last_update = None
 #last_update = {}
-compiled_results = {"nodes" : None, "queues" : None, "connections" : None}
+compiled_results = {"nodes" : None, "queues" : None, "connections" : None, "exchanges": None}
 #Make initial stat test time dict
 #for stat_type in ('queues', 'connections','exchanges', 'nodes'):
 #    last_update[stat_type] = None
@@ -51,7 +51,9 @@ RATE_METRICS = [
     'rmq_backing_queue_ack_egress_rate',
     'rmq_backing_queue_ack_ingress_rate',
     'rmq_backing_queue_egress_rate',
-    'rmq_backing_queue_ingress_rate'
+    'rmq_backing_queue_ingress_rate',
+    'rmq_exchange_publish_in_rate',
+    'rmq_exchange_publish_out_rate',
 ]
 
 QUEUE_METRICS = ['rmq_messages_ready',
@@ -80,8 +82,13 @@ keyToPath['rmq_mem_proc_used'] = "%s{0}mem_proc_used".format(JSON_PATH_SEPARATOR
 keyToPath['rmq_running'] = "%s{0}running".format(JSON_PATH_SEPARATOR) #Boolean
 
 NODE_METRICS = ['rmq_disk_free', 'rmq_mem_used', 'rmq_disk_free_alarm', 'rmq_running', 'rmq_proc_used', 'rmq_mem_proc_used', 'rmq_fd_used', 'rmq_mem_alarm', 'rmq_mem_code', 'rmq_mem_binary', 'rmq_sockets_used']
-	
 
+# EXCHANGE METRICS #
+
+keyToPath['rmq_exchange_publish_in_rate'] = "%s{0}message_stats{0}publish_in_details{0}rate".format(JSON_PATH_SEPARATOR)
+keyToPath['rmq_exchange_publish_out_rate'] = "%s{0}message_stats{0}publish_out_details{0}rate".format(JSON_PATH_SEPARATOR)
+
+EXCHANGE_METRICS = ['rmq_exchange_publish_in_rate', 'rmq_exchange_publish_out_rate']
 
 
 def metric_cleanup():
@@ -146,21 +153,27 @@ def list_nodes():
     nodes = compiled_results[('nodes', '/')].keys()
     return nodes
 
+def list_exchanges(vhost):
+    global compiled_results
+    exchanges = compiled_results[('exchanges', vhost)].keys()
+    return exchanges
+
+
 def getQueueStat(name):
     refreshStats(stats = STATS, vhosts = vhosts)
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
-    
+
     #handle queue names with . in them
-                 
+
     log.debug(name)
     stat_name, queue_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
-    
+
     vhost = vhost.replace('-', '/') #decoding vhost from metric name
     # Run refreshStats to get the result object
     result = compiled_results[('queues', vhost)]
-    
+
     value = dig_it_up(result, keyToPath[stat_name] % queue_name)
-    
+
     if zero_rates_when_idle and stat_name in RATE_METRICS  and 'idle_since' in result[queue_name].keys():
         value = 0
 
@@ -189,6 +202,33 @@ def getNodeStat(name):
         value = 0
 
     return float(value)
+
+def getExchangeStat(name):
+    refreshStats(stats = STATS, vhosts = vhosts)
+    #Split a name like "rmq_backing_queue_ack_egress_rate.access"
+    
+    #handle queue names with . in them
+                 
+    log.debug(name)
+    stat_name, exchange_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
+    
+    vhost = vhost.replace('-', '/') #decoding vhost from metric name
+    # Run refreshStats to get the result object
+    result = compiled_results[('exchanges', vhost)]
+
+    value = dig_it_up(result, keyToPath[stat_name] % exchange_name)
+    
+    if zero_rates_when_idle and stat_name in RATE_METRICS  and 'idle_since' in result[exchange_name].keys():
+        value = 0
+
+    #Convert Booleans
+    if value is True:
+        value = 1
+    elif value is False:
+        value = 0
+
+    return float(value)
+
 
 def product(*args, **kwds):
     # replacement for itertools.product
@@ -298,10 +338,29 @@ def metric_init(params):
                 log.debug(d2)
                 descriptors.append(d2)
 
+    def buildExchangeDescriptors():
+        for vhost, metric in product(vhosts, EXCHANGE_METRICS):
+            exchanges = list_exchanges(vhost)
+            for exchange in exchanges:
+                name = "{1}{0}{2}{0}{3}".format(METRIC_TOKEN_SEPARATOR, metric, exchange, vhost.replace('/', '-'))
+                log.debug(name)
+		d1 = create_desc({'name': name.encode('ascii','ignore'),
+		    'call_back': getExchangeStat,
+                    'value_type': 'float',
+		    'units': 'N',
+		    'slope': 'both',
+		    'format': '%f',
+		    'description': 'Exchange_Metric',
+		    'groups' : 'rabbitmq,exchange'})
+		log.debug(d1)
+		descriptors.append(d1)
+
     if 'queues' in STATS:
         buildQueueDescriptors()
     if 'nodes' in STATS:
         buildNodeDescriptors()
+    if 'exchanges' in STATS:
+        buildExchangeDescriptors()
     # buildTestNodeStat()
 	
     return descriptors
@@ -343,7 +402,7 @@ def parse_args(argv):
                       action='store', dest='admin_port', default=15672,
                       help='')
     parser.add_option('--stats',
-                      action='store', dest='stats', default='nodes,queues',
+                      action='store', dest='stats', default='nodes,queues,exchanges',
                       help='csv of which stats to emit, choies: nodes, queues')
     parser.add_option('--vhosts',
                       action='store', dest='vhosts', default='/',
@@ -381,6 +440,10 @@ def main(argv):
     if opts.list_only is True:
         print 'nodes:'
         pprint.pprint(list_nodes())
+        print 'exchanges:'
+        for vhost in parameters['vhosts']:
+            print 'vhost: %s' % vhost
+            pprint.pprint(list_exchanges(vhost))
         print 'queues:'
         for vhost in parameters['vhosts']:
             print 'vhost: %s' % vhost
