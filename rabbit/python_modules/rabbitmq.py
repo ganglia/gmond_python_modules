@@ -19,7 +19,7 @@ global url, descriptors, last_update, vhost, username, password, url_template, r
 
 JSON_PATH_SEPARATOR = "?"
 METRIC_TOKEN_SEPARATOR = "___"
- 
+
 INTERVAL = 10
 descriptors = list()
 username, password = "guest", "guest"
@@ -57,15 +57,15 @@ RATE_METRICS = [
 ]
 
 QUEUE_METRICS = ['rmq_messages_ready',
-		'rmq_messages_unacknowledged',
-		'rmq_backing_queue_ack_egress_rate',
-		'rmq_backing_queue_ack_ingress_rate',
-		'rmq_backing_queue_egress_rate',
-		'rmq_backing_queue_ingress_rate',
-		'rmq_backing_queue_mirror_senders',
-		'rmq_memory',
+                'rmq_messages_unacknowledged',
+                'rmq_backing_queue_ack_egress_rate',
+                'rmq_backing_queue_ack_ingress_rate',
+                'rmq_backing_queue_egress_rate',
+                'rmq_backing_queue_ingress_rate',
+                'rmq_backing_queue_mirror_senders',
+                'rmq_memory',
                 'rmq_consumers',
-		'rmq_messages']
+                'rmq_messages']
 
 # NODE METRICS #
 keyToPath['rmq_disk_free'] = "%s{0}disk_free".format(JSON_PATH_SEPARATOR)
@@ -96,7 +96,7 @@ def metric_cleanup():
 
 def dig_it_up(obj,path):
     try:
-	path = path.split(JSON_PATH_SEPARATOR)
+        path = path.split(JSON_PATH_SEPARATOR)
         return reduce(lambda x,y:x[y],path,obj)
     except Exception, e:
         # not WARN because the False return is used for control flow
@@ -117,22 +117,22 @@ def refreshStats(stats = ('nodes', 'queues'), vhosts = ['/']):
         diff = now - last_update
 
     if diff >= INTERVAL or not last_update:
-	log.debug("Fetching Results after %d seconds" % INTERVAL)
-	last_update = now
+        log.debug("Fetching Results after %d seconds" % INTERVAL)
+        last_update = now
         for stat in stats:
             for vhost in vhosts:
                 if stat in ('nodes'):
                     vhost = '/'
-		result_dict = {}
+                result_dict = {}
                 urlstring = url_template.safe_substitute(stats = stat, vhost = vhost)
                 log.debug('urlspring: %s' % urlstring)
                 result = json.load(urllib2.urlopen(urlstring))
-		# Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
-		if stat in ("queues", "nodes", "exchanges"):
-		    for entry in result:
-		        name = entry['name']
-			result_dict[name] = entry
-		    compiled_results[(stat, vhost)] = result_dict
+                # Rearrange results so entry is held in a dict keyed by name - queue name, host name, etc.
+                if stat in ("queues", "nodes", "exchanges"):
+                    for entry in result:
+                        name = entry['name']
+                        result_dict[name] = entry
+                    compiled_results[(stat, vhost)] = result_dict
 
     return compiled_results
 
@@ -206,18 +206,18 @@ def getNodeStat(name):
 def getExchangeStat(name):
     refreshStats(stats = STATS, vhosts = vhosts)
     #Split a name like "rmq_backing_queue_ack_egress_rate.access"
-    
+
     #handle queue names with . in them
-                 
+
     log.debug(name)
     stat_name, exchange_name, vhost = name.split(METRIC_TOKEN_SEPARATOR)
-    
+
     vhost = vhost.replace('-', '/') #decoding vhost from metric name
     # Run refreshStats to get the result object
     result = compiled_results[('exchanges', vhost)]
 
     value = dig_it_up(result, keyToPath[stat_name] % exchange_name)
-    
+
     if zero_rates_when_idle and stat_name in RATE_METRICS  and 'idle_since' in result[exchange_name].keys():
         value = 0
 
@@ -246,7 +246,7 @@ def str2bool(string):
     if string.lower() in ("no", "false"):
         return False
     raise Exception("Invalid value of the 'zero_rates_when_idle' param, use one of the ('true', 'yes', 'false', 'no')")
-    
+
 def metric_init(params):
     ''' Create the metric definition object '''
     global descriptors, stats, vhost, username, password, urlstring, url_template, compiled_results, STATS, vhosts, zero_rates_when_idle
@@ -267,7 +267,7 @@ def metric_init(params):
     STATS = params['stats']
 
     zero_rates_when_idle = str2bool(params['zero_rates_when_idle'])
-    
+
     url = 'http://%s:%s/api/$stats/$vhost' % (host,port)
     base_url = 'http://%s:%s/api' % (host,port)
     password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -285,24 +285,24 @@ def metric_init(params):
             metric_handler.timestamp = time.time()
             return refreshStats(stats = STATS, vhosts = vhosts)
 
-            
+
 
     def create_desc(prop):
-	d = {
-	    'name'        : 'XXX',
-	    'call_back'   : getQueueStat,
-	    'time_max'    : 60,
-	    'value_type'  : 'uint',
-	    'units'       : 'units',
-	    'slope'       : 'both',
-	    'format'      : '%d',
-	    'description' : 'XXX',
-	    'groups'      : params["metric_group"],
-	}
+        d = {
+            'name'        : 'XXX',
+            'call_back'   : getQueueStat,
+            'time_max'    : 60,
+            'value_type'  : 'uint',
+            'units'       : 'units',
+            'slope'       : 'both',
+            'format'      : '%d',
+            'description' : 'XXX',
+            'groups'      : params["metric_group"],
+        }
 
-	for k,v in prop.iteritems():
-	    d[k] = v
-	return d
+        for k,v in prop.iteritems():
+            d[k] = v
+        return d
 
 
     def buildQueueDescriptors():
@@ -311,30 +311,30 @@ def metric_init(params):
             for queue in queues:
                 name = "{1}{0}{2}{0}{3}".format(METRIC_TOKEN_SEPARATOR, metric, queue, vhost.replace('/', '-'))
                 log.debug(name)
-		d1 = create_desc({'name': name.encode('ascii','ignore'),
-		    'call_back': getQueueStat,
+                d1 = create_desc({'name': name.encode('ascii','ignore'),
+                    'call_back': getQueueStat,
                     'value_type': 'float',
-		    'units': 'N',
-		    'slope': 'both',
-		    'format': '%f',
-		    'description': 'Queue_Metric',
-		    'groups' : 'rabbitmq,queue'})
-		log.debug(d1)
-		descriptors.append(d1)
-    
+                    'units': 'N',
+                    'slope': 'both',
+                    'format': '%f',
+                    'description': 'Queue_Metric',
+                    'groups' : 'rabbitmq,queue'})
+                log.debug(d1)
+                descriptors.append(d1)
+
     def buildNodeDescriptors():
         for metric in NODE_METRICS:
             for node in list_nodes():
                 name = "{1}{0}{2}{0}-".format(METRIC_TOKEN_SEPARATOR, metric, node)
                 log.debug(name)
                 d2 = create_desc({'name': name.encode('ascii','ignore'),
-		    'call_back': getNodeStat,
+                    'call_back': getNodeStat,
                     'value_type': 'float',
-		    'units': 'N',
-		    'slope': 'both',
-		    'format': '%f',
-		    'description': 'Node_Metric',
-		    'groups' : 'rabbitmq,node'}) 
+                    'units': 'N',
+                    'slope': 'both',
+                    'format': '%f',
+                    'description': 'Node_Metric',
+                    'groups' : 'rabbitmq,node'})
                 log.debug(d2)
                 descriptors.append(d2)
 
@@ -344,16 +344,16 @@ def metric_init(params):
             for exchange in exchanges:
                 name = "{1}{0}{2}{0}{3}".format(METRIC_TOKEN_SEPARATOR, metric, exchange, vhost.replace('/', '-'))
                 log.debug(name)
-		d1 = create_desc({'name': name.encode('ascii','ignore'),
-		    'call_back': getExchangeStat,
+                d1 = create_desc({'name': name.encode('ascii','ignore'),
+                    'call_back': getExchangeStat,
                     'value_type': 'float',
-		    'units': 'N',
-		    'slope': 'both',
-		    'format': '%f',
-		    'description': 'Exchange_Metric',
-		    'groups' : 'rabbitmq,exchange'})
-		log.debug(d1)
-		descriptors.append(d1)
+                    'units': 'N',
+                    'slope': 'both',
+                    'format': '%f',
+                    'description': 'Exchange_Metric',
+                    'groups' : 'rabbitmq,exchange'})
+                log.debug(d1)
+                descriptors.append(d1)
 
     if 'queues' in STATS:
         buildQueueDescriptors()
@@ -362,7 +362,7 @@ def metric_init(params):
     if 'exchanges' in STATS:
         buildExchangeDescriptors()
     # buildTestNodeStat()
-	
+
     return descriptors
 
 def metric_cleanup():
