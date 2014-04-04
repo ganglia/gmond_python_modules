@@ -15,8 +15,9 @@ modules {
     # CSV of which type of stats to emit
     # * nodes: per broker details about mem, sockets, etc
     # * queues: per queue stats, may result in many metrics on brokers with many queues
+    # * exchanges: per exchange in/out messages rates
     param stats {
-      value = "nodes,queues"
+      value = "nodes,queues,exchanges"
     }
 
     param vhost {
