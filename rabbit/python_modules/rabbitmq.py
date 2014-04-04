@@ -16,6 +16,7 @@ from string import Template
 
 global url, descriptors, last_update, vhost, username, password, url_template, result, result_dict, keyToPath
 
+log = None
 
 JSON_PATH_SEPARATOR = "?"
 METRIC_TOKEN_SEPARATOR = "___"
@@ -89,10 +90,6 @@ keyToPath['rmq_exchange_publish_in_rate'] = "%s{0}message_stats{0}publish_in_det
 keyToPath['rmq_exchange_publish_out_rate'] = "%s{0}message_stats{0}publish_out_details{0}rate".format(JSON_PATH_SEPARATOR)
 
 EXCHANGE_METRICS = ['rmq_exchange_publish_in_rate', 'rmq_exchange_publish_out_rate']
-
-
-def metric_cleanup():
-    pass
 
 
 def dig_it_up(obj, path):
@@ -372,7 +369,7 @@ def metric_init(params):
 
 
 def metric_cleanup():
-    pass
+    logging.shutdown()
 
 
 def setup_logging(handlers, facility, level):
