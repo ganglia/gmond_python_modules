@@ -1,0 +1,28 @@
+modules {
+    module {
+        name = "netapp_api_cmode"
+        language = "python"
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 15
+    time_threshold = 70
+    metric {
+        name_match = "(.+)latency"
+        }
+    metric {
+        name_match = "(.+)ops"
+        }
+    metric {
+        name_match = "(.+)files_(.+)"
+        }
+    metric {
+        name_match = "(.+)size_(.+)"
+        }
+    metric {
+        name_match = "(.+)quota_used"
+        }
+
+}
