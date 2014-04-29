@@ -306,6 +306,6 @@ if __name__ == "__main__":
     metric_init(parameters)
     result = refreshStats(stats = ('queues', 'nodes'), vhosts = ('/'))
     print '***'*20
-	getQueueStat('rmq_backing_queue_ack_egress_rate___nfl_client___-')
+    getQueueStat('rmq_backing_queue_ack_egress_rate___nfl_client___-')
     getNodeStat('rmq_disk_free___rmqone@inrmq01d1___-')
     getNodeStat('rmq_mem_used___rmqone@inrmq01d1___-')
