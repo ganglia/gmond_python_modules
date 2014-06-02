@@ -14,11 +14,29 @@ function cmp_cache_list($a, $b)
 	return ($b['num_hits'] - $a['num_hits']);
 }
 
+function _get($cache, $keys)
+{
+    $ret = 1;
+    foreach ($keys as $key) {
+        if (isset($cache[$key])) {
+            $ret = $cache[$key];
+            break;
+        }
+    }
+    return $ret;
+}
+
 if ($_SERVER["REMOTE_ADDR"] == "127.0.0.1" || TRUE)
 {
 	$cache = apc_cache_info();
 	$mem = apc_sma_info();
-	$cache['uptime'] = time() - $cache['start_time'];
+	$cache['num_slots']    = _get($cache, array('num_slots', 'nslots'));
+	$cache['num_hits']     = _get($cache, array('num_hits', 'nhits'));
+	$cache['num_misses']   = _get($cache, array('num_misses', 'nmisses'));
+	$cache['num_inserts']  = _get($cache, array('num_inserts', 'ninserts'));
+	$cache['num_entries']  = _get($cache, array('num_entries', 'nentries'));
+	$cache['expunges']     = _get($cache, array('expunges', 'nexpunges', 'num_expunges'));
+	$cache['uptime'] = time() - _get($cache, array('start_time', 'stime'));
 	$cache['request_rate'] = ($cache['num_hits'] + $cache['num_misses']) / $cache['uptime'];
 	$cache['hit_rate'] = $cache['num_hits'] / $cache['uptime'];
 	$cache['miss_rate'] = $cache['num_misses'] / $cache['uptime'];
