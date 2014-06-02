@@ -1,5 +1,5 @@
 #
-#
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4 noexpandtab
 # Module: apc_status
 # Graphs the status of APC: Another PHP Cache
 #
@@ -13,6 +13,7 @@
 import urllib2
 import json
 import traceback
+import time
 
 NAME_PREFIX = "apc_"
 
@@ -38,17 +39,18 @@ metric_list = {
 	NAME_PREFIX + 'mem_used'	: { 'type': 'uint',  'format' : '%d', 'unit': 'bytes', 		'desc': 'Used Memory' },
 	}
 
-def get_value(name):
-	try:
-		req = urllib2.Request(APC_STATUS_URL, None, {'user-agent':'ganglia-apc-python'})
-		opener = urllib2.build_opener()
-		f = opener.open(req)
-		apc_stats = json.load(f)
+def metric_handler(name):
+	if 10 < time.time() - metric_handler.timestamp:
+		try:
+			req = urllib2.Request(APC_STATUS_URL, None, {'user-agent':'ganglia-apc-python'})
+			opener = urllib2.build_opener()
+			f = opener.open(req)
+			metric_handler.apc_stats = json.load(f)
+			metric_handler.timestamp = time.time()
+		except urllib2.URLError:
+			traceback.print_exc()
 
-	except urllib2.URLError:
-		traceback.print_exc()
-
-	return apc_stats[name[len(NAME_PREFIX):]]
+	return metric_handler.apc_stats[name[len(NAME_PREFIX):]]
 
 def create_desc(prop):
 	d = Desc_Skel.copy()
@@ -59,12 +61,13 @@ def create_desc(prop):
 def metric_init(params):
 	global descriptors, Desc_Skel, APC_STATUS_URL
 
+	metric_handler.timestamp = 0
 	if "metric_group" not in params:
 		params["metric_group"] = "apc_cache"
 
 	Desc_Skel = {
 		'name'		: 'XXX',
-		'call_back'	: get_value,
+		'call_back'	: metric_handler,
 		'time_max'	: 60,
 		'value_type'	: 'uint',
 		'units'		: 'proc',
@@ -79,8 +82,8 @@ def metric_init(params):
 
 	if "url" not in params:
 		params["url"] = "http://localhost/apc-json.php"
-	
-	
+
+
 	APC_STATUS_URL = params["url"]
 
 	if "spoof_host" in params:
@@ -89,7 +92,7 @@ def metric_init(params):
 	for k,v in metric_list.iteritems():
 		descriptors.append(create_desc({
 			"name"		: k,
-			"call_back"	: get_value,
+			"call_back"	: metric_handler,
 			"value_type"	: v["type"],
 			"units"		: v["unit"],
 			"format"	: v["format"],
@@ -102,9 +105,16 @@ def metric_cleanup():
 	pass
 
 if __name__ == '__main__':
-	metric_init({})
-	for d in descriptors:
-		v = d['call_back'](d['name'])
-		print 'value for %s is %s' % (d['name'], v)
+	try:
+		metric_init({})
+		while True:
+			for d in descriptors:
+				v = d['call_back'](d['name'])
+				print 'value for %s is %s' % (d['name'], v)
+			print "5 sec sleep"
+			time.sleep(5)
+	except KeyboardInterrupt:
+		os._exit(1)
+
 
 
