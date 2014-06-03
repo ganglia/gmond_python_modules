@@ -62,12 +62,17 @@ def gpu_num_handler(name):
 def gpu_driver_version_handler(name):
     return nvmlSystemGetDriverVersion()
 
-def gpu_device_handler(name):
+def gpu_get_device_by_name(name):
     d = find_descriptor(name)
 
     (gpu, metric) = name.split('_', 1)
     gpu_id = int(gpu.split('gpu')[1])
     gpu_device = nvmlDeviceGetHandleByIndex(gpu_id)
+    return gpu_device
+
+def gpu_device_handler(name):
+    (gpu, metric) = name.split('_', 1)
+    gpu_device = gpu_get_device_by_name(name)
 
     if (metric == 'type'):
         return nvmlDeviceGetName(gpu_device)
@@ -156,9 +161,6 @@ def metric_init(params):
         build_descriptor('gpu%s_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
         build_descriptor('gpu%s_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s SM Speed' % i, 'gpu')
         build_descriptor('gpu%s_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Memory Speed' % i, 'gpu')
-        build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
-        build_descriptor('gpu%s_max_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max SM Speed' % i, 'gpu')
-        build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
         build_descriptor('gpu%s_uuid' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s UUID' % i, 'gpu')
         build_descriptor('gpu%s_pci_id' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s PCI ID' % i, 'gpu')
         build_descriptor('gpu%s_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'both', '%u', 'Temperature of GPU %s' % i, 'gpu,temp')
@@ -172,9 +174,9 @@ def metric_init(params):
         build_descriptor('gpu%s_power_usage' % i, gpu_device_handler, default_time_max, 'uint', 'watts', 'both', '%u', 'GPU%s Power Usage' % i, 'gpu')
 
         # Added for version 2.285
-        build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
-        build_descriptor('gpu%s_max_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Max SM Speed' % i, 'gpu')
-        build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
+        build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
+        build_descriptor('gpu%s_max_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max SM Speed' % i, 'gpu')
+        build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
         build_descriptor('gpu%s_serial' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Serial' % i, 'gpu')
         build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
         build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
@@ -200,3 +202,4 @@ if __name__ == '__main__':
             print 'value for %s is %f %s' % (d['name'], v, d['units'])
         elif d['value_type'] == 'string':
             print 'value for %s is %s %s' % (d['name'], v, d['units'])
+    metric_cleanup()
