@@ -24,8 +24,40 @@
 
 import os
 from pynvml import *
+from random import randint
 
 descriptors = list()
+
+device = 0
+eventSet = 0
+
+'''Register To GPU Events '''
+def register_events():
+   global eventSet
+   print "registering events"       
+   device = nvmlDeviceGetHandleByIndex(0);
+   eventTypesSupported = nvmlDeviceGetSupportedEventTypes(device) 
+   if eventTypesSupported is None:
+      print "No supported event found"
+      return 1
+   print "Supported Event: ", str(eventTypesSupported) 
+   eventSet = nvmlEventSetCreate()
+   nvmlDeviceRegisterEvents(device, eventTypesSupported, eventSet)
+   return 1
+
+def gpu_check_event(name):
+   '''global eventSet
+   try:
+       eventData = nvmlEventSetWait(eventSet,0)
+       if eventData is None:
+           print "No Event Occured"
+           return 1
+       else:
+           print "Event Occured : ", str(eventData)
+           
+   except NVMLError, err:
+        print "Error Occured While Monitoring Event", str(err)'''
+   return randint(0,1.0)
 
 '''Return the descriptor based on the name'''
 def find_descriptor(name):
@@ -64,7 +96,6 @@ def gpu_driver_version_handler(name):
 
 def gpu_get_device_by_name(name):
     d = find_descriptor(name)
-
     (gpu, metric) = name.split('_', 1)
     gpu_id = int(gpu.split('gpu')[1])
     gpu_device = nvmlDeviceGetHandleByIndex(gpu_id)
@@ -146,6 +177,7 @@ def metric_init(params):
 
     try:
         nvmlInit()
+        #register_events()
     except NVMLError, err:
         print "Failed to initialize NVML:", str(err)
         print "Exiting..."
@@ -155,12 +187,14 @@ def metric_init(params):
 
     build_descriptor('gpu_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of GPUs', 'gpu')
     build_descriptor('gpu_driver', gpu_driver_version_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU Driver Version', 'gpu')
- 
     for i in range(get_gpu_num()):
         build_descriptor('gpu%s_type' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Type' % i, 'gpu')
         build_descriptor('gpu%s_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
         build_descriptor('gpu%s_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s SM Speed' % i, 'gpu')
         build_descriptor('gpu%s_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Memory Speed' % i, 'gpu')
+        #build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
+        #build_descriptor('gpu%s_max_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max SM Speed' % i, 'gpu')
+        #build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
         build_descriptor('gpu%s_uuid' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s UUID' % i, 'gpu')
         build_descriptor('gpu%s_pci_id' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s PCI ID' % i, 'gpu')
         build_descriptor('gpu%s_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'both', '%u', 'Temperature of GPU %s' % i, 'gpu,temp')
@@ -180,12 +214,18 @@ def metric_init(params):
         build_descriptor('gpu%s_serial' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Serial' % i, 'gpu')
         build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
         build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
-
+        build_descriptor('gpu%s_event' % i, gpu_check_event, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Event' % i, 'gpu') 
     return descriptors
 
 def metric_cleanup():
     '''Clean up the metric module.'''
     try:
+        if not eventSet is None:
+	    #nvmlEventSetFree(eventSet)
+ 	    print "Events are freed" 
+        else:
+            print "event couldn't be freed"
+
         nvmlShutdown()
     except NVMLError, err:
         print "Error shutting down NVML:", str(err)
