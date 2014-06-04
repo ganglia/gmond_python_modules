@@ -32,7 +32,7 @@ device = 0
 eventSet = 0
 
 '''Register To GPU Events '''
-def register_events():
+def gpu_register_events():
    global eventSet
    print "registering events"       
    device = nvmlDeviceGetHandleByIndex(0);
@@ -114,7 +114,7 @@ def gpu_device_handler(name):
     elif (metric == 'temp'):
         return nvmlDeviceGetTemperature(gpu_device, NVML_TEMPERATURE_GPU)
     elif (metric == 'mem_total'):
-        return int(nvmlDeviceGetMemoryInfo(gpu_device).total/1024)
+        return int(nvmlDeviceGetMemoryInfo(gpu_device).total/(1024*1024))
     elif (metric == 'mem_used'):
         return int(nvmlDeviceGetMemoryInfo(gpu_device).used/1024)
     elif (metric == 'util'):
@@ -177,7 +177,7 @@ def metric_init(params):
 
     try:
         nvmlInit()
-        #register_events()
+        gpu_register_events()
     except NVMLError, err:
         print "Failed to initialize NVML:", str(err)
         print "Exiting..."
@@ -198,7 +198,7 @@ def metric_init(params):
         build_descriptor('gpu%s_uuid' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s UUID' % i, 'gpu')
         build_descriptor('gpu%s_pci_id' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s PCI ID' % i, 'gpu')
         build_descriptor('gpu%s_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'both', '%u', 'Temperature of GPU %s' % i, 'gpu,temp')
-        build_descriptor('gpu%s_mem_total' % i, gpu_device_handler, default_time_max, 'uint', 'KB', 'zero', '%u', 'GPU%s Total Memory' %i, 'gpu')
+        build_descriptor('gpu%s_mem_total' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'zero', '%u', 'GPU%s Total Memory' %i, 'gpu')
         build_descriptor('gpu%s_mem_used' % i, gpu_device_handler, default_time_max, 'uint', 'KB', 'both', '%u', 'GPU%s Used Memory' %i, 'gpu')
         build_descriptor('gpu%s_ecc_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s ECC Mode' %i, 'gpu')
         build_descriptor('gpu%s_perf_state' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Performance State' %i, 'gpu')
@@ -221,7 +221,7 @@ def metric_cleanup():
     '''Clean up the metric module.'''
     try:
         if not eventSet is None:
-	    #nvmlEventSetFree(eventSet)
+	    nvmlEventSetFree(eventSet)
  	    print "Events are freed" 
         else:
             print "event couldn't be freed"
