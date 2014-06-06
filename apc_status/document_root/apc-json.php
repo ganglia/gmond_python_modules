@@ -16,7 +16,7 @@ function cmp_cache_list($a, $b)
 
 function _get($cache, $keys)
 {
-    $ret = 1;
+    $ret = 0;
     foreach ($keys as $key) {
         if (isset($cache[$key])) {
             $ret = $cache[$key];
@@ -36,7 +36,9 @@ if ($_SERVER["REMOTE_ADDR"] == "127.0.0.1" || TRUE)
 	$cache['num_inserts']  = _get($cache, array('num_inserts', 'ninserts'));
 	$cache['num_entries']  = _get($cache, array('num_entries', 'nentries'));
 	$cache['expunges']     = _get($cache, array('expunges', 'nexpunges', 'num_expunges'));
-	$cache['uptime'] = time() - _get($cache, array('start_time', 'stime'));
+    $cache['expunges']     = _get($cache, array('expunges', 'nexpunges', 'num_expunges'));
+    $uptime                = time() - _get($cache, array('start_time', 'stime'));
+    $cache['uptime']       = $uptime ? $uptime : 1; #zero divied escape
 	$cache['request_rate'] = ($cache['num_hits'] + $cache['num_misses']) / $cache['uptime'];
 	$cache['hit_rate'] = $cache['num_hits'] / $cache['uptime'];
 	$cache['miss_rate'] = $cache['num_misses'] / $cache['uptime'];
