@@ -19,6 +19,12 @@ collection_group {
   collect_every  = 30
   time_threshold = 90
 
+  /* apcu can't get some variables.
+     try regexp format(require pcre)
+  metric {
+    name_match = "apc_(.+)"
+  }
+  */
   metric {
     name  = "apc_mem_size"
     title = "Total Memory"
@@ -54,6 +60,18 @@ collection_group {
     title = "Number of Cache Inserts"
     value_threshold = 0
   }
+  metric {
+    name  = "apc_expunges"
+    title = "Number of Cache Deletes"
+    value_threshold = 0
+  }
+  /* if apcu using. try num_expunges nexpunges. https://github.com/krakjoe/apcu/issues/41 (fixed but not merge release branch)
+  metric {
+    name  = "apc_num_expunges"
+    title = "Number of Cache Deletes"
+    value_threshold = 0
+  }
+  */
   metric {
     name  = "apc_expunges"
     title = "Number of Cache Deletes"
