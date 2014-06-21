@@ -10,8 +10,8 @@ collection_group {
   time_threshold = 50
 
   metric {
-    name_match = "([\\S]+)_graphics_speed"
-    name = "\\1_graphics_speed"
+    name_match = "([\\S]+)_graphics_speed_report"
+    name = "\\1_graphics_speed_report"
     title = "\\1 Graphics Speed"
     value_threshold = 1.0
   }
@@ -78,6 +78,32 @@ collection_group {
     title= "\\1 Performance State"
     value_threshold = 1.0
   }
+
+  metric {
+    name_match = "([\\S]+)_ecc_error_report"
+    name = "\\1_ecc_error_report"
+    title= "\\1 ECC Errors"
+    value_threshold = 1.0
+  }
+  
+  metric {
+    name_match = "([\\S]+)_ecc_sb_error"
+    name = "\\1_ecc_sb_error"
+    title= "\\1 Single Bit ECC Error Count"
+    value_threshold = 1.0
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 50 
+  
+  metric {
+    name_match = "([\\S]+)_event_report"
+    name = "\\1_event_report"
+    title= "\\1 Event Report"
+    value_threshold = 1.0
+  }
 }
 
 collection_group {
@@ -104,6 +130,7 @@ collection_group {
     title= "\\1 Power Management Limit"
     value_threshold = 1.0
   }
+  
 
 }
 

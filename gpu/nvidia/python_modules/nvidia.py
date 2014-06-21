@@ -34,30 +34,35 @@ eventSet = 0
 '''Register To GPU Events '''
 def gpu_register_events():
    global eventSet
-   print "registering events"       
+   #print "registering events"       
    device = nvmlDeviceGetHandleByIndex(0);
+   if device is None:
+     print "Device not found"
+     return 1
    eventTypesSupported = nvmlDeviceGetSupportedEventTypes(device) 
    if eventTypesSupported is None:
       print "No supported event found"
       return 1
    print "Supported Event: ", str(eventTypesSupported) 
    eventSet = nvmlEventSetCreate()
+   #print "Event Set ", str(eventSet)
    nvmlDeviceRegisterEvents(device, eventTypesSupported, eventSet)
    return 1
 
 def gpu_check_event(name):
-   '''global eventSet
+   global eventSet
    try:
        eventData = nvmlEventSetWait(eventSet,0)
        if eventData is None:
            print "No Event Occured"
-           return 1
+           return 0
        else:
            print "Event Occured : ", str(eventData)
-           
+           return 1 
    except NVMLError, err:
-        print "Error Occured While Monitoring Event", str(err)'''
-   return randint(0,1.0)
+        #print "No Event Occured ", str(err)
+        return 0 
+   return 0
 
 '''Return the descriptor based on the name'''
 def find_descriptor(name):
@@ -142,7 +147,7 @@ def gpu_device_handler(name):
             return "P%s" % state
         except ValueError:
             return state
-    elif (metric == 'graphics_speed'):
+    elif (metric == 'graphics_speed_report'):
         return nvmlDeviceGetClockInfo(gpu_device, NVML_CLOCK_GRAPHICS)
     elif (metric == 'sm_speed'):
         return nvmlDeviceGetClockInfo(gpu_device, NVML_CLOCK_SM)
@@ -168,6 +173,14 @@ def gpu_device_handler(name):
             return "UNKNOWN"
     elif (metric == 'power_man_limit'):
         return nvmlDeviceGetPowerManagementLimit(gpu_device)
+    elif (metric == 'ecc_error_report'):
+        eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 1, 1) 
+        print "Aggregate Double Bit ECC Count: ",str(eccCount)
+        return eccCount
+    elif (metric == 'ecc_sb_error'):
+        eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 0, 1)
+        print "Aggregate Single Bit ECC Count: ",str(eccCount)
+        return eccCount
     else:
         print "Handler for %s not implemented, please fix in gpu_device_handler()" % metric
         os._exit(1)
@@ -189,7 +202,7 @@ def metric_init(params):
     build_descriptor('gpu_driver', gpu_driver_version_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU Driver Version', 'gpu')
     for i in range(get_gpu_num()):
         build_descriptor('gpu%s_type' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Type' % i, 'gpu')
-        build_descriptor('gpu%s_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
+        build_descriptor('gpu%s_graphics_speed_report' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
         build_descriptor('gpu%s_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s SM Speed' % i, 'gpu')
         build_descriptor('gpu%s_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Memory Speed' % i, 'gpu')
         #build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
@@ -214,7 +227,9 @@ def metric_init(params):
         build_descriptor('gpu%s_serial' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Serial' % i, 'gpu')
         build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
         build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
-        build_descriptor('gpu%s_event' % i, gpu_check_event, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Event' % i, 'gpu') 
+        build_descriptor('gpu%s_event_report' % i, gpu_check_event, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Event' % i, 'gpu')
+        build_descriptor('gpu%s_ecc_error_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
+        build_descriptor('gpu%s_ecc_sb_error' % i, gpu_device_handler, default_time_max, 'uint', '', 'zero', '%u', 'GPU%s Single Bit ECC' % i, 'gpu')
     return descriptors
 
 def metric_cleanup():
