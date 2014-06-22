@@ -149,9 +149,9 @@ def gpu_device_handler(name):
             return state
     elif (metric == 'graphics_speed_report'):
         return nvmlDeviceGetClockInfo(gpu_device, NVML_CLOCK_GRAPHICS)
-    elif (metric == 'sm_speed'):
+    elif (metric == 'sm_speed_report'):
         return nvmlDeviceGetClockInfo(gpu_device, NVML_CLOCK_SM)
-    elif (metric == 'mem_speed'):
+    elif (metric == 'mem_speed_report'):
         return nvmlDeviceGetClockInfo(gpu_device, NVML_CLOCK_MEM)
     elif (metric == 'max_graphics_speed'):
         return nvmlDeviceGetMaxClockInfo(gpu_device, NVML_CLOCK_GRAPHICS)
@@ -159,7 +159,7 @@ def gpu_device_handler(name):
         return nvmlDeviceGetMaxClockInfo(gpu_device, NVML_CLOCK_SM)
     elif (metric == 'max_mem_speed'):
         return nvmlDeviceGetMaxClockInfo(gpu_device, NVML_CLOCK_MEM)
-    elif (metric == 'power_usage'):
+    elif (metric == 'power_usage_report'):
         return nvmlDeviceGetPowerUsage(gpu_device)
     elif (metric == 'serial'):
         return nvmlDeviceGetSerial(gpu_device)
@@ -172,14 +172,15 @@ def gpu_device_handler(name):
         else:
             return "UNKNOWN"
     elif (metric == 'power_man_limit'):
-        return nvmlDeviceGetPowerManagementLimit(gpu_device)
+        powerLimit = nvmlDeviceGetPowerManagementLimit(gpu_device)
+        return powerLimit/1000
     elif (metric == 'ecc_error_report'):
         eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 1, 1) 
-        print "Aggregate Double Bit ECC Count: ",str(eccCount)
+        #print "Aggregate Double Bit ECC Count: ",str(eccCount)
         return eccCount
     elif (metric == 'ecc_sb_error'):
         eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 0, 1)
-        print "Aggregate Single Bit ECC Count: ",str(eccCount)
+        #print "Aggregate Single Bit ECC Count: ",str(eccCount)
         return eccCount
     else:
         print "Handler for %s not implemented, please fix in gpu_device_handler()" % metric
@@ -203,8 +204,8 @@ def metric_init(params):
     for i in range(get_gpu_num()):
         build_descriptor('gpu%s_type' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Type' % i, 'gpu')
         build_descriptor('gpu%s_graphics_speed_report' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Graphics Speed' % i, 'gpu')
-        build_descriptor('gpu%s_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s SM Speed' % i, 'gpu')
-        build_descriptor('gpu%s_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Memory Speed' % i, 'gpu')
+        build_descriptor('gpu%s_sm_speed_report' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s SM Speed' % i, 'gpu')
+        build_descriptor('gpu%s_mem_speed_report' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'both', '%u', 'GPU%s Memory Speed' % i, 'gpu')
         #build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
         #build_descriptor('gpu%s_max_sm_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max SM Speed' % i, 'gpu')
         #build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
@@ -218,7 +219,7 @@ def metric_init(params):
         build_descriptor('gpu%s_util' % i, gpu_device_handler, default_time_max, 'uint', '%', 'both', '%u', 'GPU%s Utilization' %i, 'gpu')
         build_descriptor('gpu%s_mem_util' % i, gpu_device_handler, default_time_max, 'uint', '%', 'both', '%u', 'GPU%s Memory Utilization' %i, 'gpu')
         build_descriptor('gpu%s_fan' % i, gpu_device_handler, default_time_max, 'uint', '%', 'both', '%u', 'GPU%s Fan Speed' %i, 'gpu')
-        build_descriptor('gpu%s_power_usage' % i, gpu_device_handler, default_time_max, 'uint', 'watts', 'both', '%u', 'GPU%s Power Usage' % i, 'gpu')
+        build_descriptor('gpu%s_power_usage_report' % i, gpu_device_handler, default_time_max, 'uint', 'watts', 'both', '%u', 'GPU%s Power Usage' % i, 'gpu')
 
         # Added for version 2.285
         build_descriptor('gpu%s_max_graphics_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Graphics Speed' % i, 'gpu')
@@ -226,7 +227,7 @@ def metric_init(params):
         build_descriptor('gpu%s_max_mem_speed' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Speed' % i, 'gpu')
         build_descriptor('gpu%s_serial' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Serial' % i, 'gpu')
         build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
-        build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
+        build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', 'Watt', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
         build_descriptor('gpu%s_event_report' % i, gpu_check_event, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Event' % i, 'gpu')
         build_descriptor('gpu%s_ecc_error_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
         build_descriptor('gpu%s_ecc_sb_error' % i, gpu_device_handler, default_time_max, 'uint', '', 'zero', '%u', 'GPU%s Single Bit ECC' % i, 'gpu')

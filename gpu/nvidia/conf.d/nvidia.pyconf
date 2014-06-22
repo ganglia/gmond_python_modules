@@ -17,15 +17,15 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_sm_speed"
-    name = "\\1_sm_speed"
+    name_match = "([\\S]+)_sm_speed_report"
+    name = "\\1_sm_speed_report"
     title = "\\1 SM Speed"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_mem_speed"
-    name = "\\1_mem_speed"
+    name_match = "([\\S]+)_mem_speed_report"
+    name = "\\1_mem_speed_report"
     title = "\\1 Memory Speed"
     value_threshold = 1.0
   }
@@ -66,18 +66,18 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_power_usage"
+    name_match = "([\\S]+)_power_usage_report"
     name = "\\1_power_usage"
     title= "\\1 Power Usage"
     value_threshold = 1.0
   }
-
+ /* 
   metric {
     name_match = "([\\S]+)_perf_state"
     name = "\\1_perf_state"
     title= "\\1 Performance State"
     value_threshold = 1.0
-  }
+  }*/
 
   metric {
     name_match = "([\\S]+)_ecc_error_report"
@@ -117,12 +117,12 @@ collection_group {
     value_threshold = 1.0
   }
 
-  metric {
+  /*metric {
     name_match = "([\\S]+)_power_man_mode"
     name = "\\1_power_man_mode"
     title= "\\1 Power Management Mode"
     value_threshold = 1.0
-  }
+  }*/
 
   metric {
     name_match = "([\\S]+)_power_man_limit"

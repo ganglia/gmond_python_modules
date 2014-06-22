@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 /* Pass in by reference! */
-function graph_gpu0_graphics_speed_report ( &$rrdtool_graph ) {
+function graph_gpu0_sm_speed_report ( &$rrdtool_graph ) {
 
     global $context,
            $hostname,
@@ -23,7 +23,7 @@ function graph_gpu0_graphics_speed_report ( &$rrdtool_graph ) {
        $hostname = strip_domainname($hostname);
     }
 
-    $title = 'GPU0 Graphics Speed';
+    $title = 'GPU0 SM Speed';
     if ($context != 'host') {
        //$rrdtool_graph['title'] = $title;
     } else {
@@ -34,10 +34,10 @@ function graph_gpu0_graphics_speed_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'MHz';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
-    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_graphics_speed_report.rrd':'sum':AVERAGE "
-             ."DEF:gpu_max_speed=${rrd_dir}/gpu0_max_graphics_speed.rrd:sum:AVERAGE "
+    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_sm_speed_report.rrd':'sum':AVERAGE "
+             ."DEF:gpu_max_speed=${rrd_dir}/gpu0_max_sm_speed.rrd:sum:AVERAGE "
              ."LINE2:gpu_max_speed#FF0000:'MAX Limit' "
-             ."LINE2:gpu_speed#555555:'GPU0 Graphics Speed' ";
+             ."LINE2:gpu_speed#555555:'GPU0 SM Speed' ";
 
     $rrdtool_graph['series'] = $series;
 
