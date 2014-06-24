@@ -1,0 +1,50 @@
+Purpose
+===============
+
+This module allows you to
+
+  * Keep track of a presence of a particular file (0 for file not present and 1 for file present)
+  * Size of a particular file
+
+
+Install
+===============
+
+Copy file_checks.py from python_modules to your python modules directory e.g.
+
+/usr/lib64/ganglia/python_modules
+
+and file_checks.pyconf to
+
+/etc/ganglia/conf.d/
+
+Restart Gmond and you are done.
+
+
+Configure
+===============
+
+Please see file_checks.py. Under metric_init you will need to add any metrics you want added e.g.
+
+    descriptors.append(create_desc(Desc_Skel, {
+	"name"       : NAME_PREFIX + "etc_chef_disabled_present",
+	"call_back"   : get_is_file_present,
+	"description" : "/etc/chef/disabled present"
+    }))
+
+Replace slashes (/) with underscores and drop initial slash and append _present. For file sizes add
+following segment
+
+    descriptors.append(create_desc(Desc_Skel, {
+	  "name"       : NAME_PREFIX + "var_log_syslog_size",
+	  "call_back"   : get_file_size,
+	  "units"       : "bytes",
+	  "value_type"  : "float",
+	  "description" : "Size of /var/log/syslog"
+      }))
+
+Append _size to the metric name
+
+## AUTHOR
+
+Author: Vladimir Vuksan https://github.com/vvuksan

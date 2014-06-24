@@ -1,0 +1,17 @@
+modules {
+  module {
+    name = "filechecks"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 45
+
+  metric {
+      name_match = "filechecks_(.+)"
+      value_threshold = 1.0
+  }
+
+}
