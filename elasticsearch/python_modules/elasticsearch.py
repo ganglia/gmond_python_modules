@@ -9,6 +9,7 @@ except ImportError:
 import logging
 import time
 import urllib
+import re
 from functools import partial
 
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s")
@@ -186,7 +187,15 @@ def metric_init(params):
     logging.debug(params)
 
     host = params.get('host', 'http://localhost:9200/')
-    url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
+
+    version = params.get('version', '1.2')
+    
+    m = re.match('(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
+     
+    if m and m.group('major') == '0':
+        url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
+    else:
+        url_cluster = '{0}_cluster/state/nodes'.format(host)
 
     # First iteration - Grab statistics
     logging.debug('[elasticsearch] Fetching ' + url_cluster)
