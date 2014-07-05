@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 /* Pass in by reference! */
-function graph_gpu0_power_usage_report ( &$rrdtool_graph ) {
+function graph_gpu0_mem_clock_report ( &$rrdtool_graph ) {
 
     global $context,
            $hostname,
@@ -23,19 +23,25 @@ function graph_gpu0_power_usage_report ( &$rrdtool_graph ) {
        $hostname = strip_domainname($hostname);
     }
 
-    $title = 'GPU0 SM Speed';
+    $title = 'GPU0 Memory Clock';
     if ($context != 'host') {
        //$rrdtool_graph['title'] = $title;
     } else {
        //$rrdtool_graph['title'] = "$hostname $title last $range";
     }
     $rrdtool_graph['lower-limit']    = '0';
-    //$rrdtool_graph['upper-limit']    = '300.0';
-    $rrdtool_graph['vertical-label'] = 'Watts';
+    $rrdtool_graph['upper-limit']    = '5000.0';
+    $rrdtool_graph['vertical-label'] = 'MHz';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
-    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_power_usage_report.rrd':'sum':AVERAGE "
-             ."LINE2:gpu_speed#555555:'GPU0  Power Usage' ";
+    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_mem_clock_report.rrd':'sum':AVERAGE "
+             ."DEF:gpu_max_clock=${rrd_dir}/gpu0_max_mem_clock.rrd:sum:AVERAGE "
+             ."VDEF:max_speed=gpu_max_clock,MAXIMUM "
+             ."LINE2:gpu_speed#555555:'GPU0 Memory Clock' "
+             ."LINE2:gpu_max_clock#FF0000:'MAX Limit=' "
+             ."GPRINT:max_speed:'%6.2lf MHz' "
+             ."TEXTALIGN:left ";
+
 
     $rrdtool_graph['series'] = $series;
 

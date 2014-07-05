@@ -10,23 +10,23 @@ collection_group {
   time_threshold = 50
 
   metric {
-    name_match = "([\\S]+)_graphics_speed_report"
-    name = "\\1_graphics_speed_report"
-    title = "\\1 Graphics Speed"
+    name_match = "([\\S]+)_graphics_clock_report"
+    name = "\\1_graphics_clock_report"
+    title = "\\1 Graphics Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_sm_speed_report"
-    name = "\\1_sm_speed_report"
-    title = "\\1 SM Speed"
+    name_match = "([\\S]+)_sm_clock_report"
+    name = "\\1_sm_clock_report"
+    title = "\\1 SM Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_mem_speed_report"
-    name = "\\1_mem_speed_report"
-    title = "\\1 Memory Speed"
+    name_match = "([\\S]+)_mem_clock_report"
+    name = "\\1_mem_clock_report"
+    title = "\\1 Memory Clock"
     value_threshold = 1.0
   }
 
@@ -92,18 +92,24 @@ collection_group {
     title= "\\1 Single Bit ECC Error Count"
     value_threshold = 1.0
   }
+
+  metric {
+    name_match = "([\\S]+)_power_violation_report"
+    title= "\\1 Power Violation Report"
+    value_threshold = 1.0
+  } 
 }
 
 collection_group {
   collect_every = 10
   time_threshold = 50 
   
-  metric {
+  /*metric {
     name_match = "([\\S]+)_event_report"
     name = "\\1_event_report"
     title= "\\1 Event Report"
     value_threshold = 1.0
-  }
+  }*/
 }
 
 collection_group {
@@ -173,23 +179,23 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_max_graphics_speed"
-    name = "\\1_max_graphics_speed"
-    title = "\\1 Max Graphics Clock Speed"
+    name_match = "([\\S]+)_max_graphics_clock"
+    name = "\\1_max_graphics_clock"
+    title = "\\1 Max Graphics Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_max_sm_speed"
-    name = "\\1_max_sm_speed"
-    title = "\\1 Max SM Clock Speed"
+    name_match = "([\\S]+)_max_sm_clock"
+    name = "\\1_max_sm_clock"
+    title = "\\1 Max SM Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_max_mem_speed"
-    name = "\\1_max_mem_speed"
-    title = "\\1 Max Memory Clock Speed"
+    name_match = "([\\S]+)_max_mem_clock"
+    name = "\\1_max_mem_clock"
+    title = "\\1 Max Memory Clock"
     value_threshold = 1.0
   }
 

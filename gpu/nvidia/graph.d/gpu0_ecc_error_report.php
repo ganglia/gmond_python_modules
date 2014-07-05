@@ -30,8 +30,8 @@ function graph_gpu0_ecc_error_report ( &$rrdtool_graph ) {
        //$rrdtool_graph['title'] = "$hostname $title last $range";
     }
     $rrdtool_graph['lower-limit']    = '0';
-    $rrdtool_graph['upper-limit']    = '10.0';
-    $rrdtool_graph['vertical-label'] = 'No Of Error';
+    //$rrdtool_graph['upper-limit']    = '10.0';
+    $rrdtool_graph['vertical-label'] = 'Number of Errors';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
     $series = "DEF:'gpu_test_report'='${rrd_dir}/gpu0_ecc_error_report.rrd':'sum':AVERAGE "
