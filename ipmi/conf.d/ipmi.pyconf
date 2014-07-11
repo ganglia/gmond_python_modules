@@ -21,6 +21,10 @@ modules {
       value = "secret"
     }
 
+    param level {
+      value = "USER"
+    }
+
     # Location of timeout binary
     param timeout_bin {
       value = "/usr/bin/timeout"
