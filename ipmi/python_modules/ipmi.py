@@ -122,10 +122,12 @@ def metric_cleanup():
 if __name__ == '__main__':
     
     params = {
-        "metric_prefix" : "ipmi",
+    "metric_prefix" : "ipmi",
 	"ipmi_ip" : "10.1.2.3",
 	"username"  : "ADMIN",
-	"password"  : "secret"
+	"password"  : "secret",
+    "ipmitool_bin" : "/usr/bin/ipmitool",
+    "timeout_bin" : "/usr/bin/timeout"
 	}
     descriptors = metric_init(params)
 
