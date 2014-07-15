@@ -26,6 +26,7 @@ import os
 import datetime
 from pynvml import *
 from random import randint
+import time
 
 descriptors = list()
 
@@ -125,7 +126,7 @@ def gpu_device_handler(name):
         return nvmlDeviceGetTemperature(gpu_device, NVML_TEMPERATURE_GPU)
     elif (metric == 'mem_total'):
         return int(nvmlDeviceGetMemoryInfo(gpu_device).total/(1024*1024))
-    elif (metric == 'mem_used'):
+    elif (metric == 'fb_memory'):
         return int(nvmlDeviceGetMemoryInfo(gpu_device).used/1024)
     elif (metric == 'util'):
         return nvmlDeviceGetUtilizationRates(gpu_device).gpu
@@ -187,6 +188,20 @@ def gpu_device_handler(name):
         eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 0, 1)
         #print "Aggregate Single Bit ECC Count: ",str(eccCount)
         return eccCount
+    elif (metric == 'bar1_memory_report'):
+	memory =  nvmlDeviceGetBAR1MemoryInfo(gpu_device)
+        return int(memory.bar1Used/1000000)
+    elif (metric == 'bar1_max_memory'):
+        memory =  nvmlDeviceGetBAR1MemoryInfo(gpu_device)
+        return int(memory.bar1Total/1000000)
+    elif (metric == 'shutdown_temp'):
+        return nvmlDeviceGetTemperatureThreshold(gpu_device,0)
+    elif (metric == 'slowdown_temp'):
+        return nvmlDeviceGetTemperatureThreshold(gpu_device,1)
+    elif (metric == 'encoder_util'):
+        return int(nvmlDeviceGetEncoderUtilization(gpu_device)[0])
+    elif (metric == 'decoder_util'):
+        return 0 
     elif (metric == 'power_violation_report'):
        violationData = nvmlDeviceGetViolationStatus(gpu_device, 0)
        newTime = violationData.violationTime
@@ -195,15 +210,15 @@ def gpu_device_handler(name):
           violation_dur[gpu_id] = newTime
       
        diff = newTime - violation_dur[gpu_id]
-       print " initial violation diff ",diff 
+       #print " initial violation diff ",diff 
  
        #print "after condition violation duration ", violation_dur[gpu_id]
        rate = diff / 10000000
-       print "Calculated violation rate ", rate
-       print "violation old duration: ",violation_dur[gpu_id]
+       #print "Calculated violation rate ", rate
+       #print "violation old duration: ",violation_dur[gpu_id]
        violation_rate[gpu_id] = violation_rate[gpu_id] + rate
        violation_dur[gpu_id] = newTime
-       print "Final Rate: ", violation_rate[gpu_id]
+       #print "Final Rate: ", violation_rate[gpu_id]
        return violation_rate[gpu_id]
        #return int(violationData.violationTime/1000000)
     else:
@@ -236,8 +251,8 @@ def metric_init(params):
         build_descriptor('gpu%s_uuid' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s UUID' % i, 'gpu')
         build_descriptor('gpu%s_pci_id' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s PCI ID' % i, 'gpu')
         build_descriptor('gpu%s_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'both', '%u', 'Temperature of GPU %s' % i, 'gpu,temp')
-        build_descriptor('gpu%s_mem_total' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'zero', '%u', 'GPU%s Total Memory' %i, 'gpu')
-        build_descriptor('gpu%s_mem_used' % i, gpu_device_handler, default_time_max, 'uint', 'KB', 'both', '%u', 'GPU%s Used Memory' %i, 'gpu')
+        build_descriptor('gpu%s_mem_total' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'zero', '%u', 'GPU%s FB Memory Total' %i, 'gpu')
+        build_descriptor('gpu%s_fb_memory' % i, gpu_device_handler, default_time_max, 'uint', 'KB', 'both', '%u', 'GPU%s FB Memory Used' %i, 'gpu')
         build_descriptor('gpu%s_ecc_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s ECC Mode' %i, 'gpu')
         build_descriptor('gpu%s_perf_state' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Performance State' %i, 'gpu')
         build_descriptor('gpu%s_util' % i, gpu_device_handler, default_time_max, 'uint', '%', 'both', '%u', 'GPU%s Utilization' %i, 'gpu')
@@ -256,6 +271,11 @@ def metric_init(params):
         build_descriptor('gpu%s_ecc_error_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
         build_descriptor('gpu%s_ecc_sb_error' % i, gpu_device_handler, default_time_max, 'uint', '', 'zero', '%u', 'GPU%s Single Bit ECC' % i, 'gpu')
         build_descriptor('gpu%s_power_violation_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Power Violation Report' % i, 'gpu')
+        build_descriptor('gpu%s_bar1_memory_report' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'both', '%u', 'GPU%s Bar1 Memory Used' % i, 'gpu')
+        build_descriptor('gpu%s_bar1_max_memory' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'zero', '%u', 'GPU%s Bar1 Memory Total' % i, 'gpu')
+        build_descriptor('gpu%s_shutdown_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'zero', '%u', 'GPU%s Type' % i, 'gpu')
+        build_descriptor('gpu%s_slowdown_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'zero', '%u', 'GPU%s Type' % i, 'gpu')
+        build_descriptor('gpu%s_encoder_util' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Type' % i, 'gpu')
     return descriptors
 
 def metric_cleanup():

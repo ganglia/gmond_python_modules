@@ -52,9 +52,9 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_mem_used"
-    name = "\\1_mem_used"
-    title= "\\1 Memory Used"
+    name_match = "([\\S]+)_fb_memory"
+    name = "\\1_fb_memory"
+    title= "\\1 Frame Buffer Memory Used"
     value_threshold = 1.0
   }
 
@@ -97,19 +97,23 @@ collection_group {
     name_match = "([\\S]+)_power_violation_report"
     title= "\\1 Power Violation Report"
     value_threshold = 1.0
-  } 
-}
-
-collection_group {
-  collect_every = 10
-  time_threshold = 50 
+  }
   
-  /*metric {
-    name_match = "([\\S]+)_event_report"
-    name = "\\1_event_report"
-    title= "\\1 Event Report"
-    value_threshold = 1.0
-  }*/
+  metric {
+    name_match = "([\\S]+)_encoder_util"
+    title = "\\1 Encoder Utilization"
+    value_threshold = 1.0 
+  }
+  
+  metric {
+    name_match = "([\\S]+)_bar1_memory_report"
+    title = "\\1 Bar1 Memory"
+  }
+
+  metric {
+    name_match = "([\\S]+)_bar1_max_memory"
+    title = "\\1 Bar1 Total Memory"
+  } 
 }
 
 collection_group {
@@ -123,21 +127,12 @@ collection_group {
     value_threshold = 1.0
   }
 
-  /*metric {
-    name_match = "([\\S]+)_power_man_mode"
-    name = "\\1_power_man_mode"
-    title= "\\1 Power Management Mode"
-    value_threshold = 1.0
-  }*/
-
   metric {
     name_match = "([\\S]+)_power_man_limit"
     name = "\\1_power_man_limit"
     title= "\\1 Power Management Limit"
     value_threshold = 1.0
-  }
-  
-
+  } 
 }
 
 collection_group {
@@ -203,6 +198,16 @@ collection_group {
     name_match = "([\\S]+)_serial"
     name = "\\1_serial"
     title = "\\1 Board Serial Number"
+  }
+  
+  metric {
+    name_match = "([\\S]+)_shutdown_temp"
+    title = "\\1 Shutdown Temperature"
+  }
+
+  metric {
+    name_match = "([\\S]+)_slowdown_temp"
+    title = "\\1 Slowdown Temperature"
   }
 }
 

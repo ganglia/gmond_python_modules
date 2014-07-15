@@ -31,7 +31,7 @@ function graph_gpu0_power_violation_report ( &$rrdtool_graph ) {
     }
     $rrdtool_graph['lower-limit']    = '0';
     //$rrdtool_graph['upper-limit']    = '300.0';
-    $rrdtool_graph['vertical-label'] = '';
+    $rrdtool_graph['vertical-label'] = 'Violation Rate';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
     $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_power_violation_report.rrd':'sum':AVERAGE "

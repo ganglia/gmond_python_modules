@@ -36,8 +36,8 @@ function graph_gpu0_ecc_error_report ( &$rrdtool_graph ) {
     
     $series = "DEF:'gpu_test_report'='${rrd_dir}/gpu0_ecc_error_report.rrd':'sum':AVERAGE "
              ."DEF:'ecc_sb'='${rrd_dir}/gpu0_ecc_sb_error.rrd':'sum':AVERAGE "
-             ."LINE2:ecc_sb#00FF00:'Single Bit Aggregate ECC Errors' "
-             ."LINE2:gpu_test_report#FF0000:'Double Bit Aggregate ECC Errors' ";
+             ."LINE2:ecc_sb#808080:'Single Bit Aggregate ECC Errors' "
+             ."LINE2:gpu_test_report#000000:'Double Bit Aggregate ECC Errors' ";
 
     $rrdtool_graph['series'] = $series;
 

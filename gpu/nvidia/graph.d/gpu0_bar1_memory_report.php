@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 /* Pass in by reference! */
-function graph_gpu0_sm_clock_report ( &$rrdtool_graph ) {
+function graph_gpu0_bar1_memory_report ( &$rrdtool_graph ) {
 
     global $context,
            $hostname,
@@ -23,16 +23,17 @@ function graph_gpu0_sm_clock_report ( &$rrdtool_graph ) {
        $hostname = strip_domainname($hostname);
     }
 
-    $title = 'GPU0 SM Clock';
+    $title = 'GPU0 Bar1 Memory';
     if ($context != 'host') {
        //$rrdtool_graph['title'] = $title;
     } else {
        //$rrdtool_graph['title'] = "$hostname $title last $range";
     }
     $rrdtool_graph['lower-limit']    = '0';
-    $rrdtool_graph['upper-limit']    = '1000.0';
-    $rrdtool_graph['vertical-label'] = 'MHz';
+    //$rrdtool_graph['upper-limit']    = '1000.0';
+    $rrdtool_graph['vertical-label'] = 'MB';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
+      
     switch($range)
     {
 	case "hour":
@@ -44,7 +45,7 @@ function graph_gpu0_sm_clock_report ( &$rrdtool_graph ) {
         case "day":
            $range = 720;break;
         case "week":
-           $range = 2100;break;
+           $range = 3600;break;
         case "month":
            $range = 6000;break;
         case "year":
@@ -52,18 +53,21 @@ function graph_gpu0_sm_clock_report ( &$rrdtool_graph ) {
         default:
            $range = 30;
     }
-    $mod = $range/3;  
-    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_sm_clock_report.rrd':'sum':AVERAGE "
-             ."DEF:gpu_max_speed=${rrd_dir}/gpu0_max_sm_clock.rrd:sum:AVERAGE "
-             ."DEF:temp=${rrd_dir}/gpu0_max_sm_clock.rrd:sum:AVERAGE "
+    $mod = $range/3; 
+      
+    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu0_bar1_memory_report.rrd':'sum':AVERAGE "
+             ."DEF:gpu_max_speed=${rrd_dir}/gpu0_bar1_max_memory.rrd:sum:AVERAGE "
+             ."DEF:temp=${rrd_dir}/gpu0_bar1_max_memory.rrd:sum:AVERAGE "
              ."VDEF:max_speed=gpu_max_speed,MAXIMUM "
              ."CDEF:temp1=temp,POP,TIME,$range,%,$mod,LE,temp,UNKN,IF "
-             ."LINE2:temp1#FF0000:'MAX Limit=' "
-             ."GPRINT:max_speed:'%6.2lf MHz' "
+             //."CDEF:rcount1=rcount,0,LE,UNKN,rcount,IF " 
+             //."LINE2:gpu_speed#555555:'GPU0 Bar1 Memory' "
+             //."LINE2:temp1#FF0000:'MAX Limit=' "
+             //."LINE2:gpu_max_speed#FF0000:'MAX Limit=' "
+             //."GPRINT:max_speed:'%6.2lf MB' "
+             //."LINE2:gpu_speed#555555:'GPU0 Graphics Speed' ";
              ."TEXTALIGN:left "
-             ."LINE2:gpu_speed#555555:'GPU0 SM Clock' ";
-
-             
+             ."LINE2:gpu_speed#555555:'GPU0 Bar1 Memory' ";
 
     $rrdtool_graph['series'] = $series;
 
