@@ -1,10 +1,7 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
-
 /* Pass in by reference! */
-function graph_gpu0_mem_used_report ( &$rrdtool_graph ) {
+function graph_gpu_ecc_error_report ( &$rrdtool_graph ) {
 
     global $context,
            $hostname,
@@ -22,20 +19,17 @@ function graph_gpu0_mem_used_report ( &$rrdtool_graph ) {
     if ($strip_domainname) {
        $hostname = strip_domainname($hostname);
     }
-
-    $title = 'GPU0 Memory Used';
-    if ($context != 'host') {
-       //$rrdtool_graph['title'] = $title;
-    } else {
-       //$rrdtool_graph['title'] = "$hostname $title last $range";
-    }
+    $dIndex = $rrdtool_graph["arguments"]["dindex"];    
+    $title = 'GPU'.$dIndex.' ECC Error';
+    $rrdtool_graph['title'] = $title;
     $rrdtool_graph['lower-limit']    = '0';
-    $rrdtool_graph['upper-limit']    = '100000.0';
-    $rrdtool_graph['vertical-label'] = 'Memory Used';
+    $rrdtool_graph['vertical-label'] = 'Number of Errors';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
-    $series = "DEF:'gpu_test_report'='${rrd_dir}/gpu0_mem_used_report.rrd':'sum':AVERAGE "
-             ."LINE2:gpu_test_report#FF0000:'Total ECC Errors' ";
+    $series = "DEF:'gpu_test_report'='${rrd_dir}/gpu".$dIndex."_ecc_error_report.rrd':'sum':AVERAGE "
+             ."DEF:'ecc_sb'='${rrd_dir}/gpu".$dIndex."_ecc_sb_error.rrd':'sum':AVERAGE "
+             ."LINE2:ecc_sb#808080:'Single Bit Aggregate ECC Errors' "
+             ."LINE2:gpu_test_report#000000:'Double Bit Aggregate ECC Errors' ";
 
     $rrdtool_graph['series'] = $series;
 

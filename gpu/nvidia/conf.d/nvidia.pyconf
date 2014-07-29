@@ -71,13 +71,6 @@ collection_group {
     title= "\\1 Power Usage"
     value_threshold = 1.0
   }
- /* 
-  metric {
-    name_match = "([\\S]+)_perf_state"
-    name = "\\1_perf_state"
-    title= "\\1 Performance State"
-    value_threshold = 1.0
-  }*/
 
   metric {
     name_match = "([\\S]+)_ecc_error_report"
@@ -106,7 +99,7 @@ collection_group {
   }
   
   metric {
-    name_match = "([\\S]+)_bar1_memory_report"
+    name_match = "([\\S]+)_bar1_memory"
     title = "\\1 Bar1 Memory"
   }
 
