@@ -34,8 +34,8 @@ function graph_gpu_graphics_clock_report ( &$rrdtool_graph ) {
              ."DEF:gpu_max_speed=${rrd_dir}/gpu".$dIndex."_max_graphics_clock.rrd:sum:AVERAGE "
              ."DEF:temp=${rrd_dir}/gpu".$dIndex."_max_graphics_clock.rrd:sum:AVERAGE "
              ."VDEF:max_speed=gpu_max_speed,MAXIMUM "
-             ."CDEF:temp1=temp,POP,TIME,$range,%,$mod,LE,temp,UNKN,IF "
-             ."LINE2:temp1#FF0000:'MAX Limit=' "
+             ."CDEF:dash_value=temp,POP,TIME,$range,%,$mod,LE,temp,UNKN,IF "
+             ."LINE2:dash_value#FF0000:'MAX Limit=' "
              ."GPRINT:max_speed:'%6.2lf MHz' "
              ."TEXTALIGN:left "
              ."LINE2:gpu_speed#555555:'GPU".$dIndex." Graphics Clock' ";

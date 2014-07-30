@@ -31,15 +31,15 @@ function graph_gpu_mem_clock_report ( &$rrdtool_graph ) {
     include_once __DIR__."/gpu_common.php";
     list($range, $mod) =  calculate_mod_range($range);
    
-    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu".$dIndex."_mem_clock_report.rrd':'sum':AVERAGE "
-             ."DEF:gpu_max_clock=${rrd_dir}/gpu".$dIndex."_max_mem_clock.rrd:sum:AVERAGE "
+    $series = "DEF:'gpu_mem_clock'='${rrd_dir}/gpu".$dIndex."_mem_clock_report.rrd':'sum':AVERAGE "
+             ."DEF:gpu_mem_max_clock=${rrd_dir}/gpu".$dIndex."_max_mem_clock.rrd:sum:AVERAGE "
              ."DEF:temp=${rrd_dir}/gpu".$dIndex."_max_mem_clock.rrd:sum:AVERAGE "
-             ."VDEF:max_speed=gpu_max_clock,MAXIMUM "
-             ."CDEF:temp1=temp,POP,TIME,$range,%,$mod,LE,temp,UNKN,IF "
-             ."LINE2:temp1#FF0000:'MAX Limit=' "
-             ."GPRINT:max_speed:'%6.2lf MHz' "
+             ."VDEF:max_clock=gpu_mem_max_clock,MAXIMUM "
+             ."CDEF:dash_value=temp,POP,TIME,$range,%,$mod,LE,temp,UNKN,IF "
+             ."LINE2:dash_value#FF0000:'MAX Limit=' "
+             ."GPRINT:max_clock:'%6.2lf MHz' "
              ."TEXTALIGN:left "
-             ."LINE2:gpu_speed#555555:'GPU".$dIndex." Memory Clock' ";
+             ."LINE2:gpu_mem_clock#555555:'GPU".$dIndex." Memory Clock' ";
 
 
     $rrdtool_graph['series'] = $series;

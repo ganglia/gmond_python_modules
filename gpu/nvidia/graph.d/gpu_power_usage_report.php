@@ -26,8 +26,8 @@ function graph_gpu_power_usage_report ( &$rrdtool_graph ) {
     $rrdtool_graph['vertical-label'] = 'Watts';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
  
-    $series = "DEF:'gpu_speed'='${rrd_dir}/gpu".$dIndex."_power_usage_report.rrd':'sum':AVERAGE "
-             ."LINE2:gpu_speed#555555:'GPU".$dIndex."  Power Usage' ";
+    $series = "DEF:'gpu_power_usage'='${rrd_dir}/gpu".$dIndex."_power_usage_report.rrd':'sum':AVERAGE "
+             ."LINE2:gpu_power_usage#555555:'GPU".$dIndex."  Power Usage' ";
 
     $rrdtool_graph['series'] = $series;
 
