@@ -1,0 +1,16 @@
+modules {
+    module {
+        name = "cpu_temp"
+        language = "python"
+    }
+}
+
+collection_group {
+    collet_every = 10
+    time_threshold = 50
+
+    metric {
+        name_match = "physical_(.+)"
+        value_threshold = 1.0
+    }
+}
