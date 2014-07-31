@@ -6,7 +6,7 @@ modules {
 }
 
 collection_group {
-    collet_every = 10
+    collect_every = 10
     time_threshold = 50
 
     metric {
