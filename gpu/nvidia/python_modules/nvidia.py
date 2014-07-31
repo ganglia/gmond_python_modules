@@ -150,7 +150,7 @@ def gpu_device_handler(name):
     elif (metric == 'power_man_limit'):
         powerLimit = nvmlDeviceGetPowerManagementLimit(gpu_device)
         return powerLimit/1000
-    elif (metric == 'ecc_error_report'):
+    elif (metric == 'ecc_db_error'):
         eccCount =  nvmlDeviceGetTotalEccErrors(gpu_device, 1, 1) 
         return eccCount
     elif (metric == 'ecc_sb_error'):
@@ -226,14 +226,14 @@ def metric_init(params):
         build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
         build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', 'Watts', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
         build_descriptor('gpu%s_event_report' % i, gpu_check_event, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Event' % i, 'gpu')
-        build_descriptor('gpu%s_ecc_error_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
+        build_descriptor('gpu%s_ecc_db_error' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
         build_descriptor('gpu%s_ecc_sb_error' % i, gpu_device_handler, default_time_max, 'uint', '', 'zero', '%u', 'GPU%s Single Bit ECC' % i, 'gpu')
         build_descriptor('gpu%s_power_violation_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Power Violation Report' % i, 'gpu')
         build_descriptor('gpu%s_bar1_memory' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'both', '%u', 'GPU%s Bar1 Memory Used' % i, 'gpu')
         build_descriptor('gpu%s_bar1_max_memory' % i, gpu_device_handler, default_time_max, 'uint', 'MB', 'zero', '%u', 'GPU%s Bar1 Memory Total' % i, 'gpu')
         build_descriptor('gpu%s_shutdown_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'zero', '%u', 'GPU%s Type' % i, 'gpu')
         build_descriptor('gpu%s_slowdown_temp' % i, gpu_device_handler, default_time_max, 'uint', 'C', 'zero', '%u', 'GPU%s Type' % i, 'gpu')
-        build_descriptor('gpu%s_encoder_util' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Type' % i, 'gpu')
+        build_descriptor('gpu%s_encoder_util' % i, gpu_device_handler, default_time_max, 'uint', '%', 'both', '%u', 'GPU%s Type' % i, 'gpu')
     return descriptors
 
 def metric_cleanup():

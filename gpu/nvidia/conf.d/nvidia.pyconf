@@ -73,15 +73,13 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_ecc_error_report"
-    name = "\\1_ecc_error_report"
-    title= "\\1 ECC Errors"
+    name_match = "([\\S]+)_ecc_db_error"
+    title= "\\1 Double Bit ECC Errors"
     value_threshold = 1.0
   }
   
   metric {
     name_match = "([\\S]+)_ecc_sb_error"
-    name = "\\1_ecc_sb_error"
     title= "\\1 Single Bit ECC Error Count"
     value_threshold = 1.0
   }
