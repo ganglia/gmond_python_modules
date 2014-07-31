@@ -25,34 +25,30 @@ def metric_init(params):
             os._exit(1)
         for coreinput in coreinput_list:
             build_descriptor(coretemp,coreinput,phy_id_prefix)
+    return descriptors
 
 def build_descriptor(coretemp,coreinput,phy_id_prefix):
     global handler_dict
     if coreinput == 'temp1_input':
-        name = 'physical_' + phy_id_prefix + '_avg'
-        description = 'Physical id ' + phy_id_prefix
-        groups = 'cpu_temp_avg'
+        name = 'cpu_temp_physical_' + phy_id_prefix
+        description = 'Physical CPU id ' + phy_id_prefix + ' Temperature'
+        groups = 'cpu_temp_physical'
         handler_dict[name] = sysdir + coretemp + '/temp1_input'
     else:
         with open(sysdir + coretemp + '/' + coreinput[:-6] + '_label','r') as f:
             coreid = f.read().split()[-1]
-        name = 'physical_' + phy_id_prefix + '_core_' + coreid
-        description = 'Physical id ' + phy_id_prefix + ' Core ' + coreid
-        groups = 'cpu_temp'
+        name = 'cpu_temp_core_' + phy_id_prefix + '_' + coreid
+        description = 'Physical CPU id ' + phy_id_prefix + ' Core ' + coreid + ' Temperature'
+        groups = 'cpu_temp_core'
         handler_dict[name] = sysdir + coretemp + '/' + coreinput
     call_back = metric_handler
-    time_max = 60
-    value_type = 'float'
-    units = 'C'
-    slope = 'both'
-    format = '%.1f'
     d = {'name': name,
         'call_back': call_back,
-        'time_max': time_max,
-        'value_type': value_type,
-        'units': units,
-        'slope': slope,
-        'format': format,
+        'time_max': 60,
+        'value_type': 'float',
+        'units': 'C',
+        'slope': 'both',
+        'format': '%.1f',
         'description': description,
         'groups': groups
         }
