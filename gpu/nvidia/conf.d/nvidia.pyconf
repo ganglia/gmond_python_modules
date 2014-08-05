@@ -95,6 +95,12 @@ collection_group {
     title = "\\1 Encoder Utilization"
     value_threshold = 1.0 
   }
+
+  metric {
+    name_match = "([\\S]+)_decoder_util"
+    title = "\\1 Decoder Utilization"
+    value_threshold = 1.0
+  }
   
   metric {
     name_match = "([\\S]+)_bar1_memory"

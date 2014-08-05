@@ -39,7 +39,16 @@ function graph_gpu_mem_clock_report ( &$rrdtool_graph ) {
              ."LINE2:dash_value#FF0000:'MAX Limit=' "
              ."GPRINT:max_clock:'%6.2lf MHz' "
              ."TEXTALIGN:left "
-             ."LINE2:gpu_mem_clock#555555:'GPU".$dIndex." Memory Clock' ";
+             ."LINE2:'gpu_mem_clock'#555555:'GPU".$dIndex." Memory Clock' "
+             ."CDEF:user_pos=gpu_mem_clock,0,INF,LIMIT "
+                . "VDEF:user_last=user_pos,LAST "
+                . "VDEF:user_min=user_pos,MINIMUM "
+                . "VDEF:user_avg=user_pos,AVERAGE "
+                . "VDEF:user_max=user_pos,MAXIMUM "
+                . "GPRINT:'user_last':' Now\:%5.0lf\\l' "
+                . "GPRINT:'user_min':' Min\:%5.0lfl' "
+                . "GPRINT:'user_avg':' Avg\:%5.0lf' "
+                . "GPRINT:'user_max':' Max\:%5.0lf\\l' ";
 
 
     $rrdtool_graph['series'] = $series;

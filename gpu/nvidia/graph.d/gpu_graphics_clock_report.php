@@ -38,10 +38,18 @@ function graph_gpu_graphics_clock_report ( &$rrdtool_graph ) {
              ."LINE2:dash_value#FF0000:'MAX Limit=' "
              ."GPRINT:max_speed:'%6.2lf MHz' "
              ."TEXTALIGN:left "
-             ."LINE2:gpu_speed#555555:'GPU".$dIndex." Graphics Clock' ";
+             ."LINE2:'gpu_speed'#555555:'GPU".$dIndex." Graphics Clock' "
+	     ."CDEF:user_pos=gpu_speed,0,INF,LIMIT "
+                . "VDEF:user_last=user_pos,LAST "
+                . "VDEF:user_min=user_pos,MINIMUM "
+                . "VDEF:user_avg=user_pos,AVERAGE "
+                . "VDEF:user_max=user_pos,MAXIMUM "
+                . "GPRINT:'user_last':' Now\:%5.1lf' "
+                . "GPRINT:'user_min':' Min\:%5.1lf' "
+                . "GPRINT:'user_avg':' Avg\:%5.1lf' "
+                . "GPRINT:'user_max':' Max\:%5.1lf\\l' ";
 
     $rrdtool_graph['series'] = $series;
-
     return $rrdtool_graph;
 
 }
