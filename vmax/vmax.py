@@ -146,7 +146,7 @@ def get_metric(name):
                 headers = {'content-type': 'application/json','accept':'application/json'} #set the headers for how we want the response
 
                 #make the actual request, specifying the URL, the JSON from above, standard basic auth, the headers and not to verify the SSL cert.
-                r = requests.post(baseurl, requestJSON, auth=('monitor', 'm0nitors'), headers=headers, verify=False)
+                r = requests.post(baseurl, requestJSON, auth=(vmax_dict[key]['user'], vmax_dict[key]['pass']), headers=headers, verify=False)
 
                 #take the raw response text and deserialize it into a python object.
                 try:
