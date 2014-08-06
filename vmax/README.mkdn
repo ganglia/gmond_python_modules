@@ -1,4 +1,4 @@
-EMC Symmetrix VMAX Unisphere
+##EMC Symmetrix VMAX Unisphere
 This is a gmond python module that pulls EMC Symmetrix VMAX metrics via the Unisphere REST api
 
   *  It pulls 5 minute interval metrics from EMC Symmetrix VMAX SAN's via the Unisphere REST api
@@ -16,3 +16,6 @@ This is a gmond python module that pulls EMC Symmetrix VMAX metrics via the Unis
   * Update the vmax_dict section in vmax.py
   * copy vmax.py into your python_modules dir (probably /usr/lib/ganglia/python_modules)
   * copy vmax.pyconf into /etc/ganglia/conf.d/
+
+## Author
+  * evan.fraser@trademe.co.nz
