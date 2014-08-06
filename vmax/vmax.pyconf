@@ -1,0 +1,15 @@
+modules {
+    module {
+        name = "vmax"
+        language = "python"
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 15 
+    time_threshold = 70 
+    metric {
+        name_match = "vmax(.+)"
+        }
+}

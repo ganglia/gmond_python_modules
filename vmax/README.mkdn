@@ -1,0 +1,21 @@
+##EMC Symmetrix VMAX Unisphere
+This is a gmond python module that pulls EMC Symmetrix VMAX metrics via the Unisphere REST api
+
+  *  It pulls 5 minute interval metrics from EMC Symmetrix VMAX SAN's via the Unisphere REST api
+  * Currently retrieves the following Array metrics: IO_RATE, HIT_PER_SEC, MB_READ_PER_SEC, MB_WRITE_PER_SEC, READS, RESPONSE_TIME_READ, RESPONSE_TIME_WRITE, WRITES
+  * And the following per Thin Pool metrics: BE_READS, BE_WRITES, BE_RESPONSE_TIME_READ, BE_RESPONSE_TIME_WRITE, BE_MB_READ_RATE, BE_MB_WRITE_RATE
+  * It's pretty easily extendable if you follow the Unisphere REST API documentation.
+
+## DEPENDS
+  * Requires: json and requests python modules, installable via pip.
+  * Unisphere installation
+
+## USAGE
+  * Setup a performance monitor user and password unisphere account
+  * Ensure 'Real Time' is enabled in Performance -> Settings -> System Registrations -> View Details
+  * Update the vmax_dict section in vmax.py
+  * copy vmax.py into your python_modules dir (probably /usr/lib/ganglia/python_modules)
+  * copy vmax.pyconf into /etc/ganglia/conf.d/
+
+## Author
+  * evan.fraser@trademe.co.nz
