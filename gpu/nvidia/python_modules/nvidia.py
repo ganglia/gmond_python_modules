@@ -32,8 +32,7 @@ descriptors = list()
 
 device = 0
 eventSet = 0
-violation_dur = [0,0]
-violation_rate = [0,0]
+violation_dur = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 '''Return the descriptor based on the name'''
 def find_descriptor(name):
@@ -178,10 +177,11 @@ def gpu_device_handler(name):
           violation_dur[gpu_id] = newTime
       
        diff = newTime - violation_dur[gpu_id]
-       rate = diff / 10000000
-       violation_rate[gpu_id] = violation_rate[gpu_id] + rate
+       # % calculation (diff/10)*100/10^9
+       rate = diff / 100000000
        violation_dur[gpu_id] = newTime
-       return violation_rate[gpu_id]
+       print rate
+       return rate
     else:
         print "Handler for %s not implemented, please fix in gpu_device_handler()" % metric
         os._exit(1)
@@ -223,7 +223,9 @@ def metric_init(params):
         build_descriptor('gpu%s_max_mem_clock' % i, gpu_device_handler, default_time_max, 'uint', 'MHz', 'zero', '%u', 'GPU%s Max Memory Clock' % i, 'gpu')
         build_descriptor('gpu%s_serial' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Serial' % i, 'gpu')
         #build_descriptor('gpu%s_power_man_mode' % i, gpu_device_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU%s Power Management' % i, 'gpu')
-        build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'string', 'Watts', 'zero', '%s', 'GPU%s Power Management Limit' % i, 'gpu')
+        
+        # Driver version 340.25
+        build_descriptor('gpu%s_power_man_limit' % i, gpu_device_handler, default_time_max, 'uint', 'Watts', 'zero', '%u', 'GPU%s Power Management Limit' % i, 'gpu')
         build_descriptor('gpu%s_ecc_db_error' % i, gpu_device_handler, default_time_max, 'uint', 'No Of Errors', 'both', '%u', 'GPU%s ECC Report' % i, 'gpu')
         build_descriptor('gpu%s_ecc_sb_error' % i, gpu_device_handler, default_time_max, 'uint', 'No Of Errors', 'both', '%u', 'GPU%s Single Bit ECC' % i, 'gpu')
         build_descriptor('gpu%s_power_violation_report' % i, gpu_device_handler, default_time_max, 'uint', '', 'both', '%u', 'GPU%s Power Violation Report' % i, 'gpu')

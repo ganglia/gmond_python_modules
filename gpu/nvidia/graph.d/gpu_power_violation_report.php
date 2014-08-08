@@ -22,7 +22,7 @@ function graph_gpu_power_violation_report ( &$rrdtool_graph ) {
     $title = 'GPU'.$dIndex.' Power Violation';
     $rrdtool_graph['title'] = $title;
     $rrdtool_graph['lower-limit']    = '0';
-    $rrdtool_graph['vertical-label'] = 'Violation Rate';
+    $rrdtool_graph['vertical-label'] = '% Violation';
     $rrdtool_graph['extras']         = '--rigid --base 1024';
     
     $series = "DEF:'gpu_power_violation'='${rrd_dir}/gpu".$dIndex."_power_violation_report.rrd':'sum':AVERAGE "

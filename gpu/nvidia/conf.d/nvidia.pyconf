@@ -122,13 +122,6 @@ collection_group {
     name = "\\1_ecc_mode"
     title= "\\1 ECC Mode"
     value_threshold = 1.0
-  }
-
-  metric {
-    name_match = "([\\S]+)_power_man_limit"
-    name = "\\1_power_man_limit"
-    title= "\\1 Power Management Limit"
-    value_threshold = 1.0
   } 
 }
 
@@ -206,5 +199,10 @@ collection_group {
     name_match = "([\\S]+)_slowdown_temp"
     title = "\\1 Slowdown Temperature"
   }
+  
+   metric {
+    name_match = "([\\S]+)_power_man_limit"
+    title= "\\1 Power Management Limit"
+  } 
 }
 
