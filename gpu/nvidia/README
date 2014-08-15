@@ -10,9 +10,8 @@ Installation instructions:
 * Copy python_modules/nvidia.py to {libdir}/ganglia/python_modules
 * Copy conf.d/nvidia.pyconf to /etc/ganglia/conf.d
 * Copy graph.d/* to {ganglia_webroot}/graph.d/
-* Patch Ganglia Web (3.1.x) to see custom graphs (ganglia_web.patch)
 * A demo of what the GPU graphs look like is available here:
-  http://ac.ncsa.uiuc.edu/ganglia/?m=load_one&r=hour&s=descending&c=AC&h=ac22&sh=1&hc=4&z=small
+  http://ganglia.ddbj.nig.ac.jp/?c=research+month+gpu+queue&h=t135i&m=load_one&r=hour&s=by+name&hc=4&mc=2
 
 By default all metrics that the management library could detect for your GPU
 are collected.  For more information on what metrics are supported on what
@@ -49,4 +48,16 @@ The following metrics have been implemented:
 * gpu_serial
 * gpu_power_man_mode
 * gpu_power_man_limit
+
+Version 3:
+
+The following metrics have been implemented:
+* gpu_ecc_db_error
+* gpu_ecc_sb_error’
+* gpu_power_violation_report
+* gpu_encoder_util
+* gpu_decoder_util
+* gpu_bar1_memory
+* gpu_shutdown_temp
+* gpu_slowdown_temp
 
