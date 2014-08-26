@@ -80,7 +80,7 @@ class UpdateMetricThread(threading.Thread):
 
         for line in f:
             if re.search(':', line):
-                tokens  = re.split('\s+', line.strip())
+                tokens  = re.split('[:\s]+', line.strip())
                 iface   = tokens[0].strip(':')
 
                 self.metric.update({
@@ -151,7 +151,7 @@ def metric_init(params):
 
     for line in f:
         if re.search(':', line):
-            tokens  = re.split('\s+', line.strip())
+            tokens  = re.split('[:\s]+', line.strip())
             iface   = tokens[0].strip(':')
 
             for way in ('tx', 'rx'):
