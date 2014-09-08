@@ -1028,9 +1028,6 @@ if __name__ == '__main__':
             "debug" : True,
             }
         metric_init(params)
-        print json.dumps(descriptors, indent=2)
-        sys.exit()
-        
         while True:
             for d in descriptors:
                 v = d['call_back'](d['name'])
