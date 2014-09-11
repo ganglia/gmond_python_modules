@@ -1,0 +1,18 @@
+modules {
+    module {
+        name = "unbound"
+        language = "python"
+        param stats_command {
+            value = "sudo /usr/sbin/unbound-control stats"
+        }
+    }
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 60
+
+    metric {
+        name_match = "unbound_(.+)"
+    }
+}
