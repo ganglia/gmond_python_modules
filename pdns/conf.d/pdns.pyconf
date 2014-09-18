@@ -1,0 +1,21 @@
+modules {
+  module {
+    name     = "pdns"
+    language = "python"
+    param pdns_socket {
+        value = "/var/run/pdns.controlsocket"
+    }
+    param metric_prefix {
+        value = "pdns"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 20
+  time_threshold = 90
+  metric {
+    name  = "pdns_(.+)"
+    value_threshold = 1.0
+  }
+}
