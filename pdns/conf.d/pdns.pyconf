@@ -15,7 +15,7 @@ collection_group {
   collect_every  = 20
   time_threshold = 90
   metric {
-    name  = "pdns_(.+)"
+    name_match  = "pdns_(.+)"
     value_threshold = 1.0
   }
 }
