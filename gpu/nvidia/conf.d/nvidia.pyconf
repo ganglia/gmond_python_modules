@@ -10,23 +10,23 @@ collection_group {
   time_threshold = 50
 
   metric {
-    name_match = "([\\S]+)_graphics_speed"
-    name = "\\1_graphics_speed"
-    title = "\\1 Graphics Speed"
+    name_match = "([\\S]+)_graphics_clock_report"
+    name = "\\1_graphics_clock_report"
+    title = "\\1 Graphics Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_sm_speed"
-    name = "\\1_sm_speed"
-    title = "\\1 SM Speed"
+    name_match = "([\\S]+)_sm_clock_report"
+    name = "\\1_sm_clock_report"
+    title = "\\1 SM Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_mem_speed"
-    name = "\\1_mem_speed"
-    title = "\\1 Memory Speed"
+    name_match = "([\\S]+)_mem_clock_report"
+    name = "\\1_mem_clock_report"
+    title = "\\1 Memory Clock"
     value_threshold = 1.0
   }
 
@@ -52,9 +52,9 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_mem_used"
-    name = "\\1_mem_used"
-    title= "\\1 Memory Used"
+    name_match = "([\\S]+)_fb_memory"
+    name = "\\1_fb_memory"
+    title= "\\1 Frame Buffer Memory Used"
     value_threshold = 1.0
   }
 
@@ -66,18 +66,51 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_power_usage"
+    name_match = "([\\S]+)_power_usage_report"
     name = "\\1_power_usage"
     title= "\\1 Power Usage"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_perf_state"
-    name = "\\1_perf_state"
-    title= "\\1 Performance State"
+    name_match = "([\\S]+)_ecc_db_error"
+    title= "\\1 Double Bit ECC Errors"
     value_threshold = 1.0
   }
+  
+  metric {
+    name_match = "([\\S]+)_ecc_sb_error"
+    title= "\\1 Single Bit ECC Error Count"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "([\\S]+)_power_violation_report"
+    title= "\\1 Power Violation Report"
+    value_threshold = 1.0
+  }
+  
+  metric {
+    name_match = "([\\S]+)_encoder_util"
+    title = "\\1 Encoder Utilization"
+    value_threshold = 1.0 
+  }
+
+  metric {
+    name_match = "([\\S]+)_decoder_util"
+    title = "\\1 Decoder Utilization"
+    value_threshold = 1.0
+  }
+  
+  metric {
+    name_match = "([\\S]+)_bar1_memory"
+    title = "\\1 Bar1 Memory"
+  }
+
+  metric {
+    name_match = "([\\S]+)_bar1_max_memory"
+    title = "\\1 Bar1 Total Memory"
+  } 
 }
 
 collection_group {
@@ -89,22 +122,7 @@ collection_group {
     name = "\\1_ecc_mode"
     title= "\\1 ECC Mode"
     value_threshold = 1.0
-  }
-
-  metric {
-    name_match = "([\\S]+)_power_man_mode"
-    name = "\\1_power_man_mode"
-    title= "\\1 Power Management Mode"
-    value_threshold = 1.0
-  }
-
-  metric {
-    name_match = "([\\S]+)_power_man_limit"
-    name = "\\1_power_man_limit"
-    title= "\\1 Power Management Limit"
-    value_threshold = 1.0
-  }
-
+  } 
 }
 
 collection_group {
@@ -146,23 +164,23 @@ collection_group {
   }
 
   metric {
-    name_match = "([\\S]+)_max_graphics_speed"
-    name = "\\1_max_graphics_speed"
-    title = "\\1 Max Graphics Clock Speed"
+    name_match = "([\\S]+)_max_graphics_clock"
+    name = "\\1_max_graphics_clock"
+    title = "\\1 Max Graphics Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_max_sm_speed"
-    name = "\\1_max_sm_speed"
-    title = "\\1 Max SM Clock Speed"
+    name_match = "([\\S]+)_max_sm_clock"
+    name = "\\1_max_sm_clock"
+    title = "\\1 Max SM Clock"
     value_threshold = 1.0
   }
 
   metric {
-    name_match = "([\\S]+)_max_mem_speed"
-    name = "\\1_max_mem_speed"
-    title = "\\1 Max Memory Clock Speed"
+    name_match = "([\\S]+)_max_mem_clock"
+    name = "\\1_max_mem_clock"
+    title = "\\1 Max Memory Clock"
     value_threshold = 1.0
   }
 
@@ -171,5 +189,20 @@ collection_group {
     name = "\\1_serial"
     title = "\\1 Board Serial Number"
   }
+  
+  metric {
+    name_match = "([\\S]+)_shutdown_temp"
+    title = "\\1 Shutdown Temperature"
+  }
+
+  metric {
+    name_match = "([\\S]+)_slowdown_temp"
+    title = "\\1 Slowdown Temperature"
+  }
+  
+   metric {
+    name_match = "([\\S]+)_power_man_limit"
+    title= "\\1 Power Management Limit"
+  } 
 }
 
