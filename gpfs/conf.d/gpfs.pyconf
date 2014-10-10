@@ -1,0 +1,22 @@
+modules {
+  module {
+    name = "gpfs"
+    language = "python"
+
+    # Specify file systems you want to monitor or if empty it will 
+    # pick all devices
+    param fs {
+      value = ''
+    }
+
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 120
+  metric {
+    name_match = "gpfs_(.+)"
+  }
+}
+

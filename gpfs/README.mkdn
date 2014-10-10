@@ -1,0 +1,11 @@
+gpfs
+========
+
+Python module for ganglia 3.1.
+
+This module reads GPFS client statistics using mmpmon and
+creates a gpfs_* metric for each. 
+
+## AUTHOR
+
+Author: Michael Robbert &lt;mrobbert [at] gmail [dot] com&gt;
