@@ -66,12 +66,12 @@ def update_stats():
 	stats = {}
 
 	# Get data from mmpmon
-	p = subprocess.Popen(['/usr/lpp/mmfs/bin/mmpmon','-p','-i','mmpmon.cmd'],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	p = subprocess.Popen(['/usr/bin/sudo','/usr/lpp/mmfs/bin/mmpmon','-p','-s'],stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=False)
+	out, err = p.communicate(input='fs_io_s\n')
+	print(out)
 
-	for line in p.stdout:
+	for line in out.splitlines():
 		vals = line.split()
-		logging.debug(' vals: ' + str(vals))
-		#logging.debug(' fs: ' + vals[14])
 		fs = vals[14]
 		logging.debug(' Parsing FS: ' + fs)
 		if fs not in stats:
