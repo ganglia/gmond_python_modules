@@ -114,7 +114,7 @@ def get_stat(name):
 		label = name[sec + 1:]
 
 		try:
-			return stats[fs][label]
+			return int(stats[fs][label])
 		except:
 			logging.warning('failed to fetch [' + fs + '] ' + name)
 			return 0 
@@ -170,11 +170,11 @@ def metric_init(params):
 			d = {
 				'name': 'gpfs_' + fs + '_' + label,
 				'call_back': get_stat,
-				'time_max': '60',
-				'value_type': 'float',
+				'time_max': MAX_UPDATE_TIME,
+				'value_type': 'uint',
 				'units': descriptions[label]['units'],
 				'slope': 'both',
-				'format': '%f',
+				'format': '%u',
 				'description': label,
 				'groups': 'gpfs'
 			}
