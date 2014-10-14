@@ -6,6 +6,14 @@ Python module for ganglia 3.1.
 This module reads GPFS client statistics using mmpmon and
 creates a gpfs_* metric for each. 
 
+Uses mmpmon which requires root privileges. Since gmond usually runs as user 
+nobody the module will call it with sudo. This requires that the gmond user 
+be allowed to run mmpmon with sudo and without a password. You will need to 
+add to your sudo config file a line similar to the below:
+
+nobody ALL = NOPASSWD : /usr/lpp/mmfs/bin/mmpmon
+Defaults:nobody !requiretty
+
 ## AUTHOR
 
 Author: Michael Robbert &lt;mrobbert [at] gmail [dot] com&gt;

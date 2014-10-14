@@ -68,7 +68,6 @@ def update_stats():
 	# Get data from mmpmon
 	p = subprocess.Popen(['/usr/bin/sudo','/usr/lpp/mmfs/bin/mmpmon','-p','-s'],stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=False)
 	out, err = p.communicate(input='fs_io_s\n')
-	print(out)
 
 	for line in out.splitlines():
 		vals = line.split()
