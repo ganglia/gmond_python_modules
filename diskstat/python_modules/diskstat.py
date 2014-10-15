@@ -45,9 +45,7 @@ import logging
 import os
 import re
 import stat
-import subprocess
 import time
-import traceback
 
 descriptors = []
 
@@ -120,15 +118,15 @@ def build_block_major_minor_tables():
     p2d = {}
 
     # Get values from diskstats file
-    p = subprocess.Popen("awk '{print $1,$2, $3}' " + DISKSTATS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-
+    with open(DISKSTATS_FILE, 'r') as f:
+        lines = f.readlines()
     logging.debug('grabbed diskstat device info')
-    logging.debug('diskstat devices: ' + str(out))
+    logging.debug('diskstat devices: ' + '\n'.join(lines))
 
-    for n in out.split('\n'):
-        if n:
-            [maj, min, name] = n.split()
+    for line in lines:
+        if line:
+            # read the first three fields from each line
+            (maj, min, name) = line.split()[:3]
             dnames.append(name)
             d2p[name] = (maj, min)
             p2d[(maj, min)] = name
@@ -248,7 +246,6 @@ def update_stats():
         logging.debug(' wait ' + str(int(MAX_UPDATE_TIME - (cur_time - last_update))) + ' seconds')
         return True
 
-    #####
     # Update diskstats
     stats = {}
 
@@ -269,16 +266,18 @@ def update_stats():
         if dev not in last_val:
             last_val[dev] = {}
 
-        # Convert from dmname to devname for use by awk
+        # Convert from dmname to devname
         if device_mapper == 'true':
             olddev = dev
             dev = get_devname(dev)
 
         # Get values from diskstats file
-        p = subprocess.Popen("awk -v dev=" + dev + " '$3 == dev' " + DISKSTATS_FILE, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
+        with open(DISKSTATS_FILE, 'r') as f:
+            lines = f.readlines()
+        for line in lines:
+            if dev in line:
+                vals = line.split()
 
-        vals = out.split()
         logging.debug('  vals: ' + str(vals))
 
         # Reset back to orignal dev name
