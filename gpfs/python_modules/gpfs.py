@@ -64,6 +64,7 @@ def update_stats():
 	#####
 	# Update stats
 	stats = {}
+	interval = cur_time - last_update
 
 	# Get data from mmpmon
 	p = subprocess.Popen(['/usr/bin/sudo','/usr/lpp/mmfs/bin/mmpmon','-p','-s'],stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=False)
@@ -82,7 +83,7 @@ def update_stats():
 		for label, content in descriptions.iteritems():
 			#logging.debug(' Setting value for: ' + label)
 			if label in last_val[fs]:
-				stats[fs][label] = (int(vals[content['field']]) - int(last_val[fs][label])) * float(1)	
+				stats[fs][label] = (int(vals[content['field']]) - int(last_val[fs][label])) * float(1) / float(interval)	
 			else:
 				#logging.debug(' New value for: ' + fs + '_' + label)
 				stats[fs][label] = 0
@@ -128,35 +129,35 @@ def metric_init(params):
 	
 	descriptions = dict(
 		bytes_read={
-			'units': 'bytes',
+			'units': 'bytes/sec',
 			'field': 18,
 			'description': 'The number of bytes read'},
 		bytes_write={
-			'units': 'bytes',
+			'units': 'bytes/sec',
 			'field': 20,
 			'description': 'The number of bytes written'},
 		open_req={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 22,
 			'description': 'The number of open/create requests'},
 		close_req={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 24,
 			'description': 'The number of close requests'},
 		read_req={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 26,
 			'description': 'The number of application read requests'},
 		write_req={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 28,
 			'description': 'The number of application write requests'},
 		readdir_req={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 30,
 			'description': 'The number of application read directory requests'},
 		inode_updates={
-			'units': 'requests',
+			'units': 'requests/sec',
 			'field': 32,
 			'description': 'The number of inode update requests'},
 		)
