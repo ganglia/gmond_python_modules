@@ -13,8 +13,8 @@ modules {
 }
 
 collection_group {
-  collect_every = 60
-  time_threshold = 120
+  collect_every = 15
+  time_threshold = 60
   metric {
     name_match = "gpfs_(.+)"
   }
