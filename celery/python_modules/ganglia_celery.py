@@ -38,7 +38,7 @@ def get_metrics():
 	    res = urllib2.urlopen(req, None, 1)
 	    stats = res.read()
 	    metrics2 = json.loads(stats)
-            metrics = metrics2[0]
+            metrics = metrics2['celery@{}'.format(socket.gethostname())]
             metrics['status'] = "up"
 
         except StandardError, e:
@@ -148,17 +148,24 @@ def metric_init(params):
     SERVER_STATUS_URL = params["url"]
        
     descriptors.append(create_desc(Desc_Skel, {
-	"name"       : params["metrics_prefix"] + "_active",
+	"name"       : params["metrics_prefix"] + "_running_tasks",
 	"units"      : "jobs",
 	"description": "Number of active jobs",
 	"call_back"  : get_value
     }))
     
     descriptors.append(create_desc(Desc_Skel, {
-	"name"       : params["metrics_prefix"] + "_processed",
+	"name"       : params["metrics_prefix"] + "_completed_tasks",
 	"units"      : "jobs/s",
 	"description": "Number of processed jobs",
 	"call_back"  : get_delta
+    }))
+
+    descriptors.append(create_desc(Desc_Skel, {
+        "name"       : params["metrics_prefix"] + "_concurrency",
+        "units"      : "processes/s",
+        "description": "Number of worker processes",
+        "call_back"  : get_value
     }))
 
     descriptors.append(create_desc(Desc_Skel, {
@@ -183,7 +190,7 @@ def create_desc(skel, prop):
 if __name__ == '__main__':
     try:
         params = {
-            "url" : "http://localhost:8989/api/worker/",
+            "url" : "http://localhost:10000/api/workers",
             }
         metric_init(params)
 
