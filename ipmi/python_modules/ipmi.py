@@ -14,7 +14,7 @@ METRICS_CACHE_MAX = 5
 
 stats_pos = {} 
 
-def get_metrics():
+def get_metrics(params):
     """Return all metrics"""
 
     global METRICS
@@ -24,7 +24,13 @@ def get_metrics():
 	new_metrics = {}
 	units = {}
 
-	command = [ params['timeout_bin'] , "3", params['ipmitool_bin'] , "-H", params['ipmi_ip'] , "-U" , params['username'] , '-P', params['password'] , 'sensor']	
+	command = [ params['timeout_bin'],
+	"3", params['ipmitool_bin'],
+	"-H", params['ipmi_ip'],
+	"-U", params['username'],
+	'-P', params['password'],
+	'-L', params['level'],
+	'sensor']	
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
@@ -69,8 +75,7 @@ def get_value(name):
 
 	metrics = get_metrics()[0]
 
-	prefix_length = len(params['metric_prefix']) + 1
-	name = name[prefix_length:] # remove prefix from name
+	name = name.lstrip('ipmi_')
 
 	result = metrics['data'][name]
 
@@ -102,7 +107,7 @@ def metric_init(params):
         'groups'      : 'XXX',
         }
 
-    metrics = get_metrics()[0]
+    metrics = get_metrics(params)[0]
     
     for item in metrics['data']:
 	descriptors.append(create_desc(Desc_Skel, {
@@ -122,10 +127,13 @@ def metric_cleanup():
 if __name__ == '__main__':
     
     params = {
-        "metric_prefix" : "ipmi",
+	"metric_prefix" : "ipmi",
 	"ipmi_ip" : "10.1.2.3",
 	"username"  : "ADMIN",
-	"password"  : "secret"
+	"password"  : "secret",
+	"level" : "USER",
+	"ipmitool_bin" : "/usr/bin/ipmitool",
+	"timeout_bin" : "/usr/bin/timeout"
 	}
     descriptors = metric_init(params)
 

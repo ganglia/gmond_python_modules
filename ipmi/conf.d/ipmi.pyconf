@@ -2,36 +2,40 @@ modules {
   module {
     name = "ipmi"
     language = "python"
-  }
 
-  # If you change this entry make sure you put it under name_match section
-  param metric_prefix {
-    value = "ipmi"
-  }
+    # If you change this entry make sure you put it under name_match section
+    param metric_prefix {
+      value = "ipmi"
+    }
 
-  # IP of rhe IPMI
-  param ipmi_ip {
-    value = "10.1.2.3"
-  }
-  
-  param username {
-    value = "admin"
-  }
-  
-  param password {
-    value = "secret"
-  }
+    # IP of rhe IPMI
+    param ipmi_ip {
+      value = "10.1.2.3"
+    }
+    
+    param username {
+      value = "admin"
+    }
+    
+    param password {
+      value = "secret"
+    }
 
-  # Location of timeout binary
-  param timeout_bin {
-    value = "/usr/bin/timeout"
+    param level {
+      value = "USER"
+    }
+
+    # Location of timeout binary
+    param timeout_bin {
+      value = "/usr/bin/timeout"
+    }
+    
+    # Location of ipmitool binary
+    param timeout_bin {
+      value = "/usr/bin/ipmitool"
+    }
+    
   }
-  
-  # Location of ipmitool binary
-  param timeout_bin {
-    value = "/usr/bin/ipmitool"
-  }
-  
 
 }
 
