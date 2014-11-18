@@ -14,7 +14,6 @@ import socket
 if sys.version_info < (2, 6):
     socket.setdefaulttimeout(2)
 
-
 # global to store state for "total accesses"
 METRICS = {
     'time' : 0,
@@ -72,7 +71,7 @@ def get_metrics():
         # This is the short server-status. Lacks SSL metrics
         try:
             req = urllib2.Request(SERVER_STATUS_URL + "?auto")
-
+            
             # Download the status file
             if sys.version_info < (2, 6):
                 res = urllib2.urlopen(req)
@@ -96,17 +95,17 @@ def get_metrics():
              traceback.print_exc()
 
         # If we are collecting SSL metrics we'll do
-        if COLLECT_SSL:
-
+        if COLLECT_SSL:    
+    
             try:
                 req2 = urllib2.Request(SERVER_STATUS_URL)
-
+                
                 # Download the status file
                 if sys.version_info < (2, 6):
                     res = urllib2.urlopen(req2)
                 else:
                     res = urllib2.urlopen(req2, timeout=2)
-
+                
                 for line in res:
                     regMatch = SSL_REGEX.match(line)
                     if regMatch:
@@ -114,7 +113,7 @@ def get_metrics():
                         for key in linebits:
                             #print SSL_NAME_PREFIX + key + "=" + linebits[key]
                             metrics[SSL_NAME_PREFIX + key] = linebits[key]
-
+    
             except urllib2.URLError:
                  traceback.print_exc()
 
@@ -158,7 +157,7 @@ def get_delta(name):
 	print name + " is less 0"
 	delta = 0
     except KeyError:
-      delta = 0.0
+      delta = 0.0      
 
     return delta
 
@@ -195,7 +194,7 @@ def metric_init(params):
 
     if "url" not in params:
         params["url"] = "http://localhost:7070/server-status"
-
+        
     if "collect_ssl" not in params:
         params["collect_ssl"] = False
 
@@ -210,7 +209,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "rps",
                 "value_type" : "float",
                 "units"      : "req/sec",
-                "call_back"   : get_delta,
+                "call_back"   : get_delta,                
                 "format"     : "%.3f",
                 "description": "request per second",
                 }))
@@ -219,7 +218,7 @@ def metric_init(params):
                 "name"       : NAME_PREFIX + "bytes",
                 "value_type" : "float",
                 "units"      : "bytes/sec",
-                "call_back"   : get_delta,
+                "call_back"   : get_delta,                
                 "format"     : "%.3f",
                 "description": "bytes transferred per second",
                 }))
@@ -266,12 +265,12 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description" : v["desc"],
                     }))
-
+        
     ##########################################################################
     # SSL metrics
     ##########################################################################
     if params['collect_ssl']:
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "shared_mem",
                     "value_type" : "float",
@@ -280,7 +279,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Shared memory",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "current_sessions",
                     "value_type" : "uint",
@@ -289,7 +288,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Current sessions",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "num_subcaches",
                     "value_type" : "uint",
@@ -298,7 +297,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Number of subcaches",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "indexes_per_subcache",
                     "value_type" : "float",
@@ -307,8 +306,8 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Subcaches",
                     }))
-
-
+    
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "index_usage",
                     "value_type" : "float",
@@ -317,7 +316,7 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Index usage",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "cache_usage",
                     "value_type" : "float",
@@ -326,8 +325,8 @@ def metric_init(params):
                     "call_back"   : get_value,
                     "description": "Cache usage",
                     }))
-
-
+    
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "sessions_stored",
                     "value_type" : "float",
@@ -336,7 +335,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Sessions stored",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "sessions_expired",
                     "value_type" : "float",
@@ -345,7 +344,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Sessions expired",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "retrieves_hit",
                     "value_type" : "float",
@@ -354,7 +353,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Retrieves Hit",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "retrieves_miss",
                     "value_type" : "float",
@@ -363,7 +362,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Retrieves Miss",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "removes_hit",
                     "value_type" : "float",
@@ -372,7 +371,7 @@ def metric_init(params):
                     "call_back"   : get_delta,
                     "description": "Removes Hit",
                     }))
-
+    
         descriptors.append(create_desc({
                     "name"       : SSL_NAME_PREFIX + "removes_miss",
                     "value_type" : "float",
