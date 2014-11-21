@@ -179,6 +179,14 @@ METRICS = [
      'units': 'bytes/s'},
     ]
 
+def sbool(s):
+    """ convert a string that is probably supposed to be a boolean
+    value into an actual bool type."""
+    if isinstance(s, str):
+        return s.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
+    else:
+        return bool(s)
+
 
 ##### Data Access
 class ArcStats(object):
@@ -338,7 +346,7 @@ def metric_init(params):
         d['name'] = METRIC_PREFIX + d['name']
         d['call_back'] = ARC_STATS.get_metric_value
         descriptors.append(d)
-        if params['force_double'] is True:
+        if sbool(params['force_double']) is True:
             d['value_type'] = 'double'
             d['format'] = '%f'
     log.debug('descriptors: %r' % descriptors)
