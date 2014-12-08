@@ -8,7 +8,7 @@ modules {
         value = "linux"
     }
     # This module calculates all metrics (including derived) rates at
-    # onces and then serves them out of a cache. This determines the
+    # once and then serves them out of a cache. This determines the
     # minimum TTL.
     param min_poll_seconds {
         value = 5
@@ -24,7 +24,7 @@ modules {
     # Ideally some sort of unsigned integer would be used for
     # measurements of bytes of memory.  gmond/modpython on a
     # particular architecture does not necessarily support 64bit (let
-    # along zfs's 128bit) integers.  If true this flag reports all
+    # alone zfs's 128bit) integers.  If true this flag reports all
     # metrics as doubles.
     param force_double {
         value = True
