@@ -9,12 +9,11 @@ from http://docs.celeryproject.org.
 Prerequisite
 ============
 
-Make sure Celery exposes it's API over HTTP e.g.
+This version of the module works with Flower (https://github.com/mher/flower),
+a web-based tool to monitor Celery workers and tasks.
 
-curl http://localhost:8989/api/worker/
-
-or similar needs to succeed for this module to work.
-
+Previous versions of this module worked with Celerymon, which has now been
+obsoleted in favor of Flower (http://celery.readthedocs.org/en/latest/userguide/monitoring.html?highlight=flower#flower-real-time-celery-web-monitor).
 
 Install
 ===============

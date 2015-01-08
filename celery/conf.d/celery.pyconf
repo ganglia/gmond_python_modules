@@ -2,9 +2,8 @@ modules {
   module {
     name     = "ganglia_celery"
     language = "python"
-    # Don't forget the trailing slash on the URL
     param url {
-        value = "http://localhost:10000/api/worker/"
+        value = "http://localhost:10000/api/workers"
     }
 
   }

@@ -1,0 +1,14 @@
+USBRH
+===============
+python module for ganglia 3.1.
+
+This module parse output /proc/usbrh/X/temperature.
+This module required installation USBRH driver fo Linux(*1).
+
+
+(*1) USBRH driver for Linux <http://green-rabbit.sakura.ne.jp/usbrh/>
+
+
+## AUTHOR
+
+NAOYA Nakazawa <me@n0ts.org>

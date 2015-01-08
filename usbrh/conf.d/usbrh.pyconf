@@ -1,0 +1,22 @@
+modules {
+  module {
+    name     = "usbrh"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every  = 60
+  time_threshold = 90
+
+  metric {
+    name  = "usbrh_temperature_0"
+    title = "Temperature 0"
+    value_threshold = 0
+  }
+  metric {
+    name  = "usbrh_temperature_1"
+    title = "Temperature 1"
+    value_threshold = 0
+  }
+}
