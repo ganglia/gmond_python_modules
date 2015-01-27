@@ -12,6 +12,14 @@ modules {
       value = "localhost"
     }
 
+    # CSV of which type of stats to emit
+    # * nodes: per broker details about mem, sockets, etc
+    # * queues: per queue stats, may result in many metrics on brokers with many queues
+    # * exchanges: per exchange in/out messages rates
+    param stats {
+      value = "nodes,queues,exchanges"
+    }
+
     param vhost {
       value = "/,vhost1,vhost2"
     }
@@ -32,7 +40,14 @@ modules {
     param zero_rates_when_idle {
       value = "True"
     }
-
+    # Where to log information from this module (syslog facility)
+    param syslog_facility {
+        value = "user"
+    }
+    # log level, WARNING is not expected to produce any output
+    param log_level {
+        value = "WARNING"
+    }
   }
 }
 
