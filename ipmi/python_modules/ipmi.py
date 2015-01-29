@@ -18,7 +18,6 @@ def get_metrics(params):
     """Return all metrics"""
 
     global METRICS
-
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
         new_metrics = {}
@@ -51,7 +50,7 @@ def get_metrics(params):
                 vmatch = re.search("([0-9.]+)", value)
                 if not vmatch:
                     continue
-                if metric_name == "p1-dimma1_temp": print vmatch, vmatch.group(1)
+
                 metric_value = float(vmatch.group(1))
                 
                 new_metrics[metric_name] = metric_value
@@ -131,9 +130,10 @@ if __name__ == '__main__':
 	"ipmitool_bin" : "/usr/bin/ipmitool",
 	"timeout_bin" : "/usr/bin/timeout"
 	}
-    descriptors = metric_init(params)
+    
 
     while True:
+        descriptors = metric_init(params)
         for d in descriptors:
             v = d['call_back'](d['name'])
             print '%s = %s' % (d['name'],  v)
