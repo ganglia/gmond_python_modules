@@ -21,25 +21,27 @@ def get_metrics(params):
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-	new_metrics = {}
-	units = {}
+        new_metrics = {}
+        units = {}
 
-	command = [ params['timeout_bin'],
-	"3", params['ipmitool_bin'],
-	"-H", params['ipmi_ip'],
-	"-U", params['username'],
-	'-P', params['password'],
-	'-L', params['level'],
-	'sensor']	
+        command = [ params['timeout_bin'],
+        "3", params['ipmitool_bin'],
+        # "-H", params['ipmi_ip'],
+        # "-U", params['username'],
+        # '-P', params['password'],
+        # '-L', params['level'],
+        'sensor']	
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
 
         for i, v in enumerate(p.split("\n")):
             data = v.split("|")
+            
             try:
                 metric_name = data[0].strip().lower().replace("+", "").replace(" ", "_")
-                value = data[1].strip()
+                value = data[1].strip()  
+                
 
                 # Skip missing sensors
                 if re.search("(0x)", value ) or value == 'na':
@@ -49,21 +51,22 @@ def get_metrics(params):
                 vmatch = re.search("([0-9.]+)", value)
                 if not vmatch:
                     continue
+                if metric_name == "p1-dimma1_temp": print vmatch, vmatch.group(1)
                 metric_value = float(vmatch.group(1))
-
+                
                 new_metrics[metric_name] = metric_value
                 units[metric_name] = data[2].strip().replace("degrees C", "C")
-		
+
             except ValueError:
                 continue
             except IndexError:
                 continue
-		
-	METRICS = {
-            'time': time.time(),
-            'data': new_metrics,
-            'units': units
-        }
+
+        METRICS = {
+                'time': time.time(),
+                'data': new_metrics,
+                'units': units
+            }
 
     return [METRICS]
 
@@ -71,16 +74,9 @@ def get_metrics(params):
 def get_value(name):
     """Return a value for the requested metric"""
 
-    try:
+    name = name[5:]
 
-	metrics = get_metrics()[0]
-
-	name = name.lstrip('ipmi_')
-
-	result = metrics['data'][name]
-
-    except Exception:
-        result = 0
+    result = METRICS['data'][name]
 
     return result
 
@@ -110,13 +106,13 @@ def metric_init(params):
     metrics = get_metrics(params)[0]
     
     for item in metrics['data']:
-	descriptors.append(create_desc(Desc_Skel, {
-		"name"       	: params['metric_prefix'] + "_" + item,
-		'groups'	: params['metric_prefix'],
-		'units'		: metrics['units'][item]
-		}))
-
-
+        descriptors.append(create_desc(Desc_Skel, {
+            "name"       	: params['metric_prefix'] + "_" + item,
+            'groups'	: params['metric_prefix'],
+            'units'		: metrics['units'][item],
+            # "call_back" : get_value(item)
+            }))
+            
     return descriptors
 
 def metric_cleanup():
@@ -128,10 +124,10 @@ if __name__ == '__main__':
     
     params = {
 	"metric_prefix" : "ipmi",
-	"ipmi_ip" : "10.1.2.3",
-	"username"  : "ADMIN",
-	"password"  : "secret",
-	"level" : "USER",
+    # "ipmi_ip" : "10.1.2.3",
+    # "username"  : "ADMIN",
+    # "password"  : "secret",
+    # "level" : "USER",
 	"ipmitool_bin" : "/usr/bin/ipmitool",
 	"timeout_bin" : "/usr/bin/timeout"
 	}
