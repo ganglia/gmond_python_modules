@@ -14,7 +14,7 @@ METRICS_CACHE_MAX = 5
 
 stats_pos = {} 
 
-def get_metrics(params):
+def get_metrics(params = None):
     """Return all metrics"""
 
     global METRICS
@@ -23,13 +23,22 @@ def get_metrics(params):
         new_metrics = {}
         units = {}
 
-        command = [ params['timeout_bin'],
-        "3", params['ipmitool_bin'],
-        # "-H", params['ipmi_ip'],
-        # "-U", params['username'],
-        # '-P', params['password'],
-        # '-L', params['level'],
-        'sensor']	
+        if params != None:
+            command = [ params['timeout_bin'],
+            "3", params['ipmitool_bin'],
+            # "-H", params['ipmi_ip'],
+            # "-U", params['username'],
+            # '-P', params['password'],
+            # '-L', params['level'],
+            'sensor']
+        else:
+            command = [ "/usr/bin/timeout",
+            "3", "/usr/bin/ipmitool",
+            # "-H", params['ipmi_ip'],
+            # "-U", params['username'],
+            # '-P', params['password'],
+            # '-L', params['level'],
+            'sensor']
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
@@ -41,6 +50,8 @@ def get_metrics(params):
                 metric_name = data[0].strip().lower().replace("+", "").replace(" ", "_")
                 value = data[1].strip()  
                 
+                # if not (("fan" in metric_name) or ("temp" in metric_name)):
+                #     continue
 
                 # Skip missing sensors
                 if re.search("(0x)", value ) or value == 'na':
@@ -75,7 +86,8 @@ def get_value(name):
 
     name = name[5:]
 
-    result = METRICS['data'][name]
+    # result = METRICS['data'][name]    
+    result = get_metrics()[0]['data'][name]
 
     return result
 
@@ -122,14 +134,14 @@ def metric_cleanup():
 if __name__ == '__main__':
     
     params = {
-	"metric_prefix" : "ipmi",
+    "metric_prefix" : "ipmi",
     # "ipmi_ip" : "10.1.2.3",
     # "username"  : "ADMIN",
     # "password"  : "secret",
     # "level" : "USER",
-	"ipmitool_bin" : "/usr/bin/ipmitool",
-	"timeout_bin" : "/usr/bin/timeout"
-	}
+    "ipmitool_bin" : "/usr/bin/ipmitool",
+    "timeout_bin" : "/usr/bin/timeout"
+    }
     
 
     while True:
