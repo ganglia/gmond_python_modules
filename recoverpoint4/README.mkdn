@@ -1,0 +1,27 @@
+EMC RecoverPoint 4.x
+===============
+
+This is a new GMOND Python Module that gets metrics from EMC RecoverPoint v 4.x replication appliances via their REST API.
+
+Currently gathers per Consistency Group:
+  * Data, Time and Journal Lags
+  * Incoming (SAN) and Outgoing (WAN) traffic, compression and dedupe ratios.
+  * Initialisation Traffic and completion metrics
+  * Journal size and capacity usage metrics
+  
+
+## Compatibility
+  * Compatible with Recoverpoint 4.x
+
+## DEPENDS
+  * Python modules: requests and urllib3
+
+## USAGE
+  * Save the recoverpoint4.pyconf into /etc/ganglia/conf.d directory.
+  * Save the recoverpoint4.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.  Update the cluster ip and username and passwords.
+  * Restart gmond and a "recoverpoint" host should appear in ganglia.
+
+
+## AUTHOR
+
+Author: Evan Fraser &lt;evan.fraser@trademe.co.nz&gt;
