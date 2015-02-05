@@ -171,7 +171,8 @@ def get_partitions():
     logging.debug('getting partitions')
     global PARTITIONS
 
-    if DEVICES is not None:
+    # We need DEVICES != "" because on at least Centos 6 this evaluates to true
+    if DEVICES is not None and DEVICES != "" :
         # Explicit device list has been set
         logging.debug(' DEVICES has already been set')
         out = DEVICES
