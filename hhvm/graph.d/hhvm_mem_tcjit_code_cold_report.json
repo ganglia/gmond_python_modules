@@ -1,0 +1,10 @@
+{
+   "report_name" : "hhvm mem tcjit code cold report",
+   "report_type" : "standard",
+   "title" : "hhvm mem tc/jit code cold",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_breakdown_tcjit_code_cold_capacity", "color": "E51400", "label": "tc/jit code cold capacity", "line_width": "3", "type": "line" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_cold_used", "color": "0050EF", "label": "tc/jit code cold used", "line_width": "2", "type": "stack" }
+   ]
+}

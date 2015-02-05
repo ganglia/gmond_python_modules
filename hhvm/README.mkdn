@@ -1,0 +1,67 @@
+hhvm
+==========
+
+Python module for ganglia 3.6
+
+This module parses output from the HHVM AdminServer memory and health commands and creates "hhvm_*" metrics
+
+## Metrics
+
+* hhvm_health_funcs
+* hhvm_health_hhbc_roarena_capac
+* hhvm_health_load
+* hhvm_health_queued
+* hhvm_health_rds
+* hhvm_health_target_cache
+* hhvm_health_units
+* hhvm_mem_breakdown_code_bytes
+* hhvm_mem_breakdown_static_strings_bytes
+* hhvm_mem_breakdown_static_strings_count
+* hhvm_mem_breakdown_tcjit_bytes
+* hhvm_mem_breakdown_tcjit_code_cold_capacity
+* hhvm_mem_breakdown_tcjit_code_cold_used
+* hhvm_mem_breakdown_tcjit_code_frozen_capacity
+* hhvm_mem_breakdown_tcjit_code_frozen_used
+* hhvm_mem_breakdown_tcjit_code_hot_capacity
+* hhvm_mem_breakdown_tcjit_code_hot_used
+* hhvm_mem_breakdown_tcjit_code_main_capacity
+* hhvm_mem_breakdown_tcjit_code_main_used
+* hhvm_mem_breakdown_tcjit_code_prof_capacity
+* hhvm_mem_breakdown_tcjit_code_prof_used
+* hhvm_mem_breakdown_tcjit_data_capacity
+* hhvm_mem_breakdown_tcjit_data_used
+* hhvm_mem_breakdown_tcjit_total_capacity
+* hhvm_mem_breakdown_tcjit_total_used
+* hhvm_mem_breakdown_unknown
+* hhvm_mem_procstats_code
+* hhvm_mem_procstats_data
+* hhvm_mem_procstats_shared
+* hhvm_mem_procstats_vmrss
+* hhvm_mem_procstats_vmsize
+* hhvm_jemalloc_low_allocated
+* hhvm_jemalloc_allocated
+* hhvm_jemalloc_mapped
+* hhvm_jemalloc_active
+* hhvm_jemalloc_low_mapped
+* hhvm_jemalloc_low_active
+* hhvm_jemalloc_error
+
+## Parameters
+
+* url (The URL for the HHVM AdminServer, default: 'http://localhost/')
+* username (username for basic HTTP authentication, default: '')
+* password (password for basic HTTP authentication or HHVM AdminServer standalone built-in authentication, default: '')
+
+## Notes
+
+* Tested with python 2.7 and Ganglia 3.6
+* Tested with HHVM 3.4 and 3.5
+
+## AUTHORS
+
+Juan J. Villalobos <jj@debianized.net>
+
+## LICENSE
+
+License to use, modify, and distribute under the GPL
+http://www.gnu.org/licenses/gpl-3.0.txt

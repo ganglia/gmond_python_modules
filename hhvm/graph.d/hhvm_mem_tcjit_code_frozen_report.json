@@ -1,0 +1,10 @@
+{
+   "report_name" : "hhvm mem tcjit code frozen report",
+   "report_type" : "standard",
+   "title" : "hhvm mem tc/jit code frozen",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_breakdown_tcjit_code_frozen_capacity", "color": "E51400", "label": "tc/jit code frozen capacity", "line_width": "3", "type": "line" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_frozen_used", "color": "0050EF", "label": "tc/jit code frozen used", "line_width": "2", "type": "stack" }
+   ]
+}

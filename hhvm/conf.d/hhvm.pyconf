@@ -1,0 +1,37 @@
+modules {
+  module {
+    name = "hhvm"
+    language = "python"
+
+    param url {
+      value = 'http://localhost:9001/'
+    }
+    param user {
+      value = ''
+    }
+    param pass {
+      value = ''
+    }
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 30
+
+  metric {
+    name_match = "hhvm_mem_(.+)"
+    title = "hhvm_mem_\\1"
+  }
+  
+  metric {
+    name_match = "hhvm_health_(.+)"
+    title = "hhvm_health_\\1"
+  }
+
+  metric {
+    name_match = "hhvm_jemalloc_(.+)"
+    title = "hhvm_jemalloc_\\1"
+  }
+
+}

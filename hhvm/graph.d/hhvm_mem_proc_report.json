@@ -1,0 +1,13 @@
+{
+   "report_name" : "hhvm process memory report",
+   "report_type" : "standard",
+   "title" : "hhvm process memory",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_procstats_vmsize", "color": "A20025", "label": "vm size", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_mem_procstats_data", "color": "76608A", "label": "data", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_mem_procstats_vmrss", "color": "6A00FF", "label": "vm rss", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_mem_procstats_shared", "color": "FA6800", "label": "shared", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_mem_procstats_code", "color": "008A00", "label": "code/text", "line_width": "2", "type": "line" }
+   ]
+}

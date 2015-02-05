@@ -1,0 +1,15 @@
+{
+   "report_name" : "hhvm mem tcjit aggregated report",
+   "report_type" : "standard",
+   "title" : "hhvm mem tc/jit aggregated report",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_breakdown_tcjit_code_frozen_used", "color": "00DD00", "label": "tc/jit code frozen", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_cold_used", "color": "0000DD", "label": "tc/jit code cold", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_hot_used", "color": "A20025", "label": "tc/jit code hot", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_main_used", "color": "FFFF00", "label": "tc/jit code main", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_prof_used", "color": "825A2C", "label": "tc/jit code prof", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_data_used", "color": "FF00FF", "label": "tc/jit data", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_mem_breakdown_tcjit_total_capacity", "color": "E51400", "label": "tc/jit total capacity", "line_width": "3", "type": "line" }
+   ]
+}
