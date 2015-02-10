@@ -9,6 +9,8 @@
 # Changelog:
 #   v1.0.0 - 2015-01-15
 #       * Initial version
+#   v1.0.1 - 2015-02-10
+#       * Added debug mode
 #
 # Copyright (c) 2015 Juan J. Villalobos <jj@debianized.net>
 # License to use, modify, and distribute under the GPL
@@ -16,8 +18,14 @@
 #
 
 import urllib2
+import logging
 import json
 import xml.etree.ElementTree as ET
+
+
+logging.basicConfig(level=logging.ERROR,
+                    format="%(asctime)s - hhvm - %(levelname)s - %(message)s")
+logging.debug('starting')
 
 descriptors = list()
 
@@ -110,56 +118,65 @@ password = ''
 
 class MemoryData(object):
     ''' Object to store /memory-json endpoint result '''
-    global url, username, password
+    global url, password
 
     def __init__(self):
         self.url = url + '/memory.json?auth=' + password
         self.data = {}
+        logging.debug('MemoryData object initialized pointing to ' + self.url)
 
     def get(self, name):
         try:
+            logging.debug('MemoryData get method called')
             temp_data = json.load(fetch_url(self.url))
             self.data = flatten(temp_data)
             return int(self.data[name_map[name]])
         except:
-            print 'ERR: Could not parse output data, retval=0'
+            logging.error('MemoryData get method failed, '
+                          'could not parse output data, retval=0')
             return 0
 
 
 class HealthData(object):
     ''' Object to store /check-health endpoint result '''
-    global url, username, password
+    global url, password
 
     def __init__(self):
         self.url = url + '/check-health?auth=' + password
         self.data = {}
+        logging.debug('HealthData object initialized pointing to ' + self.url)
 
     def get(self, name):
         try:
+            logging.debug('HealthData get method called')
             temp_data = json.load(fetch_url(self.url))
             self.data = flatten(temp_data)
             return int(self.data[name_map[name]])
         except:
-            print 'ERR: Could not parse output data, retval=0'
+            logging.error('HealthData get method failed, '
+                          'could not parse output data, retval=0')
             return 0
 
 
 class JemallocData(object):
     ''' Object to store /jemalloc-stats endpoint result '''
-    global url, username, password
+    global url, password
 
     def __init__(self):
         self.url = url + '/jemalloc-stats?auth=' + password
         self.data = {}
+        logging.debug('JemallocData object initialized pointing to ' + self.url)
 
     def get(self, name):
         try:
+            logging.debug('JemallocData get method called')
             root = ET.parse(fetch_url(self.url)).getroot()
             for child in root:
                 self.data['hhvm_jemalloc_' + child.tag] = child.text
             return int(self.data[name_map[name]])
         except:
-            print 'ERR: Could not parse output data, retval = 0'
+            logging.error('JemallocData get method failed, '
+                          'could not parse output data, retval=0')
             return 0
 
 
@@ -182,11 +199,12 @@ def fetch_url(url):
     try:
         result = urllib2.urlopen(url)
     except urllib2.HTTPError as e:
+        # Checking for 401 allows module to retry authentication without restart
         if e.code == 401:
-            print 'HTTPError: ' + str(e.reason) + ' ' + str(e.code) + ', retry'
+            logging.error('HTTPError: ' + str(e.reason) + ' ' + str(e.code))
             auth_admin_url()
         else:
-            print 'HTTPError: ' + str(e.reason) + ' ' + str(e.code)
+            logging.error('HTTPError: ' + str(e.reason) + ' ' + str(e.code))
     else:
         return result
 
@@ -194,6 +212,8 @@ def fetch_url(url):
 def auth_admin_url():
     '''Returns fetched url'''
     global url, username, password
+    logging.debug('HTTP basic authentication with '
+                  'username=' + username + ', password=' + password)
     if (username and password):
         try:
             password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -203,11 +223,11 @@ def auth_admin_url():
             opener.open(url)
             urllib2.install_opener(opener)
         except urllib2.HTTPError as e1:
-            print 'HTTPError: ' + str(e1.reason) + ' ' + str(e1.code)
+            logging.error('HTTPError: ' + str(e1.reason) + ' ' + str(e1.code))
         except urllib2.URLError as e2:
-            print 'URLError: ' + str(e2.reason)
+            logging.error('URLError: ' + str(e2.reason))
         except Exception as e3:
-            print 'ERR: ' + str(e3.message)
+            logging.error('Error: ' + str(e3.message))
 
 
 def create_desc(skel, prop):
@@ -218,7 +238,7 @@ def create_desc(skel, prop):
 
 
 def metric_init(params):
-    '''Initialize the hhvm objects'''
+    '''Initialize hhvm module'''
     global descriptors, metric_map
     global url, username, password
     global Desc_Skel_Memory, Desc_Skel_Health
@@ -227,6 +247,11 @@ def metric_init(params):
     username = params.get('user', '')
     password = params.get('pass', '')
 
+    logging.debug('metric_init received params: ' +
+                  'user=' + username + ' pass=' + password + ' url=' + url)
+
+    logging.debug('metric_init calls auth_admin_url() for '
+                  'initial HTTP basic authentication')
     auth_admin_url()
 
     memory_data = MemoryData()
@@ -504,13 +529,14 @@ def metric_init(params):
 
 def metric_cleanup():
     '''Clean up the metric module.'''
+    logging.debug('metric_cleanup')
     pass
 
 
 # This code is for debugging and unit testing
 if __name__ == '__main__':
     params = {
-        'url': 'http://localhost:9001/',
+        'url': 'http://localhost/memory.json',
         'user': '',
         'pass': ''
     }

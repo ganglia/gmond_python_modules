@@ -5,6 +5,11 @@ Python module for ganglia 3.6
 
 This module parses output from the HHVM AdminServer memory and health commands and creates "hhvm_*" metrics
 
+This module supports two types of authentication:
+
+* HHVM built-in authentication using password on the URL (only password parameter needed)
+* HTTP Basic Authentication (username and password parameters needed)
+
 ## Metrics
 
 * hhvm_health_funcs
@@ -48,9 +53,14 @@ This module parses output from the HHVM AdminServer memory and health commands a
 
 ## Parameters
 
-* url (The URL for the HHVM AdminServer, default: 'http://localhost/')
-* username (username for basic HTTP authentication, default: '')
-* password (password for basic HTTP authentication or HHVM AdminServer standalone built-in authentication, default: '')
+* url (The URL for the HHVM AdminServer, mandatory, default: 'http://localhost/')
+* username (username for basic HTTP authentication, optioal, default: '')
+* password (password for basic HTTP authentication or HHVM AdminServer built-in authentication, optional, default: '')
+
+## Changelog
+
+* v1.0.0 - 2015-01-15 - Initial version
+* v1.0.1 - 2015-02-10 - Added debug mode
 
 ## Notes
 
