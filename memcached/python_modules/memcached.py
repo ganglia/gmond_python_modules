@@ -255,6 +255,30 @@ def metric_init(params):
                 "description": "Number of valid items removed from cache to free memory for new items",
                 }))
     descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_reclaimed",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Number of times an entry was stored using memory from an expired entry",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_expired_unfetched",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Items pulled from LRU that were never touched by get/incr/append/etc before expiring",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_evicted_unfetched",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Items evicted from LRU that were never touched by get/incr/append/etc.",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
+                "name"       : mp+"_crawler_reclaimed",
+                "units"      : "items",
+                "slope"      : "both",
+                "description": "Total items freed by LRU Crawler",
+                }))
+    descriptors.append(create_desc(Desc_Skel, {
                 "name"       : mp+"_get_hits",
                 "units"      : "items",
                 "slope"      : "positive",
@@ -313,6 +337,10 @@ def metric_init(params):
                 mp+"_limit_maxbytes",
                 mp+"_curr_connections",
                 mp+"_evictions",
+                mp+"_reclaimed",
+                mp+"_expired_unfetched",
+                mp+"_evicted_unfetched",
+                mp+"_crawler_reclaimed",
                 ]:
                 descriptors.remove(d)
         for d in descriptors:
