@@ -54,7 +54,7 @@ This module supports two types of authentication:
 ## Parameters
 
 * url (The URL for the HHVM AdminServer, mandatory, default: 'http://localhost/')
-* username (username for basic HTTP authentication, optioal, default: '')
+* username (username for basic HTTP authentication, optional, default: '')
 * password (password for basic HTTP authentication or HHVM AdminServer built-in authentication, optional, default: '')
 
 ## Changelog
