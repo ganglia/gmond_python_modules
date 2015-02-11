@@ -1,0 +1,37 @@
+# Name: recoverpoint.pyconf
+# Author: Evan Fraser (evan.fraser@trademe.co.nz)
+# Desc: Config file for the ganglia gmond recoverpoint4 module.
+# Date: 04/02/2015
+# To use: Save this file in /etc/ganglia/conf.d/
+
+modules {
+    module {
+        name = "recoverpoint4"
+        language = "python"
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 20
+    time_threshold = 50
+    metric {
+        name_match = "(.+)Throughput"
+        }
+    metric {
+        name_match = "(.+)Writes"
+        }
+    metric {
+        name_match = "(.+)Bytes"
+        }
+    metric {
+        name_match = "(.+)Lag"
+        }
+    metric {
+        name_match = "(.+)Ratio"
+        }
+    metric {
+        name_match = "(.+)Portion"
+        }
+}
+
