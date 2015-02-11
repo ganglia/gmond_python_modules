@@ -1,0 +1,10 @@
+{
+   "report_name" : "hhvm mem tcjit code hot report",
+   "report_type" : "standard",
+   "title" : "hhvm mem tc/jit code hot",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_breakdown_tcjit_code_hot_capacity", "color": "E51400", "label": "tc/jit code hot capacity", "line_width": "3", "type": "line" },
+      { "metric": "hhvm_mem_breakdown_tcjit_code_hot_used", "color": "0050EF", "label": "tc/jit code hot used", "line_width": "2", "type": "stack" }
+   ]
+}

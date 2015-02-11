@@ -1,0 +1,10 @@
+{
+   "report_name" : "hhvm mem tcjit total report",
+   "report_type" : "standard",
+   "title" : "hhvm mem tc/jit total",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_mem_breakdown_tcjit_total_capacity", "color": "E51400", "label": "tc/jit total capacity", "line_width": "3", "type": "line" },
+      { "metric": "hhvm_mem_breakdown_tcjit_total_used", "color": "0050EF", "label": "tc/jit total used", "line_width": "2", "type": "stack" }
+   ]
+}

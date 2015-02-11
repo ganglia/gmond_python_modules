@@ -1,0 +1,15 @@
+{
+   "report_name" : "hhvm jemalloc report",
+   "report_type" : "standard",
+   "title" : "hhvm jemalloc stats",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_jemalloc_low_allocated", "color": "FF0000", "label": "low allocated", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_allocated", "color": "00FF00", "label": "allocated", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_mapped", "color": "0000FF", "label": "mapped", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_active", "color": "FFFF00", "label": "active", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_low_active", "color": "00FFFF", "label": "low active", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_error", "color": "000000", "label": "error", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_jemalloc_low_mapped", "color": "FF00FF", "label": "low mapped", "line_width": "2", "type": "line" }
+   ]
+}
