@@ -3,4 +3,4 @@ python:
   - '2.6'
   - '2.7'
 script:
-  - python -m compileall -f .
+  - python -m compileall -f . 
