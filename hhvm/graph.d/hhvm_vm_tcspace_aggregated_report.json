@@ -1,0 +1,14 @@
+{
+   "report_name" : "hhvm vm tc space aggregated report",
+   "report_type" : "standard",
+   "title" : "hhvm vm tc space aggregated report",
+   "vertical_label" : "Bytes",
+   "series" : [
+      { "metric": "hhvm_vm_tcspace_code_hot", "color": "00DD00", "label": "vm tc space code hot", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_vm_tcspace_code_main", "color": "0000DD", "label": "vm tc space code main", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_vm_tcspace_code_prof", "color": "A20025", "label": "vm tc space code prof", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_vm_tcspace_code_cold", "color": "FFFF00", "label": "vm tc space code cold", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_vm_tcspace_code_frozen", "color": "825A2C", "label": "vm tc space code frozen", "line_width": "2", "type": "stack" },
+      { "metric": "hhvm_vm_tcspace_data", "color": "FF00FF", "label": "vm tc space data", "line_width": "2", "type": "stack" }
+   ]
+}

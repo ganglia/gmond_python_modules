@@ -50,6 +50,32 @@ This module supports two types of authentication:
 * hhvm_jemalloc_low_mapped
 * hhvm_jemalloc_low_active
 * hhvm_jemalloc_error
+* hhvm_vm_tcspace_code_hot
+* hhvm_vm_tcspace_code_main
+* hhvm_vm_tcspace_code_prof
+* hhvm_vm_tcspace_code_cold
+* hhvm_vm_tcspace_code_frozen
+* hhvm_vm_tcspace_data
+* hhvm_vm_tcspace_rds
+* hhvm_vm_tcspace_rds_local
+* hhvm_vm_tcspace_persistent_rds
+* hhvm_vm_tcspace_cloned_closures
+* hhvm_vm_tcspace_total
+
+## Optional graphs
+
+* hhvm_jemalloc_aggregated_report
+* hhvm_mem_proc_report
+* hhvm_vm_rds_aggregated_report
+* hhvm_vm_tcspace_aggregated_report
+* hhvm_mem_tcjit_aggregated_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_code_cold_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_code_frozen_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_code_hot_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_code_main_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_code_prof_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_data_report (hhvm >= 3.4)
+* hhvm_mem_tcjit_total_report (hhvm >= 3.4)
 
 ## Parameters
 
@@ -61,11 +87,12 @@ This module supports two types of authentication:
 
 * v1.0.0 - 2015-01-15 - Initial version
 * v1.0.1 - 2015-02-10 - Added debug mode
+* v1.0.2 - 2015-02-12 - Added vm tc space metrics
 
 ## Notes
 
 * Tested with python 2.7 and Ganglia 3.6
-* Tested with HHVM 3.4 and 3.5
+* Tested with HHVM 3.3.3, 3.4.2 and 3.5.0
 
 ## AUTHORS
 

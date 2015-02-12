@@ -11,6 +11,8 @@
 #       * Initial version
 #   v1.0.1 - 2015-02-10
 #       * Added debug mode
+#   v1.0.2 - 2015-02-12
+#       * Added vm tc space metrics
 #
 # Copyright (c) 2015 Juan J. Villalobos <jj@debianized.net>
 # License to use, modify, and distribute under the GPL
@@ -111,6 +113,30 @@ name_map['hhvm_jemalloc_low_active'] = \
 name_map['hhvm_jemalloc_error'] = \
     'hhvm_jemalloc_error'
 
+name_map['hhvm_vm_tcspace_code_hot'] = \
+    'code.hot'
+name_map['hhvm_vm_tcspace_code_main'] = \
+    'code.main'
+name_map['hhvm_vm_tcspace_code_prof'] = \
+    'code.prof'
+name_map['hhvm_vm_tcspace_code_cold'] = \
+    'code.cold'
+name_map['hhvm_vm_tcspace_code_frozen'] = \
+    'code.frozen'
+name_map['hhvm_vm_tcspace_data'] = \
+    'data'
+name_map['hhvm_vm_tcspace_rds'] = \
+    'RDS'
+name_map['hhvm_vm_tcspace_rds_local'] = \
+    'RDSLocal'
+name_map['hhvm_vm_tcspace_persistent_rds'] = \
+    'persistentRDS'
+name_map['hhvm_vm_tcspace_cloned_closures'] = \
+    'cloned-closures'
+name_map['hhvm_vm_tcspace_total'] = \
+    'total'
+
+
 url = ''
 username = ''
 password = ''
@@ -180,6 +206,25 @@ class JemallocData(object):
             return 0
 
 
+class TCSpaceData(object):
+    '''Object to store /vm-tcspace endpoint result'''
+    global url, password
+
+    def __init__(self):
+        self.url = url + '/vm-tcspace?auth=' + password
+        self.data = {}
+        logging.debug('TCSpaceData object initialized pointing to ' + self.url)
+
+    def get(self, name):
+        try:
+            logging.debug('TCSpaceData get method called')
+            self.data = tab_to_dict(fetch_url(self.url))
+            return int(self.data[name_map[name]])
+        except Exception as e:
+            logging.error('TCSpaceData get method failed, '
+                          'could not parse output data, retval=0' + e.message)
+
+
 def flatten(structure, key="", path="", flattened=None):
     if flattened is None:
         flattened = {}
@@ -192,6 +237,18 @@ def flatten(structure, key="", path="", flattened=None):
         for new_key, value in structure.items():
             flatten(value, new_key, path + "_" + key, flattened)
     return flattened
+
+
+def tab_to_dict(tsvdata, result=None):
+    if result is None:
+        result = {}
+    for line in tsvdata:
+        splitted = line.rstrip().split()
+        f1 = splitted[1]
+        f5 = splitted[5]
+        result[''+str(f5)] = int(f1)
+
+    return result
 
 
 def fetch_url(url):
@@ -257,6 +314,7 @@ def metric_init(params):
     memory_data = MemoryData()
     health_data = HealthData()
     jemalloc_data = JemallocData()
+    tcspace_data = TCSpaceData()
 
     descriptors = []
 
@@ -287,6 +345,18 @@ def metric_init(params):
     Desc_Skel_Jemalloc = {
         'name': 'XXX',
         'call_back': jemalloc_data.get,
+        'time_max': 20,
+        'value_type': 'uint',
+        'format': '%u',
+        'units': 'XXX',
+        'slope': 'both',  # zero|positive|negative|both
+        'description': 'XXX',
+        'groups': 'hhvm',
+    }
+
+    Desc_Skel_TCSpace = {
+        'name': 'XXX',
+        'call_back': tcspace_data.get,
         'time_max': 20,
         'value_type': 'uint',
         'format': '%u',
@@ -524,6 +594,72 @@ def metric_init(params):
         "description": "hhvm jemalloc error",
         }))
 
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_code_hot",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace code hot",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_code_main",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace code main",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_code_prof",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace code prof",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_code_cold",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace code cold",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_code_frozen",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace code frozen",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_data",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace data",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_rds",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace rds",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_rds_local",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace rds local",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_persistent_rds",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace persistent rds",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_cloned_closures",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace cloned closures",
+        }))
+
+    descriptors.append(create_desc(Desc_Skel_TCSpace, {
+        "name": "hhvm_vm_tcspace_total",
+        "units": "Bytes",
+        "description": "hhvm vm tcspace total",
+        }))
+
     return descriptors
 
 
@@ -536,7 +672,7 @@ def metric_cleanup():
 # This code is for debugging and unit testing
 if __name__ == '__main__':
     params = {
-        'url': 'http://localhost/memory.json',
+        'url': 'http://localhost:9001',
         'user': '',
         'pass': ''
     }
