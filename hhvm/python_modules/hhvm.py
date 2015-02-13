@@ -218,7 +218,7 @@ class TCSpaceData(object):
     def get(self, name):
         try:
             logging.debug('TCSpaceData get method called')
-            self.data = tab_to_dict(fetch_url(self.url))
+            self.data = parse_vm_tcspace(fetch_url(self.url))
             return int(self.data[name_map[name]])
         except Exception as e:
             logging.error('TCSpaceData get method failed, '
@@ -239,15 +239,11 @@ def flatten(structure, key="", path="", flattened=None):
     return flattened
 
 
-def tab_to_dict(tsvdata, result=None):
+def parse_vm_tcspace(tsv_data, result=None):
     if result is None:
         result = {}
-    for line in tsvdata:
-        splitted = line.rstrip().split()
-        f1 = splitted[1]
-        f5 = splitted[5]
-        result[''+str(f5)] = int(f1)
-
+    result = dict((line.rstrip().split()[5], line.rstrip().split()[1])
+                  for line in tsv_data)
     return result
 
 
