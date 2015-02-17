@@ -78,7 +78,7 @@ def metric_init(params):
 
     """
     groups = params.pop('groups', 'ZeroMQ')
-    counter = {name: 0 for name in params}
+    counter = dict((name, 0) for name in params)
 
     thread = threading.Thread(target=zmq_pub_mon, args=(params, counter))
     thread.daemon = True

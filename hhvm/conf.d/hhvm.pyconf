@@ -4,7 +4,7 @@ modules {
     language = "python"
 
     param url {
-      value = 'http://localhost:9001/'
+      value = 'http://localhost:9001'
     }
     param user {
       value = ''
@@ -32,6 +32,11 @@ collection_group {
   metric {
     name_match = "hhvm_jemalloc_(.+)"
     title = "hhvm_jemalloc_\\1"
+  }
+
+  metric {
+    name_match = "hhvm_vm_tcspace_(.+)"
+    title = "hhvm_vm_tcspace_\\1"
   }
 
 }
