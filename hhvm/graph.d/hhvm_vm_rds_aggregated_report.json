@@ -4,8 +4,8 @@
    "title" : "hhvm vm tc space rds aggregated report",
    "vertical_label" : "Bytes",
    "series" : [
-      { "metric": "hhvm_vm_tcspace_rds", "color": "00DD00", "label": "vm tc space code hot", "line_width": "2", "type": "line" },
-      { "metric": "hhvm_vm_tcspace_rds_local", "color": "0000DD", "label": "vm tc space code main", "line_width": "2", "type": "line" },
-      { "metric": "hhvm_vm_tcspace_persistent_rds", "color": "A20025", "label": "vm tc space code prof", "line_width": "2", "type": "line" }
+      { "metric": "hhvm_vm_tcspace_rds", "color": "00DD00", "label": "vm tc space rds", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_vm_tcspace_rds_local", "color": "0000DD", "label": "vm tc space rds local", "line_width": "2", "type": "line" },
+      { "metric": "hhvm_vm_tcspace_persistent_rds", "color": "A20025", "label": "vm tc space persistent rds", "line_width": "2", "type": "line" }
    ]
 }
