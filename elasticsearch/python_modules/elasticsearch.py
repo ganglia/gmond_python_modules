@@ -21,13 +21,10 @@ keyToPath = dict()
 # INDICES METRICS #
 
 ## CACHE
-keyToPath['es_cache_field_eviction'] = "nodes.%s.indices.cache.field_evictions"
-keyToPath['es_cache_field_size'] = "nodes.%s.indices.cache.field_size_in_bytes"
-keyToPath['es_cache_filter_count'] = "nodes.%s.indices.cache.filter_count"
-keyToPath[
-    'es_cache_filter_evictions'] = "nodes.%s.indices.cache.filter_evictions"
-keyToPath[
-    'es_cache_filter_size'] = "nodes.%s.indices.cache.filter_size_in_bytes"
+keyToPath['es_cache_field_eviction'] = "nodes.%s.indices.fielddata.evictions"
+keyToPath['es_cache_field_size'] = "nodes.%s.indices.fielddata.memory_size_in_bytes"
+keyToPath['es_cache_filter_evictions'] = "nodes.%s.indices.filter_cache.evictions"
+keyToPath['es_cache_filter_size'] = "nodes.%s.indices.cache.filter_size_in_bytes"
 
 ## DOCS
 keyToPath['es_docs_count'] = "nodes.%s.indices.docs.count"
@@ -91,8 +88,10 @@ keyToPath['es_threads'] = "nodes.%s.jvm.threads.count"
 keyToPath['es_threads_peak'] = "nodes.%s.jvm.threads.peak_count"
 
 ## GC
-keyToPath['es_gc_time'] = "nodes.%s.jvm.gc.collection_time_in_millis"
-keyToPath['es_gc_count'] = "nodes.%s.jvm.gc.collection_count"
+keyToPath['es_gc_time_old'] = "nodes.%s.jvm.gc.collectors.old.collection_time_in_millis"
+keyToPath['es_gc_count_old'] = "nodes.%s.jvm.gc.collectors.old.collection_count"
+keyToPath['es_gc_time_young'] = "nodes.%s.jvm.gc.collectors.young.collection_time_in_millis"
+keyToPath['es_gc_count_young'] = "nodes.%s.jvm.gc.collectors.young.collection_count"
 
 # TRANSPORT METRICS #
 keyToPath['es_transport_open'] = "nodes.%s.transport.server_open"
@@ -288,7 +287,17 @@ def metric_init(params):
 
     descriptors.append(
         _create_desc({
-            'name': 'es_gc_time',
+            'name': 'es_gc_time_old',
+            'units': 'ms',
+            'format': '%d',
+            'slope': 'positive',
+            'description': 'Java GC Time (ms)'
+        })
+    )
+
+    descriptors.append(
+        _create_desc({
+            'name': 'es_gc_time_young',
             'units': 'ms',
             'format': '%d',
             'slope': 'positive',
@@ -376,7 +385,16 @@ def metric_init(params):
 
     descriptors.append(
         _create_desc({
-            'name': 'es_gc_count',
+            'name': 'es_gc_count_old',
+            'format': '%d',
+            'slope': 'positive',
+            'description': 'Java GC Count',
+        })
+    )
+
+    descriptors.append(
+        _create_desc({
+            'name': 'es_gc_count_young',
             'format': '%d',
             'slope': 'positive',
             'description': 'Java GC Count',
@@ -513,14 +531,6 @@ def metric_init(params):
             'format': '%.0f',
             'description': 'Field Cache Size',
             'value_type': 'double',
-        })
-    )
-
-    descriptors.append(
-        _create_desc({
-            'name': 'es_cache_filter_count',
-            'format': '%d',
-            'description': 'Filter Cache Count',
         })
     )
 
