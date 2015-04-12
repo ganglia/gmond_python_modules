@@ -1,0 +1,35 @@
+modules {
+    module {
+        name = "storm_topology"
+        language = "python"
+        param topologies {
+            value = "SampleTopology,AnotherTopology"
+        }
+        param SampleTopology_spouts {
+            value = "SampleSpoutTwo"
+        }
+        param SampleTopology_bolts {
+            value = "boltc"
+        }
+        param AnotherTopology_spouts {
+            value = "Spout"
+        }
+        param AnotherTopology_bolts {
+            value = "bolta,boltb,boltd"
+        }
+        param storm_thrift_gen {
+            value = "/usr/lib/ganglia"
+        }  
+        param loglevel {
+            value = "INFO"
+        }
+    }
+}
+
+collection_group { 
+  collect_every = 20 
+  time_threshold = 90 
+  metric { 
+    name_match = ".*"  
+  } 
+}
