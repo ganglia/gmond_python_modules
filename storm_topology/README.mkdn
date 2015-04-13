@@ -1,0 +1,66 @@
+Storm Topology
+===============
+
+Python module for getting stats for Storm topologies
+
+This module gets stats for Storm Topologies from Nimbus host.
+The communication to Storm Nimbus uses Thrift protocol.
+We have to install python thrift. Execute below commnand if thrift is not already installed:
+    $sudo pip install thrift
+
+Please install thrif-compiler if you want to generate the thrift modules. In that case,
+download Apache Storm from [github](https://github.com/apache/storm) and then run the below command from storm/storm-core/src directory:
+     thrift -gen py storm.thrift
+The generated modules will be under gen-py folder. Copy the content of the folder to /usr/lib/ganglia/stormpy.
+The stormpy directory may be under some directory other than /usr/lib/ganglia. For example, we may copy the content to /home/someusername/stormpy.  Then we specify the same in storm_topology.pyconf in the parameter storm_thrift_gen. In this case the value of storm_thrift_gen will be "/home/someusername".
+
+Storm source already contains generated thrift code for Python. It is accessible [here](https://github.com/apache/storm/tree/master/storm-core/src/py). So, we may directly download the content from [here](https://github.com/apache/storm/tree/master/storm-core/src/py) if we want an easy way out. 
+
+
+Topology names serve as the group names of the sats published.
+This module collects stats for uptime, worker count, task count, process latency, execute latency etc. 
+For example if there is a topology SomeTopology which runs a spout "Spout" and bolts bolta,bolb,boltd then 
+below stats are published:
+
+ * SomeTopology_Spout_Tasks 
+ * SomeTopology_Spout_Executors 
+ * SomeTopology_Spout_Emitted 
+ * SomeTopology_Spout_Acked 
+ * SomeTopology_Spout_Transferred 
+ * SomeTopology_Spout_Failed 
+ * SomeTopology_Spout_CompleteLatency 
+ * SomeTopology_bolta_Failed 
+ * SomeTopology_bolta_Executed 
+ * SomeTopology_bolta_Tasks 
+ * SomeTopology_bolta_ProcessLatency 
+ * SomeTopology_bolta_Executors 
+ * SomeTopology_bolta_Emitted 
+ * SomeTopology_bolta_ExecuteLatency 
+ * SomeTopology_bolta_Transferred 
+ * SomeTopology_bolta_Acked 
+ * SomeTopology_boltb_Failed 
+ * SomeTopology_boltb_Executed 
+ * SomeTopology_boltb_Tasks 
+ * SomeTopology_boltb_ProcessLatency 
+ * SomeTopology_boltb_Executors 
+ * SomeTopology_boltb_Emitted 
+ * SomeTopology_boltb_ExecuteLatency 
+ * SomeTopology_boltb_Transferred 
+ * SomeTopology_boltb_Acked 
+ * SomeTopology_boltd_Failed 
+ * SomeTopology_boltd_Executed 
+ * SomeTopology_boltd_Tasks 
+ * SomeTopology_boltd_ProcessLatency 
+ * SomeTopology_boltd_Executors 
+ * SomeTopology_boltd_Emitted 
+ * SomeTopology_boltd_ExecuteLatency 
+ * SomeTopology_boltd_Transferred 
+ * SomeTopology_boltd_Acked 
+ * SomeTopology_UptimeSecs 
+ * SomeTopology_ExecutorCount 
+ * SomeTopology_WorkerCount 
+ * SomeTopology_TaskCount 
+
+## AUTHOR
+
+Author: Nipun Talukdar 
