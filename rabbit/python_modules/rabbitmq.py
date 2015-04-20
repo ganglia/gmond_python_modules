@@ -192,12 +192,6 @@ def getQueueStat(name):
     if zero_rates_when_idle and stat_name in RATE_METRICS and 'idle_since' in result[queue_name].keys():
         value = 0
 
-    # Convert Booleans
-    if value is True:
-        value = 1
-    elif value is False:
-        value = 0
-
     return float(value)
 
 
@@ -211,14 +205,24 @@ def getNodeStat(name):
     value = dig_it_up(result, keyToPath[stat_name] % node_name)
 
     log.debug('name: %r value: %r' % (name, value))
-    # Convert Booleans
-    if value is True:
-        value = 1
-    elif value is False:
-        value = 0
 
     return float(value)
 
+def getNodeSumStat(name):
+    refreshStats(stats=STATS, vhosts=vhosts)
+    # Split a name like "rmq_backing_queue_ack_egress_rate.access"
+    stat_name, dummyName, vhost = name.split(METRIC_TOKEN_SEPARATOR)
+    vhost = vhost.replace('-', '/')  # decoding vhost from metric name
+
+    result = compiled_results[('nodes', '/')]
+    total = 0.0
+    for node_name in list_nodes():
+        value = dig_it_up(result, keyToPath[stat_name] % node_name)
+        total += value
+
+    log.debug('name: %r value: %r' % (name, total))
+
+    return total
 
 def getOverviewStat(name):
     refreshStats(stats=STATS, vhosts=vhosts)
@@ -234,12 +238,6 @@ def getOverviewStat(name):
     result = compiled_results[('overview', vhost)]
 
     value = dig_it_up(result, keyToPath[stat_name])
-
-    # Convert Booleans
-    if value is True:
-        value = 1
-    elif value is False:
-        value = 0
 
     return float(value)
 
@@ -259,12 +257,6 @@ def getExchangeStat(name):
     value = dig_it_up(result, keyToPath[stat_name] % exchange_name)
 
     if zero_rates_when_idle and stat_name in RATE_METRICS and 'idle_since' in result[exchange_name].keys():
-        value = 0
-
-    # Convert Booleans
-    if value is True:
-        value = 1
-    elif value is False:
         value = 0
 
     return float(value)
@@ -364,6 +356,18 @@ def metric_init(params):
 
     def buildNodeDescriptors():
         for metric in NODE_METRICS:
+            name = "{1}{0}total{0}-".format(METRIC_TOKEN_SEPARATOR, metric)
+            log.debug(name)
+            d2 = create_desc({'name': name.encode('ascii', 'ignore'),
+                              'call_back': getNodeSumStat,
+                              'value_type': 'float',
+                              'units': 'N',
+                              'slope': 'both',
+                              'format': '%f',
+                              'description': 'Node_Metric',
+                              'groups': 'rabbitmq,node'})
+            log.debug(d2)
+            descriptors.append(d2)
             for node in list_nodes():
                 name = "{1}{0}{2}{0}-".format(METRIC_TOKEN_SEPARATOR, metric, node)
                 log.debug(name)
