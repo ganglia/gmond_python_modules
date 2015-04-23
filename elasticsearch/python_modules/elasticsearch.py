@@ -116,6 +116,10 @@ keyToPath[
     'es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
 
 
+def log(string, level=logging.DEBUG):
+    logging.log(level, '[Elasticsearch] ' + string)
+
+
 def dig_it_up(obj, path):
     try:
         path = path.split('.')
@@ -125,7 +129,7 @@ def dig_it_up(obj, path):
 
 
 def update_result(result, url):
-    logging.debug('[elasticsearch] Fetching ' + url)
+    log('Fetching ' + url)
     result = json.load(urllib.urlopen(url))
     return result
 
@@ -192,8 +196,7 @@ def metric_init(params):
     # pylint: disable=too-many-statements
     descriptors = []
 
-    logging.debug('[elasticsearch] Received the following parameters')
-    logging.debug(params)
+    log('Received the following parameters %s' % params)
 
     host = params.get('host', 'http://localhost:9200/')
 
@@ -207,7 +210,7 @@ def metric_init(params):
         url_cluster = '{0}_cluster/state/nodes'.format(host)
 
     # First iteration - Grab statistics
-    logging.debug('[elasticsearch] Fetching ' + url_cluster)
+    log('Fetching ' + url_cluster)
     result = json.load(urllib.urlopen(url_cluster))
 
     metric_group = params.get('metric_group', 'elasticsearch')
@@ -227,7 +230,7 @@ def metric_init(params):
     indices = params.get('indices', '*').split()
     for index in indices:
         url_indices = '{0}{1}/_stats'.format(host, index)
-        logging.debug('[elasticsearch] Fetching ' + url_indices)
+        log('Fetching ' + url_indices)
 
         r_indices = json.load(urllib.urlopen(url_indices))
         descriptors += get_indices_descriptors(index,
@@ -742,7 +745,7 @@ def main():
     descriptors = metric_init(params)
     for descriptor in descriptors:
         value = descriptor['call_back'](descriptor['name'])
-        logging.debug('Value for %s is %s', descriptor['name'], str(value))
+        log('Value for %s is %s' % (descriptor['name'], str(value)))
 
 
 # This code is for debugging and unit testing
