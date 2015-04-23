@@ -66,6 +66,20 @@ STAT_DESCRIPTIONS = [
         'description': 'Java GC Time (ms)',
     },
     {
+        'name': 'es_gc_young_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Young Time (ms)',
+    },
+    {
+        'name': 'es_gc_old_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Old Time (ms)'
+    },
+    {
         'name': 'es_transport_open',
         'units': 'sockets',
         'format': '%d',
@@ -124,6 +138,18 @@ STAT_DESCRIPTIONS = [
         'format': '%d',
         'slope': 'positive',
         'description': 'Java GC Count',
+    },
+    {
+        'name': 'es_gc_young_count',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Young Count',
+    },
+    {
+        'name': 'es_gc_old_count',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Old Count',
     },
     {
         'name': 'es_merges_current',
@@ -214,6 +240,20 @@ STAT_DESCRIPTIONS = [
         'units': 'Bytes',
         'format': '%.0f',
         'description': 'Field Cache Size',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_cache_fielddata_evictions',
+        'units': 'units',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Field Data Cache Evictions',
+    },
+    {
+        'name': 'es_cache_fielddata_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Field Data Cache Size',
         'value_type': 'double',
     },
     {
@@ -361,16 +401,15 @@ def misc_path(string):
     return 'nodes.%s.' + string
 
 
+def gc_path(string):
+    return 'nodes.%s.jvm.gc.' + string
+
+
 def indices_path(string):
     return 'nodes.%s.indices.' + string
 
 
 COMMON_STATS = {
-    'es_cache_field_eviction': indices_path('cache.field_evictions'),
-    'es_cache_field_size': indices_path('cache.field_size_in_bytes'),
-    'es_cache_filter_count': indices_path('cache.filter_count'),
-    'es_cache_filter_evictions': indices_path('cache.filter_evictions'),
-    'es_cache_filter_size': indices_path('cache.filter_size_in_bytes'),
     'es_docs_count': indices_path('docs.count'),
     'es_docs_deleted': indices_path('docs.deleted'),
     'es_flush_total': indices_path('flush.total'),
@@ -407,8 +446,6 @@ COMMON_STATS = {
     'es_non_heap_used': misc_path('jvm.mem.non_heap_used_in_bytes'),
     'es_threads': misc_path('jvm.threads.count'),
     'es_threads_peak': misc_path('jvm.threads.peak_count'),
-    'es_gc_time': misc_path('jvm.gc.collection_time_in_millis'),
-    'es_gc_count': misc_path('jvm.gc.collection_count'),
     'es_transport_open': misc_path('transport.server_open'),
     'es_transport_rx_count': misc_path('transport.rx_count'),
     'es_transport_rx_size': misc_path('transport.rx_size_in_bytes'),
@@ -417,6 +454,28 @@ COMMON_STATS = {
     'es_http_current_open': misc_path('http.current_open'),
     'es_http_total_open': misc_path('http.total_opened'),
     'es_open_file_descriptors': misc_path('process.open_file_descriptors'),
+}
+
+
+LEGACY_STATS = {
+    'es_cache_field_eviction': indices_path('cache.field_evictions'),
+    'es_cache_field_size': indices_path('cache.field_size_in_bytes'),
+    'es_cache_filter_count': indices_path('cache.filter_count'),
+    'es_cache_filter_evictions': indices_path('cache.filter_evictions'),
+    'es_cache_filter_size': indices_path('cache.filter_size_in_bytes'),
+    'es_gc_time': gc_path('collection_time_in_millis'),
+    'es_gc_count': gc_path('collection_count'),
+}
+
+CURRENT_STATS = {
+    'es_cache_fielddata_evictions': indices_path('fielddata.evictions'),
+    'es_cache_fielddata_size': indices_path('fielddata.memory_size_in_bytes'),
+    'es_cache_filter_evictions': indices_path('filter_cache.evictions'),
+    'es_cache_filter_size': indices_path('filter_cache.memory_size_in_bytes'),
+    'es_gc_young_time': gc_path('collectors.young.collection_time_in_millis'),
+    'es_gc_young_count': gc_path('collectors.young.collection_count'),
+    'es_gc_old_time': gc_path('collectors.old.collection_time_in_millis'),
+    'es_gc_old_count': gc_path('collectors.old.collection_count'),
 }
 
 
@@ -499,8 +558,14 @@ def get_url_path(major, minor):
             return '_nodes/_local/stats'
 
 
-def get_key_to_path(_major, _minor):
-    return COMMON_STATS
+def get_key_to_path(major, minor):
+    result = COMMON_STATS.copy()
+    if major == 1 and minor > 2:
+        differences = CURRENT_STATS
+    else:
+        differences = LEGACY_STATS
+    result.update(differences)
+    return result
 
 
 def get_path(key_to_path, json_object, name):
