@@ -135,7 +135,7 @@ def dig_it_up(obj, path):
 def fetch(url):
     log('Fetching ' + url)
     result = json.load(urllib.urlopen(url))
-    log('Got %s' % result)
+    log('Got %s' % json.dumps(result))
     return result
 
 
