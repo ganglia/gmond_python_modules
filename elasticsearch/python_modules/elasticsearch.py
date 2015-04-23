@@ -7,20 +7,23 @@ except ImportError:
     import json
 
 import logging
-import time
 import urllib
 import re
 from functools import partial
 
-logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s")
+logging.basicConfig(
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s\t Thread-%(thread)d - %(message)s",
+)
 logging.debug('starting up')
 
 # short name to full path for stats
+# pylint: disable=invalid-name
 keyToPath = dict()
 
 # INDICES METRICS #
 
-## CACHE
+# CACHE
 keyToPath['es_cache_field_eviction'] = "nodes.%s.indices.cache.field_evictions"
 keyToPath['es_cache_field_size'] = "nodes.%s.indices.cache.field_size_in_bytes"
 keyToPath['es_cache_filter_count'] = "nodes.%s.indices.cache.filter_count"
@@ -29,15 +32,15 @@ keyToPath[
 keyToPath[
     'es_cache_filter_size'] = "nodes.%s.indices.cache.filter_size_in_bytes"
 
-## DOCS
+# DOCS
 keyToPath['es_docs_count'] = "nodes.%s.indices.docs.count"
 keyToPath['es_docs_deleted'] = "nodes.%s.indices.docs.deleted"
 
-## FLUSH
+# FLUSH
 keyToPath['es_flush_total'] = "nodes.%s.indices.flush.total"
 keyToPath['es_flush_time'] = "nodes.%s.indices.flush.total_time_in_millis"
 
-## GET
+# GET
 keyToPath['es_get_exists_time'] = "nodes.%s.indices.get.exists_time_in_millis"
 keyToPath['es_get_exists_total'] = "nodes.%s.indices.get.exists_total"
 keyToPath['es_get_time'] = "nodes.%s.indices.get.time_in_millis"
@@ -46,28 +49,31 @@ keyToPath[
     'es_get_missing_time'] = "nodes.%s.indices.get.missing_time_in_millis"
 keyToPath['es_get_missing_total'] = "nodes.%s.indices.get.missing_total"
 
-## INDEXING
-keyToPath['es_indexing_delete_time'] = "nodes.%s.indices.indexing.delete_time_in_millis"
+# INDEXING
+keyToPath['es_indexing_delete_time'] = \
+    "nodes.%s.indices.indexing.delete_time_in_millis"
 keyToPath[
     'es_indexing_delete_total'] = "nodes.%s.indices.indexing.delete_total"
-keyToPath['es_indexing_index_time'] = "nodes.%s.indices.indexing.index_time_in_millis"
+keyToPath['es_indexing_index_time'] = \
+    "nodes.%s.indices.indexing.index_time_in_millis"
 keyToPath['es_indexing_index_total'] = "nodes.%s.indices.indexing.index_total"
 
-## MERGES
+# MERGES
 keyToPath['es_merges_current'] = "nodes.%s.indices.merges.current"
 keyToPath['es_merges_current_docs'] = "nodes.%s.indices.merges.current_docs"
-keyToPath['es_merges_current_size'] = "nodes.%s.indices.merges.current_size_in_bytes"
+keyToPath['es_merges_current_size'] = \
+    "nodes.%s.indices.merges.current_size_in_bytes"
 keyToPath['es_merges_total'] = "nodes.%s.indices.merges.total"
 keyToPath['es_merges_total_docs'] = "nodes.%s.indices.merges.total_docs"
 keyToPath[
     'es_merges_total_size'] = "nodes.%s.indices.merges.total_size_in_bytes"
 keyToPath['es_merges_time'] = "nodes.%s.indices.merges.total_time_in_millis"
 
-## REFRESH
+# REFRESH
 keyToPath['es_refresh_total'] = "nodes.%s.indices.refresh.total"
 keyToPath['es_refresh_time'] = "nodes.%s.indices.refresh.total_time_in_millis"
 
-## SEARCH
+# SEARCH
 keyToPath['es_query_current'] = "nodes.%s.indices.search.query_current"
 keyToPath['es_query_total'] = "nodes.%s.indices.search.query_total"
 keyToPath['es_query_time'] = "nodes.%s.indices.search.query_time_in_millis"
@@ -75,22 +81,22 @@ keyToPath['es_fetch_current'] = "nodes.%s.indices.search.fetch_current"
 keyToPath['es_fetch_total'] = "nodes.%s.indices.search.fetch_total"
 keyToPath['es_fetch_time'] = "nodes.%s.indices.search.fetch_time_in_millis"
 
-## STORE
+# STORE
 keyToPath['es_indices_size'] = "nodes.%s.indices.store.size_in_bytes"
 
 # JVM METRICS #
-## MEM
+# MEM
 keyToPath['es_heap_committed'] = "nodes.%s.jvm.mem.heap_committed_in_bytes"
 keyToPath['es_heap_used'] = "nodes.%s.jvm.mem.heap_used_in_bytes"
 keyToPath[
     'es_non_heap_committed'] = "nodes.%s.jvm.mem.non_heap_committed_in_bytes"
 keyToPath['es_non_heap_used'] = "nodes.%s.jvm.mem.non_heap_used_in_bytes"
 
-## THREADS
+# THREADS
 keyToPath['es_threads'] = "nodes.%s.jvm.threads.count"
 keyToPath['es_threads_peak'] = "nodes.%s.jvm.threads.peak_count"
 
-## GC
+# GC
 keyToPath['es_gc_time'] = "nodes.%s.jvm.gc.collection_time_in_millis"
 keyToPath['es_gc_count'] = "nodes.%s.jvm.gc.collection_count"
 
@@ -112,10 +118,9 @@ keyToPath[
 
 def dig_it_up(obj, path):
     try:
-        if type(path) in (str, unicode):
-            path = path.split('.')
+        path = path.split('.')
         return reduce(lambda x, y: x[y], path, obj)
-    except:
+    except Exception:
         return False
 
 
@@ -125,7 +130,7 @@ def update_result(result, url):
     return result
 
 
-def get_stat_index(result, url, path, name):
+def get_stat_index(result, url, path, _name):
     result = update_result(result, url)
     val = dig_it_up(result, path)
 
@@ -135,7 +140,7 @@ def get_stat_index(result, url, path, name):
         return None
 
 
-def getStat(result, url, name):
+def get_stat(result, url, name):
     result = update_result(result, url)
 
     node = result['nodes'].keys()[0]
@@ -150,25 +155,28 @@ def getStat(result, url, name):
 
 
 def create_desc(skel, prop):
-    d = skel.copy()
-    for k, v in prop.iteritems():
-        d[k] = v
-    return d
+    description = skel.copy()
+    description.update(prop)
+    return description
 
 
 def get_indices_descriptors(index, skel, result, url):
     metric_tpl = 'es_index_{0}_{{0}}'.format(index)
     callback = partial(get_stat_index, result, url)
+    get_doc_count = \
+        partial(callback, '_all.primaries.docs.count'),
+    get_store_size = \
+        partial(callback, '_all.primaries.store.size_in_bytes'),
     _create_desc = partial(create_desc, skel)
 
     descriptors = [
         _create_desc({
-            'call_back': partial(callback, '_all.primaries.docs.count'),
+            'call_back': get_doc_count,
             'name': metric_tpl.format('docs_count'),
             'description': 'document count for index {0}'.format(index),
         }),
         _create_desc({
-            'call_back': partial(callback, '_all.primaries.store.size_in_bytes'),
+            'call_back': get_store_size,
             'name': metric_tpl.format('size'),
             'description': 'size in bytes for index {0}'.format(index),
             'units': 'Bytes',
@@ -181,6 +189,7 @@ def get_indices_descriptors(index, skel, result, url):
 
 
 def metric_init(params):
+    # pylint: disable=too-many-statements
     descriptors = []
 
     logging.debug('[elasticsearch] Received the following parameters')
@@ -189,10 +198,10 @@ def metric_init(params):
     host = params.get('host', 'http://localhost:9200/')
 
     version = params.get('version', '1.2')
-    
-    m = re.match('(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
-     
-    if m and m.group('major') == '0':
+
+    match = re.match(r'(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
+
+    if match and match.group('major') == '0':
         url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
     else:
         url_cluster = '{0}_cluster/state/nodes'.format(host)
@@ -203,9 +212,9 @@ def metric_init(params):
 
     metric_group = params.get('metric_group', 'elasticsearch')
 
-    Desc_Skel = {
+    description_skeleton = {
         'name': 'XXX',
-        'call_back': partial(getStat, result, url_cluster),
+        'call_back': partial(get_stat, result, url_cluster),
         'time_max': 60,
         'value_type': 'uint',
         'units': 'units',
@@ -222,11 +231,11 @@ def metric_init(params):
 
         r_indices = json.load(urllib.urlopen(url_indices))
         descriptors += get_indices_descriptors(index,
-                                               Desc_Skel,
+                                               description_skeleton,
                                                r_indices,
                                                url_indices)
 
-    _create_desc = partial(create_desc, Desc_Skel)
+    _create_desc = partial(create_desc, description_skeleton)
 
     descriptors.append(
         _create_desc({
@@ -723,9 +732,19 @@ def metric_cleanup():
     pass
 
 
-#This code is for debugging and unit testing
+def main():
+    params = {
+        'indices': '*',
+        'host': 'http://localhost:9200/',
+        'version': '1.2',
+        'metric_group': 'elasticsearch',
+    }
+    descriptors = metric_init(params)
+    for descriptor in descriptors:
+        value = descriptor['call_back'](descriptor['name'])
+        logging.debug('Value for %s is %s', descriptor['name'], str(value))
+
+
+# This code is for debugging and unit testing
 if __name__ == '__main__':
-    descriptors = metric_init({})
-    for d in descriptors:
-        v = d['call_back'](d['name'])
-        logging.debug('value for %s is %s' % (d['name'], str(v)))
+    main()
