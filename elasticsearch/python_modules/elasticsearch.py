@@ -17,6 +17,346 @@ logging.basicConfig(
 )
 
 
+STAT_DESCRIPTIONS = [
+    {
+        'name': 'es_heap_committed',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Java Heap Committed (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_heap_used',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Java Heap Used (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_non_heap_committed',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Java Non Heap Committed (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_non_heap_used',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Java Non Heap Used (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_threads',
+        'units': 'threads',
+        'format': '%d',
+        'description': 'Threads (open)',
+    },
+    {
+        'name': 'es_threads_peak',
+        'units': 'threads',
+        'format': '%d',
+        'description': 'Threads Peak (open)',
+    },
+    {
+        'name': 'es_gc_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Time (ms)',
+    },
+    {
+        'name': 'es_transport_open',
+        'units': 'sockets',
+        'format': '%d',
+        'description': 'Transport Open (sockets)',
+    },
+    {
+        'name': 'es_transport_rx_count',
+        'units': 'rx',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'RX Count',
+    },
+    {
+        'name': 'es_transport_rx_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'slope': 'positive',
+        'description': 'RX (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_transport_tx_count',
+        'units': 'tx',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'TX Count',
+    },
+    {
+        'name': 'es_transport_tx_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'slope': 'positive',
+        'description': 'TX (Bytes)',
+    },
+    {
+        'name': 'es_http_current_open',
+        'units': 'sockets',
+        'format': '%d',
+        'description': 'HTTP Open (sockets)',
+    },
+    {
+        'name': 'es_http_total_open',
+        'units': 'sockets',
+        'format': '%d',
+        'description': 'HTTP Open (sockets)',
+    },
+    {
+        'name': 'es_indices_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Index Size (Bytes)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_gc_count',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Java GC Count',
+    },
+    {
+        'name': 'es_merges_current',
+        'format': '%d',
+        'description': 'Merges (current)',
+    },
+    {
+        'name': 'es_merges_current_docs',
+        'format': '%d',
+        'description': 'Merges (docs)',
+    },
+    {
+        'name': 'es_merges_total',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Merges (total)',
+    },
+    {
+        'name': 'es_merges_total_docs',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Merges (total docs)',
+    },
+    {
+        'name': 'es_merges_current_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Merges size (current)',
+    },
+    {
+        'name': 'es_merges_total_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'slope': 'positive',
+        'description': 'Merges size (total)',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_merges_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Merges Time (ms)',
+    },
+    {
+        'name': 'es_refresh_total',
+        'units': 'refreshes',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Refresh',
+    },
+    {
+        'name': 'es_refresh_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Refresh Time',
+    },
+    {
+        'name': 'es_docs_count',
+        'units': 'docs',
+        'format': '%.0f',
+        'description': 'Number of Documents',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_docs_deleted',
+        'units': 'docs',
+        'format': '%.0f',
+        'description': 'Number of Documents Deleted',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_open_file_descriptors',
+        'units': 'files',
+        'format': '%d',
+        'description': 'Open File Descriptors',
+    },
+    {
+        'name': 'es_cache_field_eviction',
+        'units': 'units',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Field Cache Evictions',
+    },
+    {
+        'name': 'es_cache_field_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Field Cache Size',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_cache_filter_count',
+        'format': '%d',
+        'description': 'Filter Cache Count',
+    },
+    {
+        'name': 'es_cache_filter_evictions',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Filter Cache Evictions',
+    },
+    {
+        'name': 'es_cache_filter_size',
+        'units': 'Bytes',
+        'format': '%.0f',
+        'description': 'Filter Cache Size',
+        'value_type': 'double',
+    },
+    {
+        'name': 'es_query_current',
+        'units': 'Queries',
+        'format': '%d',
+        'description': 'Current Queries',
+    },
+    {
+        'name': 'es_query_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Query Time',
+    },
+    {
+        'name': 'es_fetch_current',
+        'units': 'fetches',
+        'format': '%d',
+        'description': 'Current Fetches',
+    },
+    {
+        'name': 'es_fetch_total',
+        'units': 'fetches',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Fetches',
+    },
+    {
+        'name': 'es_fetch_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Fetch Time',
+    },
+    {
+        'name': 'es_flush_total',
+        'units': 'flushes',
+        'format': '%d',
+        'description': 'Total Flushes',
+    },
+    {
+        'name': 'es_flush_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Flush Time',
+    },
+    {
+        'name': 'es_get_exists_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Exists Time',
+    },
+    {
+        'name': 'es_get_exists_total',
+        'units': 'total',
+        'format': '%d',
+        'description': 'Exists Total',
+    },
+    {
+        'name': 'es_get_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Get Time',
+    },
+    {
+        'name': 'es_get_total',
+        'units': 'total',
+        'format': '%d',
+        'description': 'Get Total',
+    },
+    {
+        'name': 'es_get_missing_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Missing Time',
+    },
+    {
+        'name': 'es_get_missing_total',
+        'units': 'total',
+        'format': '%d',
+        'description': 'Missing Total',
+    },
+    {
+        'name': 'es_indexing_delete_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Delete Time',
+    },
+    {
+        'name': 'es_indexing_delete_total',
+        'units': 'docs',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Delete Total',
+    },
+    {
+        'name': 'es_indexing_index_time',
+        'units': 'ms',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Indexing Time',
+    },
+    {
+        'name': 'es_indexing_index_total',
+        'units': 'docs',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Indexing Documents Total',
+    },
+    {
+        'name': 'es_query_total',
+        'units': 'Queries',
+        'format': '%d',
+        'slope': 'positive',
+        'description': 'Total Queries',
+    },
+]
+
+
 def misc_path(string):
     return 'nodes.%s.' + string
 
@@ -168,12 +508,13 @@ def get_path(key_to_path, json_object, name):
 
 
 def metric_init(params):
-    # pylint: disable=too-many-statements
     log('Received the following parameters %s' % params)
 
     major, minor = get_elasticsearch_version(params)
     url = params['host'] + get_url_path(major, minor)
     key_to_path = get_key_to_path(major, minor)
+
+    log('Number of keys : %s' % len(key_to_path))
 
     description_skeleton = {
         'name': 'XXX',
@@ -189,499 +530,18 @@ def metric_init(params):
 
     _create_description = partial(create_description, description_skeleton)
 
-    descriptors = []
+    descriptors = [
+        _create_description(description)
+        for description in STAT_DESCRIPTIONS
+        if description['name'] in key_to_path
+    ]
+
     for index in params['indices'].split():
         url = params['host'] + index + '/_stats'
         descriptors += get_indices_descriptors(url, index, _create_description)
 
-    descriptors.append(
-        _create_description({
-            'name': 'es_heap_committed',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Java Heap Committed (Bytes)',
-            'value_type': 'double'
-        })
-    )
+    log('Number of descriptors : %s' % len(descriptors))
 
-    descriptors.append(
-        _create_description({
-            'name': 'es_heap_used',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Java Heap Used (Bytes)',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_non_heap_committed',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Java Non Heap Committed (Bytes)',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_non_heap_used',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Java Non Heap Used (Bytes)',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_threads',
-            'units': 'threads',
-            'format': '%d',
-            'description': 'Threads (open)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_threads_peak',
-            'units': 'threads',
-            'format': '%d',
-            'description': 'Threads Peak (open)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_gc_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Java GC Time (ms)'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_transport_open',
-            'units': 'sockets',
-            'format': '%d',
-            'description': 'Transport Open (sockets)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_transport_rx_count',
-            'units': 'rx',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'RX Count'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_transport_rx_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'slope': 'positive',
-            'description': 'RX (Bytes)',
-            'value_type': 'double',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_transport_tx_count',
-            'units': 'tx',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'TX Count'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_transport_tx_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'slope': 'positive',
-            'description': 'TX (Bytes)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_http_current_open',
-            'units': 'sockets',
-            'format': '%d',
-            'description': 'HTTP Open (sockets)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_http_total_open',
-            'units': 'sockets',
-            'format': '%d',
-            'description': 'HTTP Open (sockets)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_indices_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Index Size (Bytes)',
-            'value_type': 'double',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_gc_count',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Java GC Count',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_current',
-            'format': '%d',
-            'description': 'Merges (current)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_current_docs',
-            'format': '%d',
-            'description': 'Merges (docs)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_total',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Merges (total)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_total_docs',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Merges (total docs)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_current_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Merges size (current)',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_total_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'slope': 'positive',
-            'description': 'Merges size (total)',
-            'value_type': 'double',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_merges_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Merges Time (ms)'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_refresh_total',
-            'units': 'refreshes',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Refresh'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_refresh_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Refresh Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_docs_count',
-            'units': 'docs',
-            'format': '%.0f',
-            'description': 'Number of Documents',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_docs_deleted',
-            'units': 'docs',
-            'format': '%.0f',
-            'description': 'Number of Documents Deleted',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_open_file_descriptors',
-            'units': 'files',
-            'format': '%d',
-            'description': 'Open File Descriptors',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_cache_field_eviction',
-            'units': 'units',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Field Cache Evictions',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_cache_field_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Field Cache Size',
-            'value_type': 'double',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_cache_filter_count',
-            'format': '%d',
-            'description': 'Filter Cache Count',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_cache_filter_evictions',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Filter Cache Evictions',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_cache_filter_size',
-            'units': 'Bytes',
-            'format': '%.0f',
-            'description': 'Filter Cache Size',
-            'value_type': 'double'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_query_current',
-            'units': 'Queries',
-            'format': '%d',
-            'description': 'Current Queries',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_query_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Query Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_fetch_current',
-            'units': 'fetches',
-            'format': '%d',
-            'description': 'Current Fetches',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_fetch_total',
-            'units': 'fetches',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Fetches'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_fetch_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Fetch Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_flush_total',
-            'units': 'flushes',
-            'format': '%d',
-            'description': 'Total Flushes',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_flush_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Flush Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_exists_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Exists Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_exists_total',
-            'units': 'total',
-            'format': '%d',
-            'description': 'Exists Total',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Get Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_total',
-            'units': 'total',
-            'format': '%d',
-            'description': 'Get Total',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_missing_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Missing Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_get_missing_total',
-            'units': 'total',
-            'format': '%d',
-            'description': 'Missing Total',
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_indexing_delete_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Delete Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_indexing_delete_total',
-            'units': 'docs',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Delete Total'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_indexing_index_time',
-            'units': 'ms',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Indexing Time'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_indexing_index_total',
-            'units': 'docs',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Indexing Documents Total'
-        })
-    )
-
-    descriptors.append(
-        _create_description({
-            'name': 'es_query_total',
-            'units': 'Queries',
-            'format': '%d',
-            'slope': 'positive',
-            'description': 'Total Queries'
-        })
-    )
     return descriptors
 
 
