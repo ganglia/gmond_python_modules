@@ -13,106 +13,71 @@ from functools import partial
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s\t Thread-%(thread)d - %(message)s",
+    format='%(asctime)s - %(levelname)5s - %(message)s',
 )
 
-# short name to full path for stats
-# pylint: disable=invalid-name
-keyToPath = dict()
 
-# INDICES METRICS #
+def misc_path(string):
+    return 'nodes.%s.' + string
 
-# CACHE
-keyToPath['es_cache_field_eviction'] = "nodes.%s.indices.cache.field_evictions"
-keyToPath['es_cache_field_size'] = "nodes.%s.indices.cache.field_size_in_bytes"
-keyToPath['es_cache_filter_count'] = "nodes.%s.indices.cache.filter_count"
-keyToPath[
-    'es_cache_filter_evictions'] = "nodes.%s.indices.cache.filter_evictions"
-keyToPath[
-    'es_cache_filter_size'] = "nodes.%s.indices.cache.filter_size_in_bytes"
 
-# DOCS
-keyToPath['es_docs_count'] = "nodes.%s.indices.docs.count"
-keyToPath['es_docs_deleted'] = "nodes.%s.indices.docs.deleted"
+def indices_path(string):
+    return 'nodes.%s.indices.' + string
 
-# FLUSH
-keyToPath['es_flush_total'] = "nodes.%s.indices.flush.total"
-keyToPath['es_flush_time'] = "nodes.%s.indices.flush.total_time_in_millis"
 
-# GET
-keyToPath['es_get_exists_time'] = "nodes.%s.indices.get.exists_time_in_millis"
-keyToPath['es_get_exists_total'] = "nodes.%s.indices.get.exists_total"
-keyToPath['es_get_time'] = "nodes.%s.indices.get.time_in_millis"
-keyToPath['es_get_total'] = "nodes.%s.indices.get.total"
-keyToPath[
-    'es_get_missing_time'] = "nodes.%s.indices.get.missing_time_in_millis"
-keyToPath['es_get_missing_total'] = "nodes.%s.indices.get.missing_total"
-
-# INDEXING
-keyToPath['es_indexing_delete_time'] = \
-    "nodes.%s.indices.indexing.delete_time_in_millis"
-keyToPath[
-    'es_indexing_delete_total'] = "nodes.%s.indices.indexing.delete_total"
-keyToPath['es_indexing_index_time'] = \
-    "nodes.%s.indices.indexing.index_time_in_millis"
-keyToPath['es_indexing_index_total'] = "nodes.%s.indices.indexing.index_total"
-
-# MERGES
-keyToPath['es_merges_current'] = "nodes.%s.indices.merges.current"
-keyToPath['es_merges_current_docs'] = "nodes.%s.indices.merges.current_docs"
-keyToPath['es_merges_current_size'] = \
-    "nodes.%s.indices.merges.current_size_in_bytes"
-keyToPath['es_merges_total'] = "nodes.%s.indices.merges.total"
-keyToPath['es_merges_total_docs'] = "nodes.%s.indices.merges.total_docs"
-keyToPath[
-    'es_merges_total_size'] = "nodes.%s.indices.merges.total_size_in_bytes"
-keyToPath['es_merges_time'] = "nodes.%s.indices.merges.total_time_in_millis"
-
-# REFRESH
-keyToPath['es_refresh_total'] = "nodes.%s.indices.refresh.total"
-keyToPath['es_refresh_time'] = "nodes.%s.indices.refresh.total_time_in_millis"
-
-# SEARCH
-keyToPath['es_query_current'] = "nodes.%s.indices.search.query_current"
-keyToPath['es_query_total'] = "nodes.%s.indices.search.query_total"
-keyToPath['es_query_time'] = "nodes.%s.indices.search.query_time_in_millis"
-keyToPath['es_fetch_current'] = "nodes.%s.indices.search.fetch_current"
-keyToPath['es_fetch_total'] = "nodes.%s.indices.search.fetch_total"
-keyToPath['es_fetch_time'] = "nodes.%s.indices.search.fetch_time_in_millis"
-
-# STORE
-keyToPath['es_indices_size'] = "nodes.%s.indices.store.size_in_bytes"
-
-# JVM METRICS #
-# MEM
-keyToPath['es_heap_committed'] = "nodes.%s.jvm.mem.heap_committed_in_bytes"
-keyToPath['es_heap_used'] = "nodes.%s.jvm.mem.heap_used_in_bytes"
-keyToPath[
-    'es_non_heap_committed'] = "nodes.%s.jvm.mem.non_heap_committed_in_bytes"
-keyToPath['es_non_heap_used'] = "nodes.%s.jvm.mem.non_heap_used_in_bytes"
-
-# THREADS
-keyToPath['es_threads'] = "nodes.%s.jvm.threads.count"
-keyToPath['es_threads_peak'] = "nodes.%s.jvm.threads.peak_count"
-
-# GC
-keyToPath['es_gc_time'] = "nodes.%s.jvm.gc.collection_time_in_millis"
-keyToPath['es_gc_count'] = "nodes.%s.jvm.gc.collection_count"
-
-# TRANSPORT METRICS #
-keyToPath['es_transport_open'] = "nodes.%s.transport.server_open"
-keyToPath['es_transport_rx_count'] = "nodes.%s.transport.rx_count"
-keyToPath['es_transport_rx_size'] = "nodes.%s.transport.rx_size_in_bytes"
-keyToPath['es_transport_tx_count'] = "nodes.%s.transport.tx_count"
-keyToPath['es_transport_tx_size'] = "nodes.%s.transport.tx_size_in_bytes"
-
-# HTTP METRICS #
-keyToPath['es_http_current_open'] = "nodes.%s.http.current_open"
-keyToPath['es_http_total_open'] = "nodes.%s.http.total_opened"
-
-# PROCESS METRICS #
-keyToPath[
-    'es_open_file_descriptors'] = "nodes.%s.process.open_file_descriptors"
+COMMON_STATS = {
+    'es_cache_field_eviction': indices_path('cache.field_evictions'),
+    'es_cache_field_size': indices_path('cache.field_size_in_bytes'),
+    'es_cache_filter_count': indices_path('cache.filter_count'),
+    'es_cache_filter_evictions': indices_path('cache.filter_evictions'),
+    'es_cache_filter_size': indices_path('cache.filter_size_in_bytes'),
+    'es_docs_count': indices_path('docs.count'),
+    'es_docs_deleted': indices_path('docs.deleted'),
+    'es_flush_total': indices_path('flush.total'),
+    'es_flush_time': indices_path('flush.total_time_in_millis'),
+    'es_get_exists_time': indices_path('get.exists_time_in_millis'),
+    'es_get_exists_total': indices_path('get.exists_total'),
+    'es_get_time': indices_path('get.time_in_millis'),
+    'es_get_total': indices_path('get.total'),
+    'es_get_missing_time': indices_path('get.missing_time_in_millis'),
+    'es_get_missing_total': indices_path('get.missing_total'),
+    'es_indexing_delete_time': indices_path('indexing.delete_time_in_millis'),
+    'es_indexing_delete_total': indices_path('indexing.delete_total'),
+    'es_indexing_index_time': indices_path('indexing.index_time_in_millis'),
+    'es_indexing_index_total': indices_path('indexing.index_total'),
+    'es_merges_current': indices_path('merges.current'),
+    'es_merges_current_docs': indices_path('merges.current_docs'),
+    'es_merges_current_size': indices_path('merges.current_size_in_bytes'),
+    'es_merges_total': indices_path('merges.total'),
+    'es_merges_total_docs': indices_path('merges.total_docs'),
+    'es_merges_total_size': indices_path('merges.total_size_in_bytes'),
+    'es_merges_time': indices_path('merges.total_time_in_millis'),
+    'es_refresh_total': indices_path('refresh.total'),
+    'es_refresh_time': indices_path('refresh.total_time_in_millis'),
+    'es_query_current': indices_path('search.query_current'),
+    'es_query_total': indices_path('search.query_total'),
+    'es_query_time': indices_path('search.query_time_in_millis'),
+    'es_fetch_current': indices_path('search.fetch_current'),
+    'es_fetch_total': indices_path('search.fetch_total'),
+    'es_fetch_time': indices_path('search.fetch_time_in_millis'),
+    'es_indices_size': indices_path('store.size_in_bytes'),
+    'es_heap_committed': misc_path('jvm.mem.heap_committed_in_bytes'),
+    'es_heap_used': misc_path('jvm.mem.heap_used_in_bytes'),
+    'es_non_heap_committed': misc_path('jvm.mem.non_heap_committed_in_bytes'),
+    'es_non_heap_used': misc_path('jvm.mem.non_heap_used_in_bytes'),
+    'es_threads': misc_path('jvm.threads.count'),
+    'es_threads_peak': misc_path('jvm.threads.peak_count'),
+    'es_gc_time': misc_path('jvm.gc.collection_time_in_millis'),
+    'es_gc_count': misc_path('jvm.gc.collection_count'),
+    'es_transport_open': misc_path('transport.server_open'),
+    'es_transport_rx_count': misc_path('transport.rx_count'),
+    'es_transport_rx_size': misc_path('transport.rx_size_in_bytes'),
+    'es_transport_tx_count': misc_path('transport.tx_count'),
+    'es_transport_tx_size': misc_path('transport.tx_size_in_bytes'),
+    'es_http_current_open': misc_path('http.current_open'),
+    'es_http_total_open': misc_path('http.total_opened'),
+    'es_open_file_descriptors': misc_path('process.open_file_descriptors'),
+}
 
 
 def log(string, level=logging.DEBUG):
@@ -139,11 +104,9 @@ def fetch(url):
     return result
 
 
-def get_stat(url, given_path, name):
-    result = fetch(url)
-
-    path = given_path or (keyToPath[name] % result['nodes'].keys()[0])
-    return dig_it_up(result, path)
+def get_stat(url, get_path_function, name):
+    json_object = fetch(url)
+    return dig_it_up(json_object, get_path_function(json_object, name))
 
 
 def create_description(skel, prop):
@@ -152,20 +115,23 @@ def create_description(skel, prop):
     return description
 
 
-def get_indices_descriptors(url, index, create_description_function):
-    get_doc_count = \
-        partial(get_stat, url, '_all.primaries.docs.count')
-    get_store_size = \
-        partial(get_stat, url, '_all.primaries.store.size_in_bytes')
+def get_doc_count_path(*_args, **_kwargs):
+    return '_all.primaries.docs.count'
 
+
+def get_store_size_path(*_args, **_kwargs):
+    return '_all.primaries.store.size_in_bytes'
+
+
+def get_indices_descriptors(url, index, create_description_function):
     descriptors = [
         create_description_function({
-            'call_back': get_doc_count,
+            'call_back': partial(get_stat, url, get_doc_count_path),
             'name': 'es_index_{0}_docs_count'.format(index),
             'description': 'document count for index {0}'.format(index),
         }),
         create_description_function({
-            'call_back': get_store_size,
+            'call_back': partial(get_stat, url, get_store_size_path),
             'name': 'es_index_{0}_size'.format(index),
             'description': 'size in bytes for index {0}'.format(index),
             'units': 'Bytes',
@@ -193,16 +159,25 @@ def get_url_path(major, minor):
             return '_nodes/_local/stats'
 
 
+def get_key_to_path(_major, _minor):
+    return COMMON_STATS
+
+
+def get_path(key_to_path, json_object, name):
+    return key_to_path[name] % json_object['nodes'].keys()[0]
+
+
 def metric_init(params):
     # pylint: disable=too-many-statements
     log('Received the following parameters %s' % params)
 
-    host = params['host']
+    major, minor = get_elasticsearch_version(params)
+    url = params['host'] + get_url_path(major, minor)
+    key_to_path = get_key_to_path(major, minor)
 
-    url = host + get_url_path(*get_elasticsearch_version(params))
     description_skeleton = {
         'name': 'XXX',
-        'call_back': partial(get_stat, url, None),
+        'call_back': partial(get_stat, url, partial(get_path, key_to_path)),
         'time_max': 60,
         'value_type': 'uint',
         'units': 'units',
@@ -216,7 +191,7 @@ def metric_init(params):
 
     descriptors = []
     for index in params['indices'].split():
-        url = host + index + '/_stats'
+        url = params['host'] + index + '/_stats'
         descriptors += get_indices_descriptors(url, index, _create_description)
 
     descriptors.append(
