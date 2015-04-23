@@ -12,7 +12,7 @@ import re
 from functools import partial
 
 logging.basicConfig(
-    level=logging.ERROR,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s\t Thread-%(thread)d - %(message)s",
 )
 
@@ -134,7 +134,9 @@ def dig_it_up(obj, path):
 
 def fetch(url):
     log('Fetching ' + url)
-    return json.load(urllib.urlopen(url))
+    result = json.load(urllib.urlopen(url))
+    log('Got %s' % result)
+    return result
 
 
 def get_stat(url, given_path, name):
@@ -175,42 +177,46 @@ def get_indices_descriptors(url, index, create_description_function):
     return descriptors
 
 
+def get_elasticsearch_version(params):
+    version = params['version']
+    match = re.match(r'(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
+    return int(match.group('major')), int(match.group('minor'))
+
+
+def get_url_path(major, minor):
+    if major == 0:
+        return '_cluster/nodes/_local/stats?all=true'
+    else:
+        if minor < 3:
+            return '_cluster/state/nodes'
+        else:
+            return '_nodes/_local/stats'
+
+
 def metric_init(params):
     # pylint: disable=too-many-statements
-    descriptors = []
-
     log('Received the following parameters %s' % params)
 
-    host = params.get('host', 'http://localhost:9200/')
+    host = params['host']
 
-    version = params.get('version', '1.2')
-
-    match = re.match(r'(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
-
-    if match and match.group('major') == '0':
-        url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
-    else:
-        url_cluster = '{0}_cluster/state/nodes'.format(host)
-
-    metric_group = params.get('metric_group', 'elasticsearch')
-
+    url = host + get_url_path(*get_elasticsearch_version(params))
     description_skeleton = {
         'name': 'XXX',
-        'call_back': partial(get_stat, url_cluster, None),
+        'call_back': partial(get_stat, url, None),
         'time_max': 60,
         'value_type': 'uint',
         'units': 'units',
         'slope': 'both',
         'format': '%d',
         'description': 'XXX',
-        'groups': metric_group,
+        'groups': params['metric_group'],
     }
 
     _create_description = partial(create_description, description_skeleton)
 
-    indices = params.get('indices', '*').split()
-    for index in indices:
-        url = '{0}{1}/_stats'.format(host, index)
+    descriptors = []
+    for index in params['indices'].split():
+        url = host + index + '/_stats'
         descriptors += get_indices_descriptors(url, index, _create_description)
 
     descriptors.append(
@@ -712,7 +718,7 @@ def main():
     params = {
         'indices': '*',
         'host': 'http://localhost:9200/',
-        'version': '1.2',
+        'version': '1.4',
         'metric_group': 'elasticsearch',
     }
     descriptors = metric_init(params)
