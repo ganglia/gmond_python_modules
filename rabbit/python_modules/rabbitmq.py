@@ -34,7 +34,7 @@ compiled_results = {"nodes": None, "queues": None, "connections": None, "exchang
 #    last_update[stat_type] = None
 
 ### CONFIGURATION SECTION ###
-STATS = ['nodes', 'queues']
+STATS = ['nodes', 'queues', 'overview']
 
 # QUEUE METRICS #
 keyToPath['rmq_messages_ready'] = "%s{0}messages_ready".format(JSON_PATH_SEPARATOR)
@@ -297,6 +297,8 @@ def metric_init(params):
     host = params['host']
     port = params['port']
     STATS = params['stats']
+    if type(STATS) is str:
+        STATS = STATS.split(',')
 
     zero_rates_when_idle = str2bool(params['zero_rates_when_idle'])
 
