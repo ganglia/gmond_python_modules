@@ -1,4 +1,4 @@
-EMC RecoverPoint 4.x
+HP 3PAR Gmond Module
 ===============
 
 This is a new GMOND Python Module that gets metrics from HP 3PAR arrays via SSH.
