@@ -22,7 +22,7 @@ METRICSDICT = {
 '''This is the minimum interval between querying the RPA for metrics.
 Each ssh query takes 1.6s so we limit the interval between getting metrics to this interval.'''
 
-METRICS_CACHE_MAX = 10
+METRICS_CACHE_MAX = 15
 
 
 def run_ssh_thread(ip,user,passwd,cmd):
@@ -65,13 +65,45 @@ def get_vol_perf_stats(ip, user, passwd):
         if line_num >= 4:
 
             #volname, metrictype, iocur, ioavg,iomax,thrcur,thravg,thrmax,latcur,latavg,sizecur,sizeavg,qlen = line.split()
-            #metric_list = []
-            #metric_list = line.split()
-            #print(line)
             vol_perf_stats.append(line)
 
     return vol_perf_stats
 
+
+def get_cpg_stats(ip, user, passwd):
+
+    cmd = 'showcpg'
+    line_list = run_ssh_thread(ip, user, passwd, cmd)
+
+    cpg_stats = []
+    line_num = 0
+    for line in line_list:
+        line_num += 1
+        if '-------------------------------------------------' in line:
+            break
+        '''if line_num == 2:
+            print(line)'''
+        if line_num >= 4:
+
+            cpg_stats.append(line)
+
+    return cpg_stats
+
+def get_cpu_stats(ip, user, passwd):
+
+    cmd = 'statcpu -iter 1 -t'
+    line_list = run_ssh_thread(ip, user, passwd, cmd)
+
+    cpu_stats = []
+    line_num = 0
+    for line in line_list:
+        line_num += 1
+
+        if line_num >= 3:
+            if bool(line.strip()):
+                cpu_stats.append(line)
+
+    return cpu_stats
 
 def get_vol_list(ip, user, passwd):
     '''Get a list of volumes to build metric definitions with'''
@@ -94,6 +126,45 @@ def get_vol_list(ip, user, passwd):
 
     return vol_list
 
+def get_cpg_list(ip, user, passwd):
+    '''Get a list of CPGs to build metric definitions with'''
+    cmd = 'showcpg'
+
+    showcpg_list = run_ssh_thread(ip, user, passwd, cmd)
+
+    cpg_list = []
+    line_num = 0
+    for line in showcpg_list:
+
+        line_num += 1
+        if '-------------------------' in line:
+            break
+        if '-----' in line or 'rcpy.' in line or '.srdata' in line or '0 admin' in line:
+            continue
+        if line_num >= 4:
+            cpg_stats = line.split()
+            cpg_list.append(cpg_stats[1])
+
+    return cpg_list
+
+def get_cpu_list(ip, user, passwd):
+    '''Get a list of cpus to build metric definitions with'''
+    cmd = 'statcpu -iter 1 -t'
+
+    showcpu_list = run_ssh_thread(ip, user, passwd, cmd)
+
+    cpu_list = []
+    line_num = 0
+    for line in showcpu_list:
+        line_num += 1
+        if line_num >= 3:
+            cpu_stats = line.split()
+            if len(cpu_stats) > 2:
+                #statcpu output has format: '#, total'  We just want the node number
+                cpu_list.append(cpu_stats[0].split(',')[0])
+
+    return cpu_list
+
 
 def get_metric(name):
     """Callback function to get the metrics"""
@@ -106,14 +177,14 @@ def get_metric(name):
         print('time expired, will get metrics')
         for array in array_dict:
             arrayname = array_dict[array]
-
+            #Get vol performance statistics
             vol_perf_stats = get_vol_perf_stats(array_dict[array]['ipaddr'], array_dict[array]['user'], array_dict[array]['pass'])
 
             for vol in vol_perf_stats:
                 vol_name, metric_type, iocur, ioavg,iomax,thrcur,thravg,thrmax,latcur,latavg,sizecur,sizeavg,qlen = vol.split()
                 #print(vol_name)
 
-                #don't give metrics on rcopy snapshots
+                '''don't give metrics on rcopy snapshots'''
                 if 'rcpy' in vol_name:
                     continue
                 elif 'r' in metric_type:
@@ -130,6 +201,32 @@ def get_metric(name):
                     metrics[array_dict[array]['array_name'] + '_' + vol_name + '_write_iosize'] = float(sizecur)
                 elif 't' in metric_type:
                     metrics[array_dict[array]['array_name'] + '_' + vol_name + '_qlen'] = float(qlen)
+
+            '''Get CPG Statistics'''
+            cpg_statistics = get_cpg_stats(array_dict[array]['ipaddr'], array_dict[array]['user'], array_dict[array]['pass'])
+
+            for cpg in cpg_statistics:
+                cpg_num, cpg_name, warn_pc, num_vv, num_tpvv, num_tdvv, usr_vvs, usr_snaps, cpg_total_user, \
+                cpg_used_user, cpg_total_snap, cpg_used_snap, cpg_total_adm, cpg_used_adm = cpg.split()
+                metrics[array_dict[array]['array_name'] + '_' + cpg_name + '_cpg_usr_used'] = float(cpg_used_user)
+                metrics[array_dict[array]['array_name'] + '_' + cpg_name + '_cpg_snap_used'] = float(cpg_used_snap)
+                metrics[array_dict[array]['array_name'] + '_' + cpg_name + '_cpg_usr_used'] = float(cpg_used_user)
+                metrics[array_dict[array]['array_name'] + '_' + cpg_name + '_cpg_num_vvols'] = float(num_vv)
+
+
+            '''Get Node CPU Statistics'''
+            cpu_statistics = get_cpu_stats(array_dict[array]['ipaddr'], array_dict[array]['user'], array_dict[array]['pass'])
+            for node in cpu_statistics:
+                '''node,cpu user sys idle intr/s ctxt/s'''
+
+                node_num, user_cpu, sys_cpu, idle_cpu, intrs_cpu, ctxts_cpu = node.split()
+                #remove the ', total' from the node number
+                node_num = node_num.split(',')[0]
+                metrics[array_dict[array]['array_name'] + '_node' + node_num + '_user_cpu'] = float(user_cpu)
+                metrics[array_dict[array]['array_name'] + '_node' + node_num + '_sys_cpu'] = float(sys_cpu)
+                metrics[array_dict[array]['array_name'] + '_node' + node_num + '_idle_cpu'] = float(idle_cpu)
+                metrics[array_dict[array]['array_name'] + '_node' + node_num + '_intrs_cpu'] = float(intrs_cpu)
+                metrics[array_dict[array]['array_name'] + '_node' + node_num + '_ctxts_cpu'] = float(ctxts_cpu)
 
         METRICSDICT= {
             'time': time.time(),
@@ -149,7 +246,7 @@ def create_desc(skel, prop):
     return d
 
 
-def define_metrics(Desc_Skel, array_name, vols, ip):
+def define_metrics(Desc_Skel, array_name, vols, ip, cpgs, cpus):
     '''Volume metrics'''
     for vol in vols:
         '''Iops'''
@@ -219,7 +316,68 @@ def define_metrics(Desc_Skel, array_name, vols, ip):
                     'groups': 'io',
                     "spoof_host"  : str(ip) + ':' + array_name,
                     }))
-    pprint(descriptors)
+
+    for cpg in cpgs:
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_' + cpg + '_cpg_usr_used').encode('ascii', 'ignore'),
+                    "units": 'MB',
+                    "description" : "CPG User Capacity",
+                    'groups': 'CPG',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_' + cpg + '_cpg_snap_used').encode('ascii', 'ignore'),
+                    "units": 'MB',
+                    "description" : "CPG Snap Capacity",
+                    'groups': 'CPG',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_' + cpg + '_num_vvols').encode('ascii', 'ignore'),
+                    "units": 'VVs',
+                    "description" : "CPG Number of VVols",
+                    'groups': 'CPG',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+
+    for cpu in cpus:
+        print((array_name + '_node' + str(cpu) + '_user_cpu').encode('ascii', 'ignore'))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_node' + str(cpu) + '_user_cpu').encode('ascii', 'ignore'),
+                    "units": 'Percent',
+                    "description" : "Node CPU User",
+                    'groups': 'CPU',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_node' + str(cpu) + '_sys_cpu').encode('ascii', 'ignore'),
+                    "units": 'Percent',
+                    "description" : "Node CPU System",
+                    'groups': 'CPU',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_node' + str(cpu) + '_idle_cpu').encode('ascii', 'ignore'),
+                    "units": 'Percent',
+                    "description" : "Node CPU Idle",
+                    'groups': 'CPU',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_node' + str(cpu) + '_intrs_cpu').encode('ascii', 'ignore'),
+                    "units": 'intr/s',
+                    "description" : "Node CPU Interupts/s",
+                    'groups': 'CPU',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+        descriptors.append(create_desc(Desc_Skel, {
+                    "name": (array_name + '_node' + str(cpu) + '_ctxts_cpu').encode('ascii', 'ignore'),
+                    "units": 'ctxt/s',
+                    "description" : "Node CPU Context Switches",
+                    'groups': 'CPU',
+                    "spoof_host"  : str(ip) + ':' + array_name,
+                    }))
+
 
     return descriptors
 
@@ -247,17 +405,22 @@ def metric_init(params):
         'groups'      : 'storage',
     }
     descriptors = []
-    #pprint(params)
+
     for array in array_dict:
         ip = array_dict[array]['ipaddr']
         user = array_dict[array]['user']
         passwd = array_dict[array]['pass']
-
+        '''Get a list of volumes in the array'''
         vols = get_vol_list(ip, user, passwd)
 
+        '''Get a list of CPGs in the array'''
+        cpgs = get_cpg_list(ip, user, passwd)
+
+        '''Get a list of CPUs in the array - Only getting totals per node at this point'''
+        cpus = get_cpu_list(ip, user, passwd)
 
         '''create descriptors for the array'''
-        array_descriptors = define_metrics(Desc_Skel, array_dict[array]['array_name'], vols, ip)
+        array_descriptors = define_metrics(Desc_Skel, array_dict[array]['array_name'], vols, ip, cpgs, cpus)
         descriptors = descriptors + array_descriptors
 
     return descriptors
@@ -272,11 +435,11 @@ if __name__ == '__main__':
     }
 
     descriptors = metric_init(params)
-    pprint(descriptors)
-    print(len(descriptors))
+    #pprint(descriptors)
+    #print(len(descriptors))
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print('value for %s is %u' % (d['name'],  v))
+            #print('value for %s is %u' % (d['name'],  v))
         print('Sleeping 5 seconds')
         time.sleep(5)

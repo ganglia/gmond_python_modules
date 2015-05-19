@@ -9,7 +9,14 @@ Currently gathers per Volume:
   * Read/Write IO Size
   * Read/Write Throughput 
   
-
+Currently gathers per Node:
+  * Total CPU:
+	- idle, user, sys, intr/s, conts/s
+  
+Currently gathers per CPG:
+  * User space used
+  * Snap space used
+  
 ## Compatibility
   * Compatible with 3PAR 7450C and OS 3.2.1 (tested)
   * Other versions of 3PAR / OS may work fine.

@@ -30,5 +30,14 @@ collection_group {
     metric {
         name_match = "(.+)iosize"
         }
+    metric {
+        name_match = "(.+)used"
+        }
+    metric {
+        name_match = "(.+)vvols"
+        }
+    metric {
+        name_match = "(.+)cpu"
+        }
 }
 
