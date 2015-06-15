@@ -1,0 +1,47 @@
+###
+### Note:
+###   To setup database access:
+###   GRANT SUPER, PROCESS ON *.* TO your_user@localhost IDENTIFIED BY "your_password";
+###
+###   Notice in this example binlogging is not enabled in the MySQL
+###   server. In this case the "mysql_binlog_*" metrics are
+###   commented out.
+###
+
+modules {
+  module {
+    name = "Jmysql"
+    language = "python"
+    param host {
+      value = 'localhost'
+    }
+    param user {
+      value = 'jianqiao'
+    }
+    param passwd {
+      value = 'jianqiao'
+    }
+    param get_engine {
+      value = False
+    }
+    param get_master {
+      value = False
+    }
+    param get_slave {
+      value = False
+    }
+    param delta_per_second {
+      value = False
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+  name = "mysql_innodb_pending_normal_aio_reads"
+  }
+}
+
