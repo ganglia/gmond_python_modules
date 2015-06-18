@@ -52,7 +52,7 @@ def run_ssh_thread(ip,user,passwd,cmd):
 
 def get_vol_perf_stats(ip, user, passwd):
 
-    cmd = 'statvv -iter 1 -rw'
+    cmd = 'statvlun -rw -vvsum -iter 1'
     line_list = run_ssh_thread(ip, user, passwd, cmd)
     vol_perf_stats = []
     line_num = 0
