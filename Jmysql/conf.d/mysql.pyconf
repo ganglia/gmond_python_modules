@@ -1,7 +1,7 @@
 ###
 ### Note:
 ###   To setup database access:
-###   GRANT SUPER, PROCESS ON *.* TO your_user@localhost IDENTIFIED BY "your_password";
+###   GRANT SUPER, PROCESS ON *.* TO 'autop'@'%' IDENTIFIED BY "autop";
 ###
 ###   Notice in this example binlogging is not enabled in the MySQL
 ###   server. In this case the "mysql_binlog_*" metrics are
@@ -17,82 +17,113 @@ modules {
             value = 'localhost'
         }
         param user {
-            value = 'jianqiao'
+            value = 'autop'
         }
         param passwd {
-            value = 'jianqiao'
+            value = 'autop'
         }
     }
 }
 
+# 速率类metric
 collection_group {
     collect_every = 30
     time_threshold = 30
 
+    # 每秒执行的use [db name]操作数量
     metric {
         name = "mysql_change_db_per_second"
     }
+    # 每秒执行的select语句数量
     metric {
         name = "mysql_select_per_second"
     }
+    # 每秒执行的insert数量
     metric {
         name = "mysql_insert_per_second"
     }
+    # 每秒执行的update数量
     metric {
         name = "mysql_update_per_second"
     }
+    # 每秒执行的delete数量
     metric {
         name = "mysql_delete_per_second"
     }
+    # 每秒接收到的连接请求的数量
     metric {
         name = "mysql_connections_per_second"
     }
+    # 每秒丢弃的连接请求的数量
     metric {
         name = "mysql_abortd_connects_per_second"
     }
-    metric {
-        name = "mysql_max_used_connections"
-    }
-    metric {
-        name = "mysql_thread_connected"
-    }
-    metric {
-        name = "mysql_thread_running"
-    }
-    metric {
-        name = "mysql_thread_cached"
-    }
+    # 每秒接收字节数
     metric {
         name = "mysql_bytes_received_per_second"
     }
+    # 每秒发送字节数
     metric {
         name = "mysql_bytes_sent_per_second"
     }
+    # 每秒产生的立即释放的表锁数
     metric {
         name = "mysql_tables_locks_immediate_per_second"
     }
+    # 每秒产生的等待的表锁数
     metric {
         name = "mysql_tables_locks_waited_per_second"
     }
-    metric {
-        name = "tokudb_locktree_memory_size"
-    }
-    metric {
-        name = "tokudb_locktree_memory_size_limit"
-    }
-    metric {
-        name = "tokudb_locktree_long_wait_count"
-    }
-    metric {
-        name = "tokudb_locktree_timeout_count"
-    }
+    # tpc(每秒处理事务数量)
     metric {
         name = "tokudb_transactions_per_second"
     }
 }
 
+# 计数类metric
+collection_group {
+    collect_every = 30
+    time_threshold = 30
+
+    # 连接缓存命中率
+    metric {
+        name = "mysql_thread_cache_used_percentage"
+    }
+    # 已连接的进程数
+    metric {
+        name = "mysql_thread_connected"
+    }
+    # 正在运行的进程数
+    metric {
+        name = "mysql_thread_running"
+    }
+    # 缓存的进程数
+    metric {
+        name = "mysql_thread_cached"
+    }
+    # tokudb 锁占用的内存空间字节数
+    metric {
+        name = "tokudb_locktree_memory_size"
+    }
+    # 新出现的long_wait各数
+    metric {
+        name = "tokudb_locktree_long_wait_count_new"
+    }
+    # 新出现的locktree_timeout
+    metric {
+        name = "tokudb_locktree_timeout_count_new"
+    }
+}
+
+# 固定值类metric
 collection_group {
     collect_ones = yes
     time_threshold = 30
 
+    metric {
+        name = "mysql_max_used_connections"
+    }
+    metric {
+        name = "tokudb_locktree_memory_size_limit"
+    }
 }
