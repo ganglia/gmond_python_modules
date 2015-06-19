@@ -14,7 +14,7 @@ modules {
         language = "python"
 
         param host {
-            value = 'localhost'
+            value = '192.168.1.104'
         }
         param user {
             value = 'autop'
@@ -107,11 +107,11 @@ collection_group {
     }
     # 新出现的long_wait各数
     metric {
-        name = "tokudb_locktree_long_wait_count_new"
+        name = "tokudb_locktree_long_wait_count"
     }
     # 新出现的locktree_timeout
     metric {
-        name = "tokudb_locktree_timeout_count_new"
+        name = "tokudb_locktree_timeout_count"
     }
 }
 
