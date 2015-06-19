@@ -87,7 +87,7 @@ def metric_init(params):
 
 def metric_cleanup():
 	"""Clean up the metric module"""
-	pass
+	logging.shutdown()
 
 if __name__ == "__main__":
 	params = dict(host="192.168.1.104",
