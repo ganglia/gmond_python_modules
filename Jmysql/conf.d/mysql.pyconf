@@ -36,27 +36,27 @@ collection_group {
     }
     # 每秒执行的select语句数量
     metric {
-        name = "mysql_select_per_second"
+        name = "mysql_Com_select_per_second"
     }
     # 每秒执行的insert数量
     metric {
-        name = "mysql_insert_per_second"
+        name = "mysql_Com_insert_per_second"
     }
     # 每秒执行的update数量
     metric {
-        name = "mysql_update_per_second"
+        name = "mysql_Com_update_per_second"
     }
     # 每秒执行的delete数量
     metric {
-        name = "mysql_delete_per_second"
+        name = "mysql_Com_delete_per_second"
     }
     # 每秒接收到的连接请求的数量
     metric {
-        name = "mysql_connections_per_second"
+        name = "mysql_Com_connections_per_second"
     }
     # 每秒丢弃的连接请求的数量
     metric {
-        name = "mysql_abortd_connects_per_second"
+        name = "mysql_Com_abortd_connects_per_second"
     }
     # 每秒接收字节数
     metric {
@@ -85,10 +85,6 @@ collection_group {
     collect_every = 30
     time_threshold = 30
 
-    # 连接缓存命中率
-    metric {
-        name = "mysql_thread_cache_used_percentage"
-    }
     # 已连接的进程数
     metric {
         name = "mysql_thread_connected"
@@ -105,13 +101,19 @@ collection_group {
     metric {
         name = "tokudb_locktree_memory_size"
     }
-    # 新出现的long_wait各数
+    # long_wait各数
     metric {
         name = "tokudb_locktree_long_wait_count"
     }
-    # 新出现的locktree_timeout
+    # locktree_timeout
     metric {
         name = "tokudb_locktree_timeout_count"
+    }
+    metric {
+        name = "mysql_max_used_connections"
+    }
+    metric {
+        name = "tokudb_locktree_memory_size_limit"
     }
 }
 
@@ -121,9 +123,6 @@ collection_group {
     time_threshold = 30
 
     metric {
-        name = "mysql_max_used_connections"
-    }
-    metric {
-        name = "tokudb_locktree_memory_size_limit"
+        name = "mysql_max_connections"
     }
 }
