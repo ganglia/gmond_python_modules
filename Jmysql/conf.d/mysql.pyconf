@@ -32,7 +32,7 @@ collection_group {
 
     # 每秒执行的use [db name]操作数量
     metric {
-        name = "mysql_change_db_per_second"
+        name = "mysql_Com_change_db_per_second"
     }
     # 每秒执行的select语句数量
     metric {

@@ -12,13 +12,13 @@
 # print(type(str))
 # f.close()
 
-# import mysql.connector
+import mysql.connector
 # import json
 #
-# conn = mysql.connector.connect(user="cupid",
-#                                password="everyone2xhfz",
-#                                host="192.168.1.104")
-# cursor = conn.cursor()
+conn = mysql.connector.connect(user="cupid",
+                               password="everyone2xhfz",
+                               host="192.168.1.104")
+cursor = conn.cursor()
 #
 # # cursor.execute("SHOW global status like \'Com_select\';")
 # # for line in cursor:
@@ -38,20 +38,20 @@
 # # print(metricDict)
 #
 #
-# cursor.execute("SHOW VARIABLES")
+cursor.execute("SHOW VARIABLES")
 # print(cursor.fetchall)
-# #variables = dict(((k.lower(), v) for (k,v) in cursor))
+variables = dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor))
 # variables = {}
 # for (k,v) in cursor:
 #     variables[k.lower()] = v
 #
-# # print(variables)
+print(variables)
 # try:
 #     raise Exception("test")
 # except Exception,e:
 #     print(e.message)
 
-a = {"a":"","b":"123","c":"ccc"}
-b = {"a":"aaa","b":"456"}
-a.update(b)
-print(a)
+# a = {"a":"","b":"123","c":"ccc"}
+# b = {"a":"aaa","b":"456"}
+# a.update(b)
+# print(a)
