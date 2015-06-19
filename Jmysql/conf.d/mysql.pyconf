@@ -56,7 +56,7 @@ collection_group {
     }
     # 每秒丢弃的连接请求的数量
     metric {
-        name = "mysql_abortd_connects_per_second"
+        name = "mysql_aborted_connects_per_second"
     }
     # 每秒接收字节数
     metric {
@@ -68,15 +68,18 @@ collection_group {
     }
     # 每秒产生的立即释放的表锁数
     metric {
-        name = "mysql_tables_locks_immediate_per_second"
+        name = "mysql_table_locks_immediate_per_second"
     }
     # 每秒产生的等待的表锁数
     metric {
-        name = "mysql_tables_locks_waited_per_second"
+        name = "mysql_table_locks_waited_per_second"
     }
     # tpc(每秒处理事务数量)
     metric {
-        name = "tokudb_transactions_per_second"
+        name = "tokudb_txn_commits_per_second"
+    }
+    metric {
+        name = "tokudb_txn_aborts_per_second"
     }
 }
 
@@ -87,15 +90,15 @@ collection_group {
 
     # 已连接的进程数
     metric {
-        name = "mysql_thread_connected"
+        name = "mysql_threads_connected"
     }
     # 正在运行的进程数
     metric {
-        name = "mysql_thread_running"
+        name = "mysql_threads_running"
     }
     # 缓存的进程数
     metric {
-        name = "mysql_thread_cached"
+        name = "mysql_threads_cached"
     }
     # tokudb 锁占用的内存空间字节数
     metric {
