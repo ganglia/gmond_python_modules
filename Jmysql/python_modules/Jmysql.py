@@ -1,10 +1,6 @@
 # -*- coding:utf-8 -*-
 import mysql.connector
 
-from packages.metrics import throughput_metrics
-from packages.metrics import count_metrics
-from packages.metrics import static_metrics
-collectTemple 	= (throughput_metrics,count_metrics,static_metrics)
 descriptors		= list()
 variables	 	= {}
 status		 	= {}
