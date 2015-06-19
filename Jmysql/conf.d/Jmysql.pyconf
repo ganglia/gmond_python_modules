@@ -1,0 +1,37 @@
+###
+### Note:
+###   To setup database access:
+###   GRANT SUPER, PROCESS ON *.* TO 'autop'@'%' IDENTIFIED BY "autop";
+###
+###   Notice in this example binlogging is not enabled in the MySQL
+###   server. In this case the "mysql_binlog_*" metrics are
+###   commented out.
+###
+
+modules {
+    module {
+        name = "Jmysql"
+        language = "python"
+
+        param host {
+            value = '127.0.0.1'
+        }
+        param user {
+            value = 'autop'
+        }
+        param passwd {
+            value = 'autop'
+        }
+    }
+}
+
+# 速率类metric
+collection_group {
+    collect_every = 30
+    time_threshold = 30
+
+    # 每秒执行的use [db name]操作数量
+    metric {
+        name = "tokudb_txn_commits"
+    }
+}
