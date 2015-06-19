@@ -6,9 +6,9 @@ import mysql.connector
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/mysqlstats.log', filemode='w')
 logging.debug('starting up')
 
-from python_modules.packages.metrics import throughput_metrics
-from python_modules.packages.metrics import count_metrics
-from python_modules.packages.metrics import static_metrics
+from packages.metrics import throughput_metrics
+from packages.metrics import count_metrics
+from packages.metrics import static_metrics
 collectTemple 	= (throughput_metrics,count_metrics,static_metrics)
 descriptors		= list()
 variables	 	= {}
