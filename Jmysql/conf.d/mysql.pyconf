@@ -52,11 +52,11 @@ collection_group {
     }
     # 每秒接收到的连接请求的数量
     metric {
-        name = "mysql_Com_connections_per_second"
+        name = "mysql_connections_per_second"
     }
     # 每秒丢弃的连接请求的数量
     metric {
-        name = "mysql_Com_abortd_connects_per_second"
+        name = "mysql_abortd_connects_per_second"
     }
     # 每秒接收字节数
     metric {
