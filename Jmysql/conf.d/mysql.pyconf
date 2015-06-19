@@ -14,7 +14,7 @@ modules {
         language = "python"
 
         param host {
-            value = '192.168.1.104'
+            value = '127.0.0.1'
         }
         param user {
             value = 'autop'
