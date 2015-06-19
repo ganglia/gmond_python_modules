@@ -117,7 +117,7 @@ collection_group {
 
 # 固定值类metric
 collection_group {
-    collect_one = yes
+    collect_once = yes
     time_threshold = 30
 
     metric {
