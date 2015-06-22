@@ -1,0 +1,9 @@
+{
+   "report_name" : "lusclt_rpc_report",
+   "report_type" : "standard",
+   "title" : "Lustre Client RPC",
+   "vertical_label" : "calls/s",
+   "series" : [
+      { "metric": "lusclt_osc_total_ost_ops", "color": "FF0000", "label": "Home", "line_width": "2","type": "stack" }
+   ]
+}

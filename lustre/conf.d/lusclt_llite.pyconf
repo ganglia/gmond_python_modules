@@ -1,0 +1,27 @@
+modules {
+  module {
+    name = "lusclt_llite"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 600
+
+  metric {
+    name_match = "lusclt_([a-zA-Z0-9]+)_write_bytes_per_sec"
+  }
+
+  metric {
+    name_match = "lusclt_([a-zA-Z0-9]+)_brw_read_bytes_per_sec"
+  }
+
+  metric {
+    name_match = "lusclt_([a-zA-Z0-9]+)_file_ops"
+  }
+
+  metric {
+    name_match = "lusclt_([a-zA-Z0-9]+)_inode_ops"
+  }
+}

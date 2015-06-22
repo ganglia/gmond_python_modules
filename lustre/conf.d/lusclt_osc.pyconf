@@ -1,0 +1,19 @@
+modules {
+  module {
+    name = "lusclt_osc"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 600
+
+  metric {
+    name_match = "lusclt_osc_total_([a-zA-Z0-9]+)"
+  }
+
+  metric {
+    name_match = "lusclt_([a-zA-Z0-9]+)_total_([a-zA-Z0-9]+)"
+  }
+}
