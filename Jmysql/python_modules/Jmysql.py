@@ -21,7 +21,7 @@ def get_status(name):
 		# return status[name2key]
 		now = int(status[name2key])
 		old = int(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
-		result = (now-old)/30
+		result = (now-old)
 		# print(name)
 		# print("now:%u" %now)
 		# print("old:%u" %old)
@@ -32,12 +32,12 @@ def get_status(name):
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
 			name2key = name.lower()
-		return status[name2key]
+		return int(status[name2key])
 	elif name in static_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
 			name2key = name.lower()
-		return variables[name2key]
+		return int(variables[name2key])
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
@@ -121,5 +121,5 @@ if __name__ == "__main__":
 		metric_init(params)
 		for d in descriptors:
 			# d["call_back"](d["name"])
-			print("%s value is %s" %(d["name"],d["call_back"](d["name"])))
+			print("%-40s value is %s" %(d["name"],d["call_back"](d["name"])))
 		metric_cleanup()
