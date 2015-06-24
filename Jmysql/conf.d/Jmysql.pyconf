@@ -35,6 +35,6 @@ collection_group {
         name = "tokudb_txn_commits_per_second"
     }
     metric {
-        name = "tokudb_txn_commits_per_second"
+        name = "tokudb_txn_aborts_per_second"
     }
 }
