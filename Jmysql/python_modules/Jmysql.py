@@ -82,14 +82,3 @@ def metric_cleanup():
 	"""Clean up the metric module"""
 	# logging.shutdown()
 	pass
-
-
-if __name__ == "__main__":
-	params = dict(host="192.168.1.104",
-				  user="autop",
-				  passwd="autop")
-	metric_init(params)
-	for d in descriptors:
-		value = d["call_back"](d["name"])
-		print("%-40s:%10s %-3s" %(d["name"],value,d["units"]))
-	# print(descriptors)
