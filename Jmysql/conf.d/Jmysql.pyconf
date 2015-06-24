@@ -25,16 +25,86 @@ modules {
     }
 }
 
-# 速率类metric
 collection_group {
-    collect_every = 30
-    time_threshold = 30
+	collect_every = 30
+	time_threshold = 30
 
-    # 每秒执行的use [db name]操作数量
-    metric {
-        name = "tokudb_txn_commits_per_second"
-    }
-    metric {
-        name = "tokudb_txn_aborts_per_second"
-    }
+	metric {
+		name = "mysql_Com_change_db_per_second"
+	}
+	metric {
+		name = "tokudb_txn_aborts_per_second"
+	}
+	metric {
+		name = "mysql_Com_select_per_second"
+	}
+	metric {
+		name = "mysql_Com_insert_per_second"
+	}
+	metric {
+		name = "mysql_table_locks_immediate_per_second"
+	}
+	metric {
+		name = "mysql_Com_update_per_second"
+	}
+	metric {
+		name = "mysql_bytes_sent_per_second"
+	}
+	metric {
+		name = "mysql_connections_per_second"
+	}
+	metric {
+		name = "mysql_bytes_received_per_second"
+	}
+	metric {
+		name = "mysql_Com_delete_per_second"
+	}
+	metric {
+		name = "tokudb_txn_commits_per_second"
+	}
+	metric {
+		name = "mysql_aborted_connects_per_second"
+	}
+	metric {
+		name = "mysql_table_locks_waited_per_second"
+	}
+}
+
+collection_group {
+	collect_every = 30
+	time_threshold = 30
+
+	metric {
+		name = "tokudb_locktree_timeout_count"
+	}
+	metric {
+		name = "mysql_max_used_connections"
+	}
+	metric {
+		name = "mysql_threads_running"
+	}
+	metric {
+		name = "mysql_threads_connected"
+	}
+	metric {
+		name = "tokudb_locktree_memory_size"
+	}
+	metric {
+		name = "tokudb_locktree_long_wait_count"
+	}
+	metric {
+		name = "tokudb_locktree_memory_size_limit"
+	}
+	metric {
+		name = "mysql_threads_cached"
+	}
+}
+
+collection_group {
+	collect_once = yes
+	time_threshold = 30
+
+	metric {
+		name = "mysql_max_connections"
+	}
 }

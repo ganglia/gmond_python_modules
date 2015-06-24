@@ -6,6 +6,8 @@ variables	 	= {}
 status		 	= {}
 
 from packages.metrics import throughput_metrics
+from packages.metrics import count_metrics
+from packages.metrics import static_metrics
 
 def get_status(name):
 	"""return a metric value."""
@@ -51,8 +53,10 @@ def metric_init(params):
 	cursor = conn.cursor()
 
 	cursor.execute("show global variables;")
+	# 初始化variables全局变量
 	variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	cursor.execute("show global status;")
+	# 初始化status全局变量
 	status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	cursor.close()
 	conn.close()
@@ -82,3 +86,14 @@ def metric_cleanup():
 	"""Clean up the metric module"""
 	# logging.shutdown()
 	pass
+
+
+if __name__ == "__main__":
+	params = dict(host="192.168.1.104",
+				  user="autop",
+				  passwd="autop")
+	metric_init(params)
+	for d in descriptors:
+		value = d["call_back"](d["name"])
+		print("%-40s:%10s %-3s" %(d["name"],value,d["units"]))
+	# print(descriptors)
