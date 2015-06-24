@@ -5,15 +5,15 @@ descriptors		= list()
 variables	 	= {}
 status		 	= {}
 
-
+from packages.metrics import throughput_metrics
 
 def get_status(name):
 	"""return a metric value."""
-	# if name in throughput_metrics:
-	# 	name2key = name[6:-11].lower()
-	# 	if not name.startswith("mysql"):
-	# 		name2key = name[:-11].lower()
-	# 	return status[name2key]
+	if name in throughput_metrics:
+		name2key = name[6:-11].lower()
+		if not name.startswith("mysql"):
+			name2key = name[:-11].lower()
+		return status[name2key]
 	# elif name in count_metrics:
 	# 	name2key = name[6:].lower()
 	# 	if not name.startswith("mysql"):
@@ -24,7 +24,7 @@ def get_status(name):
 	# 	if not name.startswith("mysql"):
 	# 		name2key = name.lower()
 	# 	return variables[name2key]
-	return status["tokudb_txn_commits"]
+	# return status["tokudb_txn_commits"]
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
@@ -57,7 +57,15 @@ def metric_init(params):
 	cursor.close()
 	conn.close()
 
-	d1 = dict(name="tokudb_txn_commits",
+	d1 = dict(name="tokudb_txn_commits_per_second",
+			  call_back=get_status,
+			  time_max=30,
+			  value_type="uint",
+			  units="N",
+			  slope="both",
+			  format="%u",
+			  description="test metric")
+	d2 = dict(name="tokudb_txn_aborts_per_second",
 			  call_back=get_status,
 			  time_max=30,
 			  value_type="uint",
@@ -66,6 +74,7 @@ def metric_init(params):
 			  format="%u",
 			  description="test metric")
 	descriptors.append(d1)
+	descriptors.append(d2)
 	# print(status)
 	return descriptors
 
