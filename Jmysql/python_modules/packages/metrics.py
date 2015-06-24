@@ -2,16 +2,16 @@
 # author:jianqiao.ms
 
 throughput_metrics = dict(
-    mysql_Com_change_db_per_second          = {"name":"mysql_change_db_per_second",
+    mysql_Com_change_db_per_second          = {"name":"mysql_Com_change_db_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
-    mysql_Com_select_per_second             = {"name":"mysql_select_per_second",
+    mysql_Com_select_per_second             = {"name":"mysql_Com_select_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
-    mysql_Com_insert_per_second             = {"name":"mysql_insert_per_second",
+    mysql_Com_insert_per_second             = {"name":"mysql_Com_insert_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
-    mysql_Com_update_per_second             = {"name":"mysql_update_per_second",
+    mysql_Com_update_per_second             = {"name":"mysql_Com_update_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
     mysql_Com_delete_per_second             = {"name":"mysql_Com_delete_per_second",
@@ -20,7 +20,7 @@ throughput_metrics = dict(
     mysql_connections_per_second            = {"name":"mysql_connections_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
-    mysql_aborted_connects_per_second       = {"name":"mysql_abortd_connects_per_second",
+    mysql_aborted_connects_per_second       = {"name":"mysql_aborted_connects_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
     mysql_bytes_received_per_second         = {"name":"mysql_bytes_received_per_second",
@@ -38,7 +38,7 @@ throughput_metrics = dict(
     tokudb_txn_commits_per_second           = {"name":"tokudb_txn_commits_per_second",
                                                "value_type":"float",
                                                "units":"N/s"},
-    tokudb_txn_aborts_per_second            = {"name":"mysql_tokudb_txn_aborts_per_second",
+    tokudb_txn_aborts_per_second            = {"name":"tokudb_txn_aborts_per_second",
                                                "value_type":"float",
                                                "units":"N/s"})
 
@@ -61,7 +61,7 @@ count_metrics = dict(
     tokudb_locktree_timeout_count           = {"name":"tokudb_locktree_timeout_count",
                                                "value_type":"uint",
                                                "units":"N"},
-    mysql_max_used_connections              = {"name":"tokudb_max_used_connections",
+    mysql_max_used_connections              = {"name":"mysql_max_used_connections",
                                                "value_type":"uint",
                                                "units":"N"},
     tokudb_locktree_memory_size_limit       = {"name":"tokudb_locktree_memory_size_limit",
@@ -69,6 +69,6 @@ count_metrics = dict(
                                                "units":"Byte"})
 
 static_metrics = dict(
-    mysql_max_connections                   = {"name":"mysql_max_used_connections",
+    mysql_max_connections                   = {"name":"mysql_max_connections",
                                                "value_type":"uint",
                                                "units":"N"})

@@ -1,9 +1,12 @@
 # -*- coding:utf-8 -*-
 import mysql.connector
+import json,sys,os
 
 descriptors		= list()
 variables	 	= {}
 status		 	= {}
+lastStatus		= {}
+statusFile 		= os.path.join(os.path.dirname(__file__),"last_status")
 
 from packages.metrics import throughput_metrics
 from packages.metrics import count_metrics
@@ -15,7 +18,17 @@ def get_status(name):
 		name2key = name[6:-11].lower()
 		if not name.startswith("mysql"):
 			name2key = name[:-11].lower()
-		return status[name2key]
+		# return status[name2key]
+		now = int(status[name2key])
+		old = int(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
+		result = (now-old)/30
+		# print(name)
+		# print("now:%u" %now)
+		# print("old:%u" %old)
+		# print("result:%u" %result)
+		# print("________________________________________________________________")
+		return result
+
 	elif name in count_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
@@ -33,6 +46,7 @@ def metric_init(params):
 	global descriptors
 	global variables
 	global status
+	global lastStatus
 
 	# 检查params
 	if "host" not in params:
@@ -44,6 +58,11 @@ def metric_init(params):
 	if "passwd" not in params:
 		print("passwd.检查Jmysql.pyconf")
 		exit(1)
+
+	# 从文件中获取json数据
+	fp=open(statusFile,"r")
+	lastStatus = json.load(fp)
+	fp.close()
 
 	# 连接mysql，获取状态
 	conn = mysql.connector.connect(host=params["host"],
@@ -77,16 +96,32 @@ def metric_init(params):
 
 def metric_cleanup():
 	"""Clean up the metric module"""
-	# logging.shutdown()
-	pass
-
+	# pass
+	global status
+	fp = open(statusFile,"w")
+	fp.write(json.dumps(status))
+	fp.close()
 
 if __name__ == "__main__":
 	params = dict(host="192.168.1.104",
 				  user="autop",
 				  passwd="autop")
-	metric_init(params)
-	for d in descriptors:
-		value = d["call_back"](d["name"])
-		print("%-40s:%10s %-3s" %(d["name"],value,d["units"]))
-	# print(descriptors)
+	if "--init" in sys.argv:
+		status = {}
+		conn = mysql.connector.connect(host=params["host"],
+								 user=params["user"],
+								 password=params["passwd"])
+		cursor = conn.cursor()
+		cursor.execute("show global status;")
+		status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+		cursor.close()
+		conn.close()
+		fp = open("last_status","w")
+		fp.write(json.dumps(status))
+		fp.close()
+	else:
+		metric_init(params)
+		for d in descriptors:
+			# d["call_back"](d["name"])
+			print("%s value is %s" %(d["name"],d["call_back"](d["name"])))
+		metric_cleanup()
