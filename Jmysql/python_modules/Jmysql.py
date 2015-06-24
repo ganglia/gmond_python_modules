@@ -28,7 +28,6 @@ def get_status(name):
 		# print("result:%u" %result)
 		# print("________________________________________________________________")
 		return result
-
 	elif name in count_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
@@ -39,7 +38,6 @@ def get_status(name):
 		if not name.startswith("mysql"):
 			name2key = name.lower()
 		return variables[name2key]
-	return status["tokudb_txn_commits"]
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
