@@ -34,4 +34,7 @@ collection_group {
     metric {
         name = "tokudb_txn_commits"
     }
+    metric {
+        name = "tokudb_txn_commits"
+    }
 }
