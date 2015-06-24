@@ -32,9 +32,9 @@ collection_group {
 
     # 每秒执行的use [db name]操作数量
     metric {
-        name = "tokudb_txn_commits"
+        name = "tokudb_txn_commits_per_second"
     }
     metric {
-        name = "tokudb_txn_commits"
+        name = "tokudb_txn_commits_per_second"
     }
 }
