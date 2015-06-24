@@ -16,22 +16,21 @@ def get_status(name):
 		if not name.startswith("mysql"):
 			name2key = name[:-11].lower()
 		return status[name2key]
-	# elif name in count_metrics:
-	# 	name2key = name[6:].lower()
-	# 	if not name.startswith("mysql"):
-	# 		name2key = name.lower()
-	# 	return status[name2key]
-	# elif name in static_metrics:
-	# 	name2key = name[6:].lower()
-	# 	if not name.startswith("mysql"):
-	# 		name2key = name.lower()
-	# 	return variables[name2key]
-	# return status["tokudb_txn_commits"]
+	elif name in count_metrics:
+		name2key = name[6:].lower()
+		if not name.startswith("mysql"):
+			name2key = name.lower()
+		return status[name2key]
+	elif name in static_metrics:
+		name2key = name[6:].lower()
+		if not name.startswith("mysql"):
+			name2key = name.lower()
+		return variables[name2key]
+	return status["tokudb_txn_commits"]
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
 	global descriptors
-	global metricsDefination
 	global variables
 	global status
 
@@ -61,25 +60,19 @@ def metric_init(params):
 	cursor.close()
 	conn.close()
 
-	d1 = dict(name="tokudb_txn_commits_per_second",
-			  call_back=get_status,
-			  time_max=30,
-			  value_type="uint",
-			  units="N",
-			  slope="both",
-			  format="%u",
-			  description="test metric")
-	d2 = dict(name="tokudb_txn_aborts_per_second",
-			  call_back=get_status,
-			  time_max=30,
-			  value_type="uint",
-			  units="N",
-			  slope="both",
-			  format="%u",
-			  description="test metric")
-	descriptors.append(d1)
-	descriptors.append(d2)
-	# print(status)
+	for collect in (throughput_metrics,count_metrics,static_metrics):
+		for metric in collect:
+			d0 = dict(call_back=get_status,
+					  time_max=30,
+					  value_type="uint",
+					  units="N",
+					  slope="both",
+					  format="%u",
+					  group="Jmysql",
+					  description="test metric")
+			d0.update(collect[metric])
+			# print(d0)
+			descriptors.append(d0)
 	return descriptors
 
 def metric_cleanup():
