@@ -42,8 +42,8 @@ def get_status(name):
 		if not name.startswith("mysql"):
 			name2key = name[:-11].lower()
 		# return status[name2key]
-		now = int(status[name2key])
-		old = int(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
+		now = float(status[name2key])
+		old = float(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
 		result = (now-old)/30
 		# print(name)
 		# print("now:%u" %now)
