@@ -7,10 +7,6 @@ static = """###
 ###   To setup database access:
 ###   GRANT SUPER, PROCESS ON *.* TO 'autop'@'%' IDENTIFIED BY "autop";
 ###
-###   Notice in this example binlogging is not enabled in the MySQL
-###   server. In this case the "mysql_binlog_*" metrics are
-###   commented out.
-###
 
 modules {
     module {
