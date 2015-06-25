@@ -74,10 +74,7 @@ static_metrics = dict(
                                                "units":"N"})
 
 test_metrics = dict(
-    mysql_Com_select_per_second             = {"name":"mysql_Com_select_per_second",
-                                               "key":"Com_select",
-                                               "units":"N"},
-    test_metric                             = {"name":"test_metric",
-                                               "key":"test",
+    test_metric0                            = {"name":"test_metric0",
+                                               "value_type":"uint",
                                                "units":"N"}
 )

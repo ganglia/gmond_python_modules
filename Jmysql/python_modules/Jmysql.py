@@ -4,9 +4,10 @@ import json,sys,os
 
 descriptors		= list()
 variables	 	= {}
-status		 	= {}
-lastStatus		= {}
+now_status		= {}
+last_Status		= {}
 statusFile 		= os.path.join(os.path.dirname(__file__),"last_status")
+testNum			= 0
 
 from packages.metrics import throughput_metrics
 from packages.metrics import count_metrics
@@ -14,46 +15,43 @@ from packages.metrics import static_metrics
 
 def get_status(name):
 	"""return a metric value."""
-	global status
-
-	# 从文件中获取json数据(上次检查时的status数据)
-	# fp=open(statusFile,"r")
-	# lastStatus = json.load(fp)
-	# fp.close()
-
-	# 获取当前状态
-	# 初始化variables全局变量
-	cursor.execute("show global variables;")
-	variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-	# 初始化status全局变量
-	cursor.execute("show global status;")
-	status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-
-	# 本次状态写入last_status文件
-	# fp = open(statusFile,"w")
-	# fp.write(json.dumps(status))
-	# fp.close()
-
-	# 返回metrics值
-	if name in throughput_metrics:
-		name2key = name[6:-11].lower()
-		if not name.startswith("mysql"):
-			name2key = name[:-11].lower()
-		return int(status[name2key])
-		# now = float(status[name2key])
-		# old = float(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
-		# result = (now-old)/30
-		# return result
-	elif name in count_metrics:
-		name2key = name[6:].lower()
-		if not name.startswith("mysql"):
-			name2key = name.lower()
-		return int(status[name2key])
-	elif name in static_metrics:
-		name2key = name[6:].lower()
-		if not name.startswith("mysql"):
-			name2key = name.lower()
-		return int(variables[name2key])
+	# global status
+    #
+	# # 获取当前状态
+	# # 初始化variables全局变量
+	# cursor.execute("show global variables;")
+	# variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+	# # 初始化status全局变量
+	# cursor.execute("show global status;")
+	# status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+    #
+	# # 返回metrics值
+	# if name in throughput_metrics:
+	# 	name2key = name[6:-11].lower()
+	# 	if not name.startswith("mysql"):
+	# 		name2key = name[:-11].lower()
+	# 	return int(status[name2key])
+	# 	# now = float(status[name2key])
+	# 	# old = float(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
+	# 	# result = (now-old)/30
+	# 	# return result
+	# elif name in count_metrics:
+	# 	name2key = name[6:].lower()
+	# 	if not name.startswith("mysql"):
+	# 		name2key = name.lower()
+	# 	return int(status[name2key])
+	# elif name in static_metrics:
+	# 	name2key = name[6:].lower()
+	# 	if not name.startswith("mysql"):
+	# 		name2key = name.lower()
+	# 	return int(variables[name2key])
+	global testNum
+	if name == "test_metric0":
+		testNum+=2
+		return testNum
+	# if name == "test_metric1":
+	# 	testNum+=3
+	# 	return testNum
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
