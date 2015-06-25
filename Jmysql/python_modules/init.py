@@ -30,8 +30,6 @@ modules {
 }
 """
 
-
-
 fp = open("../conf.d/Jmysql.pyconf","w+")
 #fp.close()
 

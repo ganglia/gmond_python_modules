@@ -63,9 +63,9 @@ def metric_init(params):
 	fp.close()
 
 	# 连接mysql，获取状态
-	conn = mysql.connector.connect(host=params["host"],
-								 user=params["user"],
-								 password=params["passwd"])
+	conn = mysql.connector.connect(host=params["host"].encode("utf-8"),
+								   user=params["user"].encode("utf-8"),
+								   password=params["passwd"].encode("utf-8"))
 	cursor = conn.cursor()
 
 	cursor.execute("show global variables;")
