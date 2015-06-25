@@ -12,6 +12,7 @@ testNum			= 0
 from packages.metrics import throughput_metrics
 from packages.metrics import count_metrics
 from packages.metrics import static_metrics
+from packages.metrics import test_metrics
 
 def get_status(name):
 	"""return a metric value."""
@@ -79,7 +80,8 @@ def metric_init(params):
 								   password=params["passwd"].encode("utf-8"))
 	cursor = conn.cursor()
 
-	for collect in (throughput_metrics,count_metrics,static_metrics):
+	# for collect in (throughput_metrics,count_metrics,static_metrics):
+	for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
 					  time_max=30,
