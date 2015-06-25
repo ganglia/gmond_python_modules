@@ -1,0 +1,10 @@
+{
+   "report_name" : "lusclt_rm_report",
+   "report_type" : "standard",
+   "title" : "Lustre Client Bandwidth",
+   "vertical_label" : "bytes/s",
+   "series" : [
+      { "metric": "lusclt_osc_total_read_bytes_per_sec", "color": "FF8A60", "label": "Read", "line_width": "2","type": "stack" },
+      { "metric": "lusclt_osc_total_write_bytes_per_sec", "color": "FF0000", "label": "Write", "line_width": "2","type": "stack" }
+   ]
+}

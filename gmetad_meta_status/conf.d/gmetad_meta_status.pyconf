@@ -1,0 +1,46 @@
+modules {
+  module {
+    name     = "gmetad_meta_status"
+    language = "python"
+
+    # Which gmetad instance to monitor
+    param gmetad_host {
+        value = "localhost"
+    }
+
+    # The gmetad interactive port
+    param gmetad_port {
+        value = 8652
+    }
+
+    # Which metrics to report. choices=['basic-only', 'raw', 'rate',
+    #  'all']  'basic' metrics are included in all 'raw' and 'rate'.
+    param metrics {
+        value = "all"
+    }
+
+    # This module calculates all metrics (including derived) rates at
+    # once and then serves them out of a cache. This determines the
+    # minimum TTL.
+    param check_every {
+        value = 30
+    }
+    # Where to log information from this module (syslog facility)
+    param syslog_facility {
+        value = "user"
+    }
+    # log level, WARNING is not expected to produce any output
+    param log_level {
+        value = "WARNING"
+    }
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 60
+
+  metric {
+    name_match = "gmetad_meta_status_(.+)"
+  }
+}
