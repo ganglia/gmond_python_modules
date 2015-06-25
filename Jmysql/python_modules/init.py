@@ -34,45 +34,45 @@ fp = open("../conf.d/Jmysql.pyconf","w+")
 fp.write(static+"\n")
 
 
-# from packages.metrics import throughput_metrics
-# from packages.metrics import count_metrics
-# from packages.metrics import static_metrics
-#
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_every = 30\n")
-# fp.write("\ttime_threshold = 30\n\n")
-# for key in throughput_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n\n")
-#
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_every = 30\n")
-# fp.write("\ttime_threshold = 30\n\n")
-# for key in count_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n\n")
-#
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_once = yes\n")
-# fp.write("\ttime_threshold = 30\n\n")
-# for key in static_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n")
+from packages.metrics import throughput_metrics
+from packages.metrics import count_metrics
+from packages.metrics import static_metrics
 
-
-from packages.metrics import test_metrics
 fp.write("collection_group {\n")
 fp.write("\tcollect_every = 30\n")
 fp.write("\ttime_threshold = 30\n\n")
-for key in test_metrics:
+for key in throughput_metrics:
+    fp.write("\tmetric {\n")
+    fp.write("\t\tname = \"%s\"\n" %key)
+    fp.write("\t}\n")
+fp.write("}\n\n")
+
+fp.write("collection_group {\n")
+fp.write("\tcollect_every = 30\n")
+fp.write("\ttime_threshold = 30\n\n")
+for key in count_metrics:
+    fp.write("\tmetric {\n")
+    fp.write("\t\tname = \"%s\"\n" %key)
+    fp.write("\t}\n")
+fp.write("}\n\n")
+
+fp.write("collection_group {\n")
+fp.write("\tcollect_once = yes\n")
+fp.write("\ttime_threshold = 30\n\n")
+for key in static_metrics:
     fp.write("\tmetric {\n")
     fp.write("\t\tname = \"%s\"\n" %key)
     fp.write("\t}\n")
 fp.write("}\n")
-fp.close()
+
+
+# from packages.metrics import test_metrics
+# fp.write("collection_group {\n")
+# fp.write("\tcollect_every = 30\n")
+# fp.write("\ttime_threshold = 30\n\n")
+# for key in test_metrics:
+#     fp.write("\tmetric {\n")
+#     fp.write("\t\tname = \"%s\"\n" %key)
+#     fp.write("\t}\n")
+# fp.write("}\n")
+# fp.close()
