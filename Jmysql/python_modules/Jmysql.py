@@ -11,9 +11,32 @@ statusFile 		= os.path.join(os.path.dirname(__file__),"last_status")
 from packages.metrics import throughput_metrics
 from packages.metrics import count_metrics
 from packages.metrics import static_metrics
+# from packages.metrics import test_metrics
 
 def get_status(name):
 	"""return a metric value."""
+	global status
+
+	# 从文件中获取json数据(上次检查时的status数据)
+	fp=open(statusFile,"r")
+	lastStatus = json.load(fp)
+	fp.close()
+
+	# 获取当前状态
+	# 初始化variables全局变量
+	cursor.execute("show global variables;")
+	variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+	# 初始化status全局变量
+	cursor.execute("show global status;")
+	status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+
+	# 本次状态写入last_status文件
+
+	fp = open(statusFile,"w")
+	fp.write(json.dumps(status))
+	fp.close()
+
+	# 返回metrics值
 	if name in throughput_metrics:
 		name2key = name[6:-11].lower()
 		if not name.startswith("mysql"):
@@ -21,7 +44,7 @@ def get_status(name):
 		# return status[name2key]
 		now = int(status[name2key])
 		old = int(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
-		result = (now-old)
+		result = (now-old)/30
 		# print(name)
 		# print("now:%u" %now)
 		# print("old:%u" %old)
@@ -38,13 +61,18 @@ def get_status(name):
 		if not name.startswith("mysql"):
 			name2key = name.lower()
 		return int(variables[name2key])
+	# global descriptors,status
+	# return status[descriptors[name]["key"]]
+	# print(descriptors)
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
 	global descriptors
 	global variables
 	global status
-	global lastStatus
+
+	global conn
+	global cursor
 
 	# 检查params
 	if "host" not in params:
@@ -57,27 +85,14 @@ def metric_init(params):
 		print("passwd.检查Jmysql.pyconf")
 		exit(1)
 
-	# 从文件中获取json数据
-	fp=open(statusFile,"r")
-	lastStatus = json.load(fp)
-	fp.close()
-
-	# 连接mysql，获取状态
+	# 连接mysql
 	conn = mysql.connector.connect(host=params["host"].encode("utf-8"),
 								   user=params["user"].encode("utf-8"),
 								   password=params["passwd"].encode("utf-8"))
 	cursor = conn.cursor()
 
-	cursor.execute("show global variables;")
-	# 初始化variables全局变量
-	variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-	cursor.execute("show global status;")
-	# 初始化status全局变量
-	status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-	cursor.close()
-	conn.close()
-
 	for collect in (throughput_metrics,count_metrics,static_metrics):
+	# for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
 					  time_max=30,
@@ -86,19 +101,19 @@ def metric_init(params):
 					  slope="both",
 					  format="%u",
 					  group="Jmysql",
-					  description="test metric")
+					  description="test metric",
+					  test="100")
 			d0.update(collect[metric])
-			# print(d0)
+
 			descriptors.append(d0)
 	return descriptors
 
 def metric_cleanup():
 	"""Clean up the metric module"""
+	cursor.close()
+	conn.close()
 	# pass
-	global status
-	fp = open(statusFile,"w")
-	fp.write(json.dumps(status))
-	fp.close()
+
 
 if __name__ == "__main__":
 	params = dict(host="192.168.1.104",
