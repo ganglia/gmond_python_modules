@@ -49,7 +49,6 @@ def get_status(name):
 		cursor.execute("show global status;")
 		logging.debug("%-40s 更新now_status" %name)
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-		logging.debug("%-40s now_status Com_select %s" %(name,now_status["com_select"]))
 
 	# 返回metrics值
 	if name in throughput_metrics:
@@ -59,7 +58,6 @@ def get_status(name):
 		# return int(now_status[name2key])
 		nowV = float(now_status[name2key])
 		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
-		logging.debug("%-40s nowV:%s | oldV:%s" %(name,nowV,oldV))
 		result = (nowV-oldV)/10
 		logging.debug("%-40s result %s" %(name,result))
 		if result < 0:
@@ -70,16 +68,19 @@ def get_status(name):
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
 			name2key = name.lower()
-		return int(now_status[name2key])
+
+		result = int(now_status[name2key])
+		logging.debug("%-40s result %s" %(name,result))
+		return result
 	elif name in static_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
 			name2key = name.lower()
-		return int(variables[name2key])
+
+		result = int(variables[name2key])
+		logging.debug("%-40s result %s" %(name,result))
+		return result
 	global testNum
-	if name == "test_metric0":
-		testNum+=2
-		return testNum
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
@@ -113,6 +114,7 @@ def metric_init(params):
 	cursor.execute("show global status;")
 	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	logging.debug("开始")
+	time.sleep(10)
 	for collect in (throughput_metrics,count_metrics,static_metrics):
 	# for collect in (throughput_metrics,):
 	# for collect in (almost_real_metrics,):
@@ -137,8 +139,6 @@ def metric_cleanup():
 	cursor.close()
 	conn.close()
 	logging.shutdown()
-	# pass
-
 
 if __name__ == "__main__":
 	params = dict(host="192.168.1.104",
