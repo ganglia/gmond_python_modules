@@ -43,11 +43,11 @@ def get_status(name):
 		name2key = name[6:-11].lower()
 		if not name.startswith("mysql"):
 			name2key = name[:-11].lower()
-		return int(now_status[name2key])
-		# now = float(status[name2key])
-		# old = float(lastStatus[name2key.decode('utf-8')].encode("utf-8"))
-		# result = (now-old)/30
-		# return result
+		# return int(now_status[name2key])
+		now = float(now_status[name2key])
+		old = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
+		result = (now-old)/30
+		return result
 	elif name in count_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
