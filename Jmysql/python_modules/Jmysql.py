@@ -102,7 +102,7 @@ def metric_init(params):
 	# 初始化status全局变量
 	cursor.execute("show global status;")
 	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-
+	logging.debug("开始")
 	for collect in (throughput_metrics,count_metrics,static_metrics):
 	# for collect in (throughput_metrics,):
 	# for collect in (almost_real_metrics,):
