@@ -30,11 +30,9 @@ def get_status(name):
 		pass
 	else:
 		last_update = now
+		last_status.update(now_status)
 		# 获取当前状态
-		# 初始化variables全局变量
-		cursor.execute("show global variables;")
-		variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-		# 初始化status全局变量
+		# now_status全局变量
 		cursor.execute("show global status;")
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 
@@ -88,6 +86,12 @@ def metric_init(params):
 								   user=params["user"].encode("utf-8"),
 								   password=params["passwd"].encode("utf-8"))
 	cursor = conn.cursor()
+	# 初始化variables全局变量
+	cursor.execute("show global variables;")
+	variables.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
+	# 初始化status全局变量
+	cursor.execute("show global status;")
+	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 
 	for collect in (throughput_metrics,count_metrics,static_metrics):
 	# for collect in (throughput_metrics,):
