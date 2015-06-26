@@ -78,3 +78,15 @@ test_metrics = dict(
                                                "value_type":"uint",
                                                "units":"N"}
 )
+
+almost_real_metrics = dict(
+    mysql_Com_select_per_second             = {"name":"mysql_Com_select_per_second",
+                                               "value_type":"int",
+                                               "units":"N/s"},
+    mysql_bytes_received_per_second         = {"name":"mysql_bytes_received_per_second",
+                                               "value_type":"int",
+                                               "units":"Bytes/s"},
+    mysql_bytes_sent_per_second             = {"name":"mysql_bytes_sent_per_second",
+                                               "value_type":"int",
+                                               "units":"Bytes/s"}
+)

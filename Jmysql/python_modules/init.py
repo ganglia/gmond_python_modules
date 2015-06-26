@@ -62,13 +62,26 @@ fp.write(static+"\n")
 # fp.write("}\n")
 
 
-from packages.metrics import test_metrics
+# from packages.metrics import test_metrics
+# fp.write("collection_group {\n")
+# fp.write("\tcollect_every = 10\n")
+# fp.write("\ttime_threshold = 10\n\n")
+# for key in test_metrics:
+#     fp.write("\tmetric {\n")
+#     fp.write("\t\tname = \"%s\"\n" %key)
+#     fp.write("\t}\n")
+# fp.write("}\n")
+
+from packages.metrics import almost_real_metrics
 fp.write("collection_group {\n")
 fp.write("\tcollect_every = 10\n")
 fp.write("\ttime_threshold = 10\n\n")
-for key in test_metrics:
+for key in almost_real_metrics:
     fp.write("\tmetric {\n")
     fp.write("\t\tname = \"%s\"\n" %key)
     fp.write("\t}\n")
 fp.write("}\n")
+
+
+
 fp.close()
