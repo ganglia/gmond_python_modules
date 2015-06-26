@@ -35,8 +35,8 @@ from packages.metrics import count_metrics
 from packages.metrics import static_metrics
 
 fp.write("collection_group {\n")
-fp.write("\tcollect_every = 30\n")
-fp.write("\ttime_threshold = 30\n\n")
+fp.write("\tcollect_every = 10\n")
+fp.write("\ttime_threshold = 10\n\n")
 for key in throughput_metrics:
     fp.write("\tmetric {\n")
     fp.write("\t\tname = \"%s\"\n" %key)
@@ -44,8 +44,8 @@ for key in throughput_metrics:
 fp.write("}\n\n")
 
 fp.write("collection_group {\n")
-fp.write("\tcollect_every = 30\n")
-fp.write("\ttime_threshold = 30\n\n")
+fp.write("\tcollect_every = 10\n")
+fp.write("\ttime_threshold = 10\n\n")
 for key in count_metrics:
     fp.write("\tmetric {\n")
     fp.write("\t\tname = \"%s\"\n" %key)

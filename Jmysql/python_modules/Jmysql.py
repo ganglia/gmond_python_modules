@@ -1,6 +1,15 @@
 # -*- coding:utf-8 -*-
 import mysql.connector
 import json,sys,os,time
+import logging
+
+
+from packages.metrics import throughput_metrics
+from packages.metrics import count_metrics
+from packages.metrics import static_metrics
+from packages.metrics import test_metrics
+from packages.metrics import almost_real_metrics
+
 
 descriptors		= list()
 variables	 	= {}
@@ -11,11 +20,9 @@ TIME_INTERVAL	= 15
 
 testNum			= 0
 
-from packages.metrics import throughput_metrics
-from packages.metrics import count_metrics
-from packages.metrics import static_metrics
-from packages.metrics import test_metrics
-from packages.metrics import almost_real_metrics
+
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/mysqlstats.log', filemode='w')
+logging.debug('starting up')
 
 def get_status(name):
 	"""return a metric value."""
@@ -36,15 +43,18 @@ def get_status(name):
 		cursor.execute("show global status;")
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 
+	logging.debug("now:%s | delt:%s" %(now,delt))
+
 	# 返回metrics值
 	if name in throughput_metrics:
 		name2key = name[6:-11].lower()
 		if not name.startswith("mysql"):
 			name2key = name[:-11].lower()
 		# return int(now_status[name2key])
-		now = float(now_status[name2key])
-		old = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
-		result = (now-old)/30
+		nowV = float(now_status[name2key])
+		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
+		logging.debug("nowV:%s | oldV:%s" %(nowV,oldV))
+		result = (nowV-oldV)/10
 		return result
 	elif name in count_metrics:
 		name2key = name[6:].lower()
@@ -116,6 +126,7 @@ def metric_cleanup():
 	"""Clean up the metric module"""
 	cursor.close()
 	conn.close()
+	logging.shutdown()
 	# pass
 
 
