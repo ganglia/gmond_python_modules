@@ -16,7 +16,7 @@ variables	 	= {}
 now_status		= {}
 last_status		= {}
 last_update		= 0
-TIME_INTERVAL	= 15
+TIME_INTERVAL	= 10
 
 testNum			= 0
 
@@ -37,7 +37,7 @@ def get_status(name):
 
 	now = time.time()
 	delt = now - last_update
-	logging.debug('11111111111111111111111111')
+	# logging.debug('11111111111111111111111111')
 	if delt<TIME_INTERVAL:
 		logging.debug("%-40s <<<<<<<<" %name)
 	else:
@@ -55,8 +55,6 @@ def get_status(name):
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 		logging.debug("%-40s now_status Com_select %s" %(name,now_status["com_select"]))
 
-	logging.debug("name:%-40s | nowTime:%s | delt:%s" %(name,now,delt))
-
 	# 返回metrics值
 	if name in throughput_metrics:
 		name2key = name[6:-11].lower()
@@ -67,6 +65,7 @@ def get_status(name):
 		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
 		logging.debug("name:%-40s | nowV:%s | oldV:%s" %(name,nowV,oldV))
 		result = nowV-oldV
+		logging.debug("%-40s result %s" %(name,result))
 		return result
 	elif name in count_metrics:
 		name2key = name[6:].lower()
@@ -116,12 +115,12 @@ def metric_init(params):
 	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	logging.debug("开始")
 	# for collect in (throughput_metrics,count_metrics,static_metrics):
-	for collect in (throughput_metrics,):
-	# for collect in (almost_real_metrics,):
+	# for collect in (throughput_metrics,):
+	for collect in (almost_real_metrics,):
 	# for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
-					  time_max=15,
+					  time_max=10,
 					  value_type="uint",
 					  units="N",
 					  slope="both",
