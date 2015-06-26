@@ -18,14 +18,11 @@ last_status		= {}
 last_update		= 0
 TIME_INTERVAL	= 10
 
-testNum			= 0
-
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(process)d-%(threadName)s-%(asctime)s-%(filename)s[line:%(lineno)d]-%(levelname)s-%(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
+logging.basicConfig(level=logging.ERROR,
+                    format='%(asctime)s-%(filename)s[line:%(lineno)d]-%(levelname)s-%(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
                     filename='/tmp/test.log',
-                    filemode='w')
+                    filemode='a')
 logging.debug('starting up')
 
 def get_status(name):
@@ -37,7 +34,6 @@ def get_status(name):
 
 	now = time.time()
 	delt = now - last_update
-	# logging.debug('11111111111111111111111111')
 	if delt<TIME_INTERVAL:
 		logging.debug("%-40s <<<<<<<<" %name)
 	else:
@@ -66,7 +62,10 @@ def get_status(name):
 		logging.debug("%-40s nowV:%s | oldV:%s" %(name,nowV,oldV))
 		result = nowV-oldV
 		logging.debug("%-40s result %s" %(name,result))
-		return result
+		if result < 0:
+			return 0
+		else:
+			return result
 	elif name in count_metrics:
 		name2key = name[6:].lower()
 		if not name.startswith("mysql"):
@@ -123,8 +122,8 @@ def metric_init(params):
 					  time_max=10,
 					  value_type="uint",
 					  units="N",
+					  format="%u",
 					  slope="both",
-					  format="%f",
 					  GROUP="Jmysql",
 					  description="test metric"
 					  )
