@@ -34,32 +34,32 @@ from packages.metrics import throughput_metrics
 from packages.metrics import count_metrics
 from packages.metrics import static_metrics
 
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_every = 10\n")
-# fp.write("\ttime_threshold = 10\n\n")
-# for key in throughput_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n\n")
-#
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_every = 10\n")
-# fp.write("\ttime_threshold = 10\n\n")
-# for key in count_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n\n")
-#
-# fp.write("collection_group {\n")
-# fp.write("\tcollect_once = yes\n")
-# fp.write("\ttime_threshold = 30\n\n")
-# for key in static_metrics:
-#     fp.write("\tmetric {\n")
-#     fp.write("\t\tname = \"%s\"\n" %key)
-#     fp.write("\t}\n")
-# fp.write("}\n")
+fp.write("collection_group {\n")
+fp.write("\tcollect_every = 10\n")
+fp.write("\ttime_threshold = 10\n\n")
+for key in throughput_metrics:
+    fp.write("\tmetric {\n")
+    fp.write("\t\tname = \"%s\"\n" %key)
+    fp.write("\t}\n")
+fp.write("}\n\n")
+
+fp.write("collection_group {\n")
+fp.write("\tcollect_every = 10\n")
+fp.write("\ttime_threshold = 10\n\n")
+for key in count_metrics:
+    fp.write("\tmetric {\n")
+    fp.write("\t\tname = \"%s\"\n" %key)
+    fp.write("\t}\n")
+fp.write("}\n\n")
+
+fp.write("collection_group {\n")
+fp.write("\tcollect_once = yes\n")
+fp.write("\ttime_threshold = 1200\n\n")
+for key in static_metrics:
+    fp.write("\tmetric {\n")
+    fp.write("\t\tname = \"%s\"\n" %key)
+    fp.write("\t}\n")
+fp.write("}\n")
 
 
 # from packages.metrics import test_metrics
@@ -72,15 +72,15 @@ from packages.metrics import static_metrics
 #     fp.write("\t}\n")
 # fp.write("}\n")
 
-from packages.metrics import almost_real_metrics
-fp.write("collection_group {\n")
-fp.write("\tcollect_every = 10\n")
-fp.write("\ttime_threshold = 10\n\n")
-for key in almost_real_metrics:
-    fp.write("\tmetric {\n")
-    fp.write("\t\tname = \"%s\"\n" %key)
-    fp.write("\t}\n")
-fp.write("}\n")
+# from packages.metrics import almost_real_metrics
+# fp.write("collection_group {\n")
+# fp.write("\tcollect_every = 10\n")
+# fp.write("\ttime_threshold = 10\n\n")
+# for key in almost_real_metrics:
+#     fp.write("\tmetric {\n")
+#     fp.write("\t\tname = \"%s\"\n" %key)
+#     fp.write("\t}\n")
+# fp.write("}\n")
 
 
 
