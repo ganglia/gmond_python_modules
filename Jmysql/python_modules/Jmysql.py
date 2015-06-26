@@ -65,7 +65,7 @@ def metric_init(params):
 	"""Initialize all necessary initialization here."""
 	global descriptors
 	global variables
-	global status
+	global now_status
 
 	global conn
 	global cursor
