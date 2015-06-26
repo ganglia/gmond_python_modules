@@ -45,14 +45,14 @@ def get_status(name):
 		last_update = now
 		logging.debug("%-40s 更新last_status" %name)
 		last_status.update(now_status)
-		logging.debug("%-40s last_status Com_select %s" %(name,last_status["Com_select"]))
+		logging.debug("%-40s last_status Com_select %s" %(name,last_status["com_select"]))
 		# 获取当前状态
 		# now_status全局变量
 		logging.debug("%-40s 数据库操作" %name)
 		cursor.execute("show global status;")
 		logging.debug("%-40s 更新now_status" %name)
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
-		logging.debug("%-40s now_status Com_select %s" %(name,now_status["Com_select"]))
+		logging.debug("%-40s now_status Com_select %s" %(name,now_status["com_select"]))
 
 	logging.debug("name:%-40s | nowTime:%s | delt:%s" %(name,now,delt))
 
@@ -115,8 +115,8 @@ def metric_init(params):
 	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	logging.debug("开始")
 	# for collect in (throughput_metrics,count_metrics,static_metrics):
-	for collect in (throughput_metrics,):
-	# for collect in (almost_real_metrics,):
+	# for collect in (throughput_metrics,):
+	for collect in (almost_real_metrics,):
 	# for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
