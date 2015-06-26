@@ -89,9 +89,9 @@ def metric_init(params):
 								   password=params["passwd"].encode("utf-8"))
 	cursor = conn.cursor()
 
-	# for collect in (throughput_metrics,count_metrics,static_metrics):
+	for collect in (throughput_metrics,count_metrics,static_metrics):
 	# for collect in (throughput_metrics,):
-	for collect in (almost_real_metrics,):
+	# for collect in (almost_real_metrics,):
 	# for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
