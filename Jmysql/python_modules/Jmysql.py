@@ -22,7 +22,7 @@ testNum			= 0
 
 
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    format='%(asctime)s-%(filename)s[line:%(lineno)d]-%(levelname)s-%(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
                     filename='/tmp/test.log',
                     filemode='w')
@@ -38,7 +38,7 @@ def get_status(name):
 	now = time.time()
 	delt = now - last_update
 	if delt<TIME_INTERVAL:
-		pass
+		return True
 	else:
 		last_update = now
 		last_status.update(now_status)
@@ -47,7 +47,7 @@ def get_status(name):
 		cursor.execute("show global status;")
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 
-	logging.debug("name:%s | now:%s | delt:%s" %(name,now,delt))
+	logging.debug("name:%s | nowTime:%s | delt:%s" %(name,now,delt))
 
 	# 返回metrics值
 	if name in throughput_metrics:
@@ -58,7 +58,7 @@ def get_status(name):
 		nowV = float(now_status[name2key])
 		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
 		logging.debug("name:%s | nowV:%s | oldV:%s" %(name,nowV,oldV))
-		result = (nowV-oldV)/10
+		result = nowV-oldV
 		return result
 	elif name in count_metrics:
 		name2key = name[6:].lower()
@@ -107,13 +107,13 @@ def metric_init(params):
 	cursor.execute("show global status;")
 	now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 	logging.debug("开始")
-	for collect in (throughput_metrics,count_metrics,static_metrics):
-	# for collect in (throughput_metrics,):
+	# for collect in (throughput_metrics,count_metrics,static_metrics):
+	for collect in (throughput_metrics,):
 	# for collect in (almost_real_metrics,):
 	# for collect in (test_metrics,):
 		for metric in collect:
 			d0 = dict(call_back=get_status,
-					  time_max=30,
+					  time_max=15,
 					  value_type="uint",
 					  units="N",
 					  slope="both",
