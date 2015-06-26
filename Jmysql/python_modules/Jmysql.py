@@ -21,7 +21,11 @@ TIME_INTERVAL	= 15
 testNum			= 0
 
 
-logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s\t Thread-%(thread)d - %(message)s", filename='/tmp/mysqlstats.log', filemode='w')
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S',
+                    filename='/tmp/test.log',
+                    filemode='w')
 logging.debug('starting up')
 
 def get_status(name):
@@ -43,7 +47,7 @@ def get_status(name):
 		cursor.execute("show global status;")
 		now_status.update(dict(((k.lower().encode("utf-8"), v.encode("utf-8")) for (k,v) in cursor)))
 
-	logging.debug("now:%s | delt:%s" %(now,delt))
+	logging.debug("name:%s | now:%s | delt:%s" %(name,now,delt))
 
 	# 返回metrics值
 	if name in throughput_metrics:
@@ -53,7 +57,7 @@ def get_status(name):
 		# return int(now_status[name2key])
 		nowV = float(now_status[name2key])
 		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
-		logging.debug("nowV:%s | oldV:%s" %(nowV,oldV))
+		logging.debug("name:%s | nowV:%s | oldV:%s" %(name,nowV,oldV))
 		result = (nowV-oldV)/10
 		return result
 	elif name in count_metrics:
