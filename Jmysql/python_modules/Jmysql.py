@@ -124,7 +124,7 @@ def metric_init(params):
 					  value_type="uint",
 					  units="N",
 					  slope="both",
-					  format="%u",
+					  format="%f",
 					  GROUP="Jmysql",
 					  description="test metric"
 					  )
