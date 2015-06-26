@@ -81,6 +81,6 @@ test_metrics = dict(
 
 almost_real_metrics = dict(
     mysql_Com_select_per_second             = {"name":"mysql_Com_select_per_second",
-                                               "value_type":"int",
+                                               "value_type":"float",
                                                "units":"N/s"}
 )
