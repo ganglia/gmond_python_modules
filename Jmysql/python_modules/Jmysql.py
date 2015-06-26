@@ -60,7 +60,7 @@ def get_status(name):
 		nowV = float(now_status[name2key])
 		oldV = float(last_status[name2key.decode('utf-8')].encode("utf-8"))
 		logging.debug("%-40s nowV:%s | oldV:%s" %(name,nowV,oldV))
-		result = nowV-oldV
+		result = (nowV-oldV)/10
 		logging.debug("%-40s result %s" %(name,result))
 		if result < 0:
 			return 0
