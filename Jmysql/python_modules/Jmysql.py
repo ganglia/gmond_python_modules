@@ -77,10 +77,12 @@ def get_status(name):
 		if not name.startswith("mysql"):
 			name2key = name.lower()
 
+			result = int(now_status[name2key])
+			logging.debug("%-40s result %s" %(name,result))
+			return result
 		result = int(variables[name2key])
 		logging.debug("%-40s result %s" %(name,result))
 		return result
-	global testNum
 
 def metric_init(params):
 	"""Initialize all necessary initialization here."""
