@@ -140,9 +140,8 @@ def update_stats():
 		logging.debug('  result: ' + out)
 
 		httpd_stats['avg_worker_size'] = int(out)
-	except Exception,e:
+	except:
 		logging.warning('error refreshing stats (avg_worker_size)')
-		logging.debug(e)
 		return False
 
 	logging.debug('success refreshing stats')
