@@ -74,7 +74,8 @@ def update_stats():
 	try:
 		httpd_stats = {}
 		logging.debug(' opening URL: ' + str(STATUS_URL))
-		f = urllib.urlopen(STATUS_URL, None, 2)
+		# f = urllib.urlopen(STATUS_URL, None, 2)
+		f = urllib.urlopen(STATUS_URL)
 
 		for line in f.readlines():
 			diff = False
@@ -412,10 +413,10 @@ if __name__ == '__main__':
 
 	logging.debug('running from cmd line')
 	parser = OptionParser()
-	parser.add_option('-U', '--URL', dest='status_url', default='http://localhost/server-status?auto', help='URL for Apache status page')
-	parser.add_option('-a', '--apache-conf', dest='apache_conf', default='/etc/httpd/conf/httpd.conf', help='path to httpd.conf')
-	parser.add_option('-t', '--apache-ctl', dest='apache_ctl', default='/usr/sbin/apachectl', help='path to apachectl')
-	parser.add_option('-d', '--apache-bin', dest='apache_bin', default='/usr/sbin/httpd', help='path to httpd')
+	parser.add_option('-U', '--URL', dest='status_url', default='http://192.168.1.103/server-status?auto', help='URL for Apache status page')
+	parser.add_option('-a', '--apache-conf', dest='apache_conf', default='/usr/local/apache2/conf/httpd.conf', help='path to httpd.conf')
+	parser.add_option('-t', '--apache-ctl', dest='apache_ctl', default='/usr/local/apache2/bin/apachectl', help='path to apachectl')
+	parser.add_option('-d', '--apache-bin', dest='apache_bin', default='/usr/local/apache2/bin/httpd', help='path to httpd')
 	parser.add_option('-u', '--apache-user', dest='apache_user', default='apache', help='username that runs httpd')        
 	parser.add_option('-e', '--extended', dest='get_extended', action='store_true', default=False)
 	parser.add_option('-p', '--prefork', dest='get_prefork', action='store_true', default=False)
