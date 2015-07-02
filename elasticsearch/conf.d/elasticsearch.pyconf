@@ -14,12 +14,12 @@ modules {
     }
 
     param version {
-	value = "1.2"
+        value = "1.4"
     }
 
     # In order to get index specific stats specify each index seperated by
     # whitespace.
-    # 
+    #
     # indices can be grouped by using comma,
     # e.g. index3,index4 will give statistics (docs_count, etc.) for both
     # index1 and index2
