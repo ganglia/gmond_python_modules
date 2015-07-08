@@ -1,0 +1,144 @@
+modules {
+  module {
+    name = "infiniband"
+    language = "python"
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 45
+
+  metric {
+    name_match = "ib_port_xmit_data_([\\S]+)"
+    title = "Bytes Sent \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_data_([\\S]+)"
+    title = "Bytes Received \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_xmit_packets_([\\S]+)"
+    title = "Packets Sent \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_packets_([\\S]+)"
+    title = "Packets Received \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_unicast_xmit_packets_([\\S]+)"
+    title = "UniCast Packets Sent \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_unicast_rcv_packets_([\\S]+)"
+    title = "UniCast Packets Received \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_multicast_xmit_packets_([\\S]+)"
+    title = "MultiCast Packets Sent \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_multicast_rcv_packets_([\\S]+)"
+    title = "MultiCast Packets Received \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_excessive_buffer_overrun_errors_([\\S]+)"
+    title = "Buffer Overrun Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_link_downed_([\\S]+)"
+    title = "Link Downed \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_link_error_recovery_([\\S]+)"
+    title = "Link Error Recoveries \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_local_link_integrity_errors_([\\S]+)"
+    title = "Link Integrity Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_constraint_errors_([\\S]+)"
+    title = "Switch Receive Constraint Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_errors_([\\S]+)"
+    title = "Packet Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_remote_physical_errors_([\\S]+)"
+    title = "Bad Packets \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_rcv_switch_relay_errors_([\\S]+)"
+    title = "Switch Relay Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_xmit_constraint_errors_([\\S]+)"
+    title = "Switch Transmit Constraint Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_port_xmit_discards_([\\S]+)"
+    title = "Packet Discards \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_symbol_error_([\\S]+)"
+    title = "Symbol Errors \\1"
+    value_threshold = 1.0
+  }
+
+  metric {
+    name_match = "ib_vl15_dropped_([\\S]+)"
+    title = "Management Packet Drops \\1"
+    value_threshold = 1.0
+  }
+
+}
+
+collection_group {
+  collect_every = 600
+  time_threshold = 1200
+
+  metric {
+    name_match = "ib_rate_([\\S]+)"
+    title= "Data Rate \\1"
+    value_threshold = 1.0
+  }
+}
+
