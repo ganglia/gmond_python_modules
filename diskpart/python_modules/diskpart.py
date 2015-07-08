@@ -87,7 +87,7 @@ def metric_init(params):
         'units'       : 'GB',
         'slope'       : 'both',
         'description' : 'XXX',
-        'groups'      : 'disk',
+        'groups'      : 'disk-part',
         }
 
     if "refresh_rate" not in params:
