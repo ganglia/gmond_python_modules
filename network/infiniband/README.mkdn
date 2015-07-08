@@ -13,11 +13,12 @@ Installation instructions:
     * ``groupadd --system infiniband``
     * ``usermod --append --groups infiniband ganglia``
     * ``chgrp -R infiniband /dev/infiniband/``
+    * ``chmod 660 /dev/infiniband/umad* /dev/infiniband/issm*``
     * To make these changes permanent, you may need custom udev rules. Create a
       file named ``/etc/udev/rules.d/90-ib.rules`` with the contents:
 
-          KERNEL=="umad*", NAME="infiniband/%k", GROUP="infiniband"
-          KERNEL=="issm*", NAME="infiniband/%k", GROUP="infiniband"
+          KERNEL=="umad*", NAME="infiniband/%k", MODE="0660", GROUP="infiniband"
+          KERNEL=="issm*", NAME="infiniband/%k", MODE="0660", GROUP="infiniband"
           KERNEL=="ucm*", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
           KERNEL=="uverbs*", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
           KERNEL=="ucma", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
@@ -25,7 +26,7 @@ Installation instructions:
 
     * Ensure your gmond daemon is set to run as the ``ganglia`` username. Set
       ``user = ganglia`` in the file ``/etc/ganglia/gmond.conf``
-    * ``service gmond restart``
+    * ``service gmond restart`` or ``systemctl restart gmond``
 
 
 By default, all metrics that we could detect for each InfiniBand port are
