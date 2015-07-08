@@ -1,0 +1,43 @@
+# Name: hp3par.pyconf
+# Author: Evan Fraser (evan.fraser@trademe.co.nz)
+# Desc: Config file for the ganglia gmond HP 3PAR module.
+# Date: 14/05/2015
+# To use: Save this file in /etc/ganglia/conf.d/
+
+modules {
+    module {
+        name = "hp3par"
+        language = "python"
+    }
+}
+#/* Collection groups for the
+#    example python module */
+collection_group {
+    collect_every = 20
+    time_threshold = 50
+    metric {
+        name_match = "(.+)iops"
+        }
+    metric {
+        name_match = "(.+)qlen"
+        }
+    metric {
+        name_match = "(.+)throughput"
+        }
+    metric {
+        name_match = "(.+)latency"
+        }
+    metric {
+        name_match = "(.+)iosize"
+        }
+    metric {
+        name_match = "(.+)used"
+        }
+    metric {
+        name_match = "(.+)vvols"
+        }
+    metric {
+        name_match = "(.+)cpu"
+        }
+}
+
