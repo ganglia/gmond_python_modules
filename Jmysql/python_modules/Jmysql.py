@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 import mysql.connector
-import json,sys,os,time
+import json,sys,os,time,socket
 import logging
 
 
@@ -17,6 +17,8 @@ now_status		= {}
 last_status		= {}
 last_update		= 0
 TIME_INTERVAL	= 10
+HOSTNAME		= None
+IPADDR			= None
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s-%(filename)s[line:%(lineno)d]-%(levelname)s-%(message)s',
@@ -89,6 +91,10 @@ def metric_init(params):
 	global descriptors
 	global variables
 	global now_status
+	global HOSTNAME
+	global IPADDR
+
+
 
 	global conn
 	global cursor
@@ -128,8 +134,9 @@ def metric_init(params):
 					  units="N",
 					  format="%u",
 					  slope="both",
-					  GROUP="Jmysql",
-					  description="test metric"
+					  groups="Jmysql",
+					  description="test metric",
+					  SPOOF_HOST=":%s" %HOSTNAME
 					  )
 			d0.update(collect[metric])
 
