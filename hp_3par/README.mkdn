@@ -1,0 +1,36 @@
+HP 3PAR Gmond Module
+===============
+
+This is a new GMOND Python Module that gets metrics from HP 3PAR arrays via SSH.
+
+Currently gathers per Volume:
+  * Read/Write IOs
+  * Read/Write Latency
+  * Read/Write IO Size
+  * Read/Write Throughput 
+  
+Currently gathers per Node:
+  * Total CPU:
+	- idle, user, sys, intr/s, conts/s
+  
+Currently gathers per CPG:
+  * User space used
+  * Snap space used
+  
+## Compatibility
+  * Compatible with 3PAR 7450C and OS 3.2.1 (tested)
+  * Other versions of 3PAR / OS may work fine.
+
+## DEPENDS
+  * Python modules: paramiko ssh module
+	- install with 'pip3 install paramiko'
+
+## USAGE
+  * Save the hp3par.pyconf into /etc/ganglia/conf.d directory.
+  * Save the hp3par.py into your ganglia python module dir eg: /usr/lib/ganglia/python_modules.  Update the Array Names, IP's, Usernames and passwords.
+  * Restart gmond and the Arrays should appear in ganglia.
+
+
+## AUTHOR
+
+Author: Evan Fraser &lt;evan.fraser@trademe.co.nz&gt;

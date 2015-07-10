@@ -1,0 +1,63 @@
+InfiniBand monitoring plugin for gmond
+======================================
+
+Installation instructions:
+
+  1. Copy ``python_modules/infiniband.py`` to ``{libdir}/ganglia/python_modules/``
+  2. Copy ``conf.d/infiniband.pyconf`` to ``/etc/ganglia/conf.d``
+  3. The ``gmond`` Ganglia daemon will need read/write access to the InfiniBand
+     devices in order to perform these queries. To make this happen, you will
+     need ``gmond`` to be running as some user other than ``nobody`` (e.g.,
+     ``ganglia``). For example, create an InfiniBand group and add ganglia:
+
+    * ``groupadd --system infiniband``
+    * ``usermod --append --groups infiniband ganglia``
+    * ``chgrp -R infiniband /dev/infiniband/``
+    * ``chmod 660 /dev/infiniband/umad* /dev/infiniband/issm*``
+    * To make these changes permanent, you may need custom udev rules. Create a
+      file named ``/etc/udev/rules.d/90-ib.rules`` with the contents:
+
+          KERNEL=="umad*", NAME="infiniband/%k", MODE="0660", GROUP="infiniband"
+          KERNEL=="issm*", NAME="infiniband/%k", MODE="0660", GROUP="infiniband"
+          KERNEL=="ucm*", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
+          KERNEL=="uverbs*", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
+          KERNEL=="ucma", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
+          KERNEL=="rdma_cm", NAME="infiniband/%k", MODE="0666", GROUP="infiniband"
+
+    * Ensure your gmond daemon is set to run as the ``ganglia`` username. Set
+      ``user = ganglia`` in the file ``/etc/ganglia/gmond.conf``
+    * ``service gmond restart`` or ``systemctl restart gmond``
+
+
+By default, all metrics that we could detect for each InfiniBand port are
+collected. The device type (e.g., ``mlx4``), device number and port number will
+be appended to the end of each metric. For example:
+
+  * ``ib_port_multicast_xmit_packets_mlx4_0_port1``
+  * ``ib_port_multicast_xmit_packets_mlx4_0_port2``
+
+
+The following metrics have been implemented:
+
+  * ib_excessive_buffer_overrun_errors
+  * ib_link_downed
+  * ib_link_error_recovery
+  * ib_local_link_integrity_errors
+  * ib_port_rcv_constraint_errors
+  * ib_port_rcv_data
+  * ib_port_rcv_errors
+  * ib_port_rcv_packets
+  * ib_port_rcv_remote_physical_errors
+  * ib_port_rcv_switch_relay_errors
+  * ib_port_unicast_xmit_packets
+  * ib_port_unicast_rcv_packets
+  * ib_port_multicast_xmit_packets
+  * ib_port_multicast_rcv_packets
+  * ib_port_xmit_constraint_errors
+  * ib_port_xmit_data
+  * ib_port_xmit_discards
+  * ib_port_xmit_packets
+  * ib_symbol_error
+  * ib_vl15_dropped
+  * ib_rate
+

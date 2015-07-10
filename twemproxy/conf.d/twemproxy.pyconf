@@ -1,0 +1,29 @@
+
+modules {
+  module {
+    name     = 'twemproxy'
+    language = 'python'
+
+    param stats_addr {
+      value = 'localhost'
+    }
+    param stats_port {
+      value = '22222'
+    }
+    # Exclude pool stats (and their servers)
+#    param exclude {
+      # Use a comma to specify more than one pool name in the value
+#      value = 'alpha'
+#    }
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 90
+
+  metric {
+    name_match = "twemproxy_(.+)"
+  }
+
+}
