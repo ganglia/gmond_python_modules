@@ -166,6 +166,8 @@ if __name__ == "__main__":
         conn.close()
     else:
         metric_init(params)
+        print(HOSTNAME)
+        print(IPADDR)
         for d in descriptors:
             print("%-40s value is %s" %(d["name"],d["call_back"](d["name"])))
         metric_cleanup()
