@@ -136,10 +136,10 @@ def metric_init(params):
             'name'        : 'XXX',
             'call_back'   : get_value,
             'time_max'    : 60,
-            'value_type'  : 'uint',
+            'value_type'  : 'float',
             'units'       : 'connections',
             'slope'       : 'both',
-            'format'      : '%u',
+            'format'      : '%.0f',
             'description' : 'XXX',
             'groups'      : 'twemproxy',
     }
@@ -269,4 +269,4 @@ if __name__ == '__main__':
     metric_init(params)
     for d in descriptors:
         v = d['call_back'](d['name'])
-        print 'value for %s is %u' % (d['name'], v)
+        print 'value for %s is %.0f' % (d['name'], v)
