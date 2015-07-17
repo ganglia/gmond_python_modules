@@ -187,7 +187,10 @@ def metric_init(params):
 
     host = params.get('host', 'http://localhost:9200/')
 
-    result = json.load(urllib.urlopen(host))
+    try:
+        result = json.load(urllib.urlopen(host))
+    except (ValueError, IOError):
+        result = {}
 
     host_version = result.get('version',{}).get('number') or "1.2"
     version = params.get('version', host_version)
