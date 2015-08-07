@@ -5,3 +5,27 @@ modules {
     language = "python"
   }
 }
+
+
+collection_group {
+  collect_every = 1
+  time_threshold = 45
+
+  # You can enumerate all metrics you want to see from the /proc/net/netstat and
+  # /proc/net/snmp files. The name of the metric will be "netstat_CATEGORY_NAME".
+  # Where CATEGORY is a row like Tcp from snmp or TcpExt from netstat and
+  # NAME is a column like RcvbufErrors from the snmp or InMcastPkts in netstat.
+  #
+  # Few examples below:
+
+  metric {
+    name = "netstat_TcpExt_SyncookiesRecv"
+    title = "TCP syncookies received"
+  }
+
+  metric {
+    name = "netstat_Tcp_ActiveOpens"
+    title = "TCP active opened connections"
+  }
+
+}

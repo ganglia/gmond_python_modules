@@ -10,6 +10,7 @@ import time
 
 MODULE_NAME = "netstat"
 STATS_FILE = "/proc/net/netstat"
+SNMP_FILE = "/proc/net/snmp"
 
 descriptors = list()
 Desc_Skel = {}
@@ -82,11 +83,11 @@ class UpdateMetricThread(threading.Thread):
         }
 
         try:
-            for stat_type, key, value in netstat_iterator():
+            for stat_type, key, value in netstats_iterator():
                 update_dict['%s_%s_%s' % (self.mp, stat_type, key)] = int(value)
 
-        except IOError:
-            dprint("unable to open " + STATS_FILE)
+        except IOError as err:
+            dprint("unable to open stats file. %s" % err)
             return False
 
         self.metric.update(update_dict)
@@ -115,7 +116,7 @@ def metric_init(params):
         'call_back': metric_delta,
         'time_max': 60,
         'value_type': 'float',
-        'format': '%d',
+        'format': '%.2f',
         'units': 'XXX',
         'slope': 'XXX',  # zero|positive|negative|both
         'description': 'XXX',
@@ -134,7 +135,7 @@ def metric_init(params):
     mp = params["metrix_prefix"]
 
     try:
-        for stat_type, key, value in netstat_iterator():
+        for stat_type, key, value in netstats_iterator():
             descriptors.append(create_desc(Desc_Skel, {
                 "name": '%s_%s_%s' % (mp, stat_type, key),
                 "units": "number",
@@ -147,8 +148,8 @@ def metric_init(params):
     return descriptors
 
 
-def netstat_iterator():
-    f = open(STATS_FILE, 'r')
+def file_iterator(file_name):
+    f = open(file_name, 'r')
 
     line_number = -1
     labels = []
@@ -179,6 +180,14 @@ def netstat_iterator():
 
             for ind, value in enumerate(tokens[1:]):
                 yield values_type, labels[ind], value
+
+
+def netstats_iterator():
+    for vt, key, val in file_iterator(STATS_FILE):
+        yield vt, key, val
+
+    for vt, key, val in file_iterator(SNMP_FILE):
+        yield vt, key, val
 
 
 def create_desc(skel, prop):

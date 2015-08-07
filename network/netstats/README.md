@@ -1,6 +1,7 @@
 netstats
 =====
 
+Exports raw stats found in `/proc/net/netstat` and /proc/net/snmp`.
 
 Install 
 -------
@@ -14,7 +15,7 @@ Copy netstats.pyconf to the gmond conf.d directory, e.g. :
 
  - /etc/ganglia/conf.d/
 
-Tune the netstats.pyconf file to match your server interfaces and then restart gmond.
+Tune the netstats.pyconf file to match your needs and then restart gmond.
 
 ## AUTHOR
 
