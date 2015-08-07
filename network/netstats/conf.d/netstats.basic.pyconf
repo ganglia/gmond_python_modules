@@ -8,7 +8,7 @@ modules {
 
 
 collection_group {
-  collect_every = 1
+  collect_every = 15
   time_threshold = 45
 
   # You can enumerate all metrics you want to see from the /proc/net/netstat and
