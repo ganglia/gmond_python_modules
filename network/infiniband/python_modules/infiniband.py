@@ -332,10 +332,12 @@ def metric_init(params):
                 with open(lid_file) as f:
                     # Linux sysfs lists the port_lid in hex
                     port_lid = int(f.readline().split(' ')[0], 0)
+                    if port_lid == 0:
+                        continue
+                    IB_PORTS[port_lid] = ib_device
             except IOError:
                 print("Unable to read IB port LID # from file: %s" % lid_file)
-            IB_PORTS[port_lid] = ib_device
-
+            
             # Create definitions for the known perfquery InfiniBand metrics
             for metric_name, metric_settings in KNOWN_PERFQUERY_METRICS.iteritems():
                 name_prefix = metric_settings['name_prefix']
