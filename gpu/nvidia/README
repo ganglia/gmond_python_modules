@@ -60,4 +60,5 @@ The following metrics have been implemented:
 * gpu_bar1_memory
 * gpu_shutdown_temp
 * gpu_slowdown_temp
+* gpu_use_num
 
