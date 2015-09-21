@@ -123,6 +123,10 @@ collection_group {
     title= "\\1 ECC Mode"
     value_threshold = 1.0
   } 
+  metric {
+    name = "gpu_use_num"
+    title = "GPU Use Count"
+  }
 }
 
 collection_group {
