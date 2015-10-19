@@ -178,6 +178,9 @@ def get_indices_descriptors(index, skel, result, url):
 
     return descriptors
 
+def parse_elastic_version(version):
+    match = re.match(r'(?P<major>\d+)\.(?P<minor>(\d+))(\.\d+)*', version)
+    return int(match.group('major')), int(match.group('minor'))
 
 def metric_init(params):
     descriptors = []
@@ -194,15 +197,14 @@ def metric_init(params):
 
     host_version = result.get('version',{}).get('number') or "1.2"
     version = params.get('version', host_version)
+    major, minor = parse_elastic_version(version)
 
-    m = re.match('(?P<major>\d+)\.(?P<minor>(\d+(\.\d+)*))', version)
-
-    if m and m.group('major') == '0':
+    if major == 0:
         url_cluster = '{0}_cluster/nodes/_local/stats?all=true'.format(host)
-    elif m and m.group('major') == '1' and m.group('minor') == '3.2':
-        url_cluster = '{0}_nodes/_local/stats'.format(host)
-    else:
+    elif major == 1 and minor < 3:
         url_cluster = '{0}_cluster/state/nodes'.format(host)
+    else:
+        url_cluster = '{0}_nodes/_local/stats'.format(host)
 
     # First iteration - Grab statistics
     logging.debug('[elasticsearch] Fetching ' + url_cluster)
