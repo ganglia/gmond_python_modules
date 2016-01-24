@@ -432,13 +432,13 @@ def update_metrics():
             delta = 0.0
             last_value = 0.0
             try:
-                last_value = LAST_METRICS[metric_name]
+                last_value = float(LAST_METRICS[metric_name])
 
                 # If a counter reset occurred previously, we could go negative
                 if last_value > counter_value:
                     delta = counter_value
                 else:
-                    delta = counter_value - last_value
+                    delta = float(counter_value - last_value)
 
             except KeyError:
                 # If LAST_METRICS has no value, this is our first time updating.
