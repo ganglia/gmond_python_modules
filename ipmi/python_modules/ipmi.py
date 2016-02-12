@@ -67,18 +67,11 @@ def get_metrics():
 def get_value(name):
     """Return a value for the requested metric"""
 
-    try:
+    metrics = get_metrics()[0]
 
-	metrics = get_metrics()[0]
+    name = re.sub('ipmi_', '', name)
 
-	name = name.lstrip('ipmi_')
-
-	result = metrics['data'][name]
-
-    except Exception:
-        result = 0
-
-    return result
+    return metrics['data'][name]
 
 def create_desc(skel, prop):
     d = skel.copy()
