@@ -33,7 +33,9 @@ def get_metrics():
             data = v.split("|")
             try:
                 metric_name = data[0].strip().lower().replace("+", "").replace(" ", "_")
-                value = data[1].strip()
+                data[1] = data[1].strip().split(" ")
+                value = data[1][0].strip()
+                unit = " ".join(data[1][1:])
 
                 # Skip missing sensors
                 if re.search("(0x)", value ) or value == 'na':
@@ -46,8 +48,8 @@ def get_metrics():
                 metric_value = float(vmatch.group(1))
 
                 new_metrics[metric_name] = metric_value
-                units[metric_name] = data[2].strip().replace("degrees C", "C")
-		
+                units[metric_name] = unit.replace("degrees C", "C")
+
             except ValueError:
                 continue
             except IndexError:
