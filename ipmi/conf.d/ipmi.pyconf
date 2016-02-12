@@ -8,11 +8,6 @@ modules {
       value = "ipmi"
     }
     
-    # Location of ipmitool binary
-    param timeout_bin {
-      value = "/usr/bin/ipmitool"
-    }
-    
   }
 
 }
