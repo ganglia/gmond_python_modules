@@ -24,13 +24,7 @@ def get_metrics(params):
 	new_metrics = {}
 	units = {}
 
-	command = [ params['timeout_bin'],
-	"3", params['ipmitool_bin'],
-	"-H", params['ipmi_ip'],
-	"-U", params['username'],
-	'-P', params['password'],
-	'-L', params['level'],
-	'sensor']	
+        command = [params['ipmitool_bin'], 'sdr']
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
