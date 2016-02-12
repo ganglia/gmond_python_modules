@@ -14,7 +14,7 @@ METRICS_CACHE_MAX = 5
 
 stats_pos = {} 
 
-def get_metrics(params):
+def get_metrics():
     """Return all metrics"""
 
     global METRICS
@@ -24,7 +24,7 @@ def get_metrics(params):
 	new_metrics = {}
 	units = {}
 
-        command = [params['ipmitool_bin'], 'sdr']
+	command = ['ipmitool', 'sdr']
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
@@ -101,7 +101,7 @@ def metric_init(params):
         'groups'      : 'XXX',
         }
 
-    metrics = get_metrics(params)[0]
+    metrics = get_metrics()[0]
     
     for item in metrics['data']:
 	descriptors.append(create_desc(Desc_Skel, {
