@@ -1,0 +1,19 @@
+modules {
+  module {
+    name     = "ganglia_docker"
+    language = "python"
+    param docker_url {
+        value = "unix://var/run/docker.sock"
+    }
+
+  }
+}
+
+collection_group {
+  collect_every  = 30
+  time_threshold = 60
+  metric {
+    name_match = "docker_(.+)"
+    value_threshold = 0.0
+  }
+}
