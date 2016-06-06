@@ -25,7 +25,6 @@
 import os
 import subprocess
 import time
-import traceback
 
 
 # Dict containing the LIDs of InfiniBand devices in this system
@@ -34,6 +33,9 @@ IB_PORTS = {
     # '234':  'scif0',
     # '888':  'qib0',
 }
+
+# Dict containing IB HCA devices and ports
+IB_DEVS = {}
 
 # Dict containing the most recent readings
 METRICS = {
@@ -286,6 +288,9 @@ def get_metric(name):
     """Return the current value for the named metric"""
     # Check if the metrics need to be updated
     update_metrics()
+    if not name in METRICS['data']:
+        print "ERROR metric: "+str(name)+" not found in dict METRICS"
+        return False
     # Return the latest value for the desired metric
     return METRICS['data'][name]
 
@@ -302,7 +307,7 @@ def metric_init(params):
         List of metric definition Dicts
 
     """
-    global IB_QUERY_UTILITY
+    global IB_QUERY_UTILITY, IB_DEVS
 
     metric_definitions = []
 
@@ -322,18 +327,54 @@ def metric_init(params):
     # Loop through the InfiniBand devices on this system
     for ib_device in os.listdir(IB_STATS_DIR):
         # Loop through the InfiniBand ports on this device
+
+        if not ib_device in IB_DEVS: IB_DEVS[ib_device]=[]
+
         ports_path = os.path.join(IB_STATS_DIR, ib_device, 'ports')
         for ib_port_number in os.listdir(ports_path):
-            sys_file_path = os.path.join(ports_path, ib_port_number)
-
             # Store the device information for this port
+            sys_file_path = os.path.join(ports_path, ib_port_number)
+            state_file = os.path.join(sys_file_path, 'state')
+            link_layer_file = os.path.join(sys_file_path, 'link_layer')
             lid_file = os.path.join(sys_file_path, 'lid')
+
+            try:
+                with open(state_file) as f:
+                    port_state = int(f.readline().split(' ')[0][0])
+            except IOError:
+                print("Unable to read IB port state from file: %s" % state_file)
+            f.close()
+            
+            # check if port state is down
+            if port_state == 1:
+                continue ##skip rest of loop/ib_port_number
+
+            try:
+                with open(link_layer_file) as f:
+                    port_link_layer = str(f.readline())
+            except IOError:
+                print("Unable to read IB link_layer from file: %s" % link_layer_file)
+            f.close()
+
+            # check if port state is down
+            if 'InfiniBand' not in port_link_layer:
+                continue ##skip rest of loop/ib_port_number
+                
             try:
                 with open(lid_file) as f:
                     # Linux sysfs lists the port_lid in hex
                     port_lid = int(f.readline().split(' ')[0], 0)
             except IOError:
                 print("Unable to read IB port LID # from file: %s" % lid_file)
+            f.close()
+
+            # check if connected to fabric manager/subnet manager
+            if port_lid == 0:
+                continue ##skip rest of loop/ib_port_number
+
+            # build Dict IB_DEVS
+            if not ib_port_number in IB_DEVS[ib_device]: IB_DEVS[ib_device].append(ib_port_number)
+            
             IB_PORTS[port_lid] = ib_device
 
             # Create definitions for the known perfquery InfiniBand metrics
@@ -344,6 +385,8 @@ def metric_init(params):
                 # Create the definition using the specified settings
                 overrides = metric_settings
                 overrides['name'] = full_name
+                overrides['ca_name'] = ib_device
+                overrides['ca_port'] = ib_port_number
                 metric_definitions.append(build_metric_definition(overrides))
 
             # Create definitions for the known sysfs InfiniBand metrics
@@ -389,13 +432,13 @@ def update_metrics():
             delta = 0.0
             last_value = 0.0
             try:
-                last_value = LAST_METRICS[metric_name]
+                last_value = float(LAST_METRICS[metric_name])
 
                 # If a counter reset occurred previously, we could go negative
                 if last_value > counter_value:
                     delta = counter_value
                 else:
-                    delta = counter_value - last_value
+                    delta = float(counter_value - last_value)
 
             except KeyError:
                 # If LAST_METRICS has no value, this is our first time updating.
@@ -408,7 +451,7 @@ def update_metrics():
             # If this metric is one of the 32-bit data volume counters, we have
             # to adjust for the fact that we're reporting the value in bytes
             if metric_name.startswith(('ib_port_xmit_data','ib_port_rcv_data')):
-                delta *= 4
+                delta *= 4.0
 
             # Adjust this value so that we're measuring in values per second
             try:
@@ -438,83 +481,85 @@ def update_metrics():
 
         process_metric_value(metric_name, counter_value)
 
-    # Run an instance of perfquery and parse the results
-    try:
-        process = subprocess.Popen(
-            IB_QUERY_UTILITY + " -x",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+    ## Collect perfquery output for Infiniband devices and ports
+    ib_query_output = str()
+    for ibdev,plist in IB_DEVS.iteritems():
+        for pn in plist:
+            cmd_args = [IB_QUERY_UTILITY+" -x "+" -C "+str(ibdev)+" -P "+str(pn)]
 
-        # Poll process for output until finished.
-        current_lid = None
-        current_port = None
-        current_device = None
-        while True:
-            nextline = process.stdout.readline()
-            if nextline == '' and process.poll() != None:
+            # Run an instance of perfquery and parse the results
+            try:
+                process = subprocess.Popen(cmd_args,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+                [stdoutdata,stderrdata] = process.communicate()
+                if stderrdata:
+                    print 'ERROR command '+str(cmd_args)
+                    print str(stderrdata)
+                    return False
+
+            except subprocess.CalledProcessError:
+                print 'ERROR command: '+str(cmd_args)
+                print str(stderrdata)
+                return False
+
+            ib_query_output = ib_query_output + stdoutdata
+
+
+    current_lid = None
+    current_port = None
+    current_device = None
+
+    ## split output into multilines (along line breaks)
+    for line in ib_query_output.splitlines():
+        # Each section header will tell us which port is being listed:
+        #
+        #     # Port extended counters: Lid 8 port 1 (CapMask: 0x1400)
+        #
+        if line.startswith('# Port extended counters'):
+            try:
+                current_lid = int(line.split()[5])
+                current_port = line.split()[7]
+            except KeyError, ValueError:
+                print("Unable to read LID and port # details from InfiniBand perfquery")
+                print str(line)
+                break
+            
+            try:
+                current_device = IB_PORTS[current_lid]
+            except KeyError:
+                print("Unable to reconcile the InfiniBand port LID number between Linux sysfs and the perfquery utility (%d)." % current_lid)
                 break
 
-            # Each section header will tell us which port is being listed:
-            #
-            #     # Port extended counters: Lid 8 port 1 (CapMask: 0x1400)
-            #
-            elif nextline.startswith('# Port extended counters'):
-                try:
-                    current_lid = int(nextline.split()[5])
-                    current_port = nextline.split()[7]
-                except KeyError, ValueError:
-                    print("Unable to read LID and port # details from InfiniBand perfquery")
-                    break
+        # Port select and counter select are not needed
+        elif line.startswith(('PortSelect', 'CounterSelect')):
+            pass
 
-                try:
-                    current_device = IB_PORTS[current_lid]
-                except KeyError:
-                    print("Unable to reconcile the InfiniBand port LID number between Linux sysfs and the perfquery utility (%d)." % current_lid)
-                    break
+        # The remaining lines of each section will be port counters. E.g.:
+        #
+        #     PortRcvData:.....................2089265119334
+        #
+        else:
+            counter_name = line.split(':')[0]
+            
+            try:
+                counter_name_prefix = KNOWN_PERFQUERY_METRICS[counter_name]['name_prefix']
+            except KeyError:
+                print("An unknown InfiniBand counter was returned by perfquery: '%s'" % counter_name)
+                continue
 
-            # Port select and counter select are not needed
-            elif nextline.startswith(('PortSelect', 'CounterSelect')):
-                pass
+            try:
+                counter_value = float(line.split('.')[-1])
+            except KeyError, ValueError:
+                # If there is a parsing error, report 0
+                counter_value = 0
+                print("Unable to read a value from InfiniBand counter %s" % counter_name)
 
-            # The remaining lines of each section will be port counters. E.g.:
-            #
-            #     PortRcvData:.....................2089265119334
-            #
-            else:
-                counter_name = nextline.split(':')[0]
-
-                try:
-                    counter_name_prefix = KNOWN_PERFQUERY_METRICS[counter_name]['name_prefix']
-                except KeyError:
-                    print("An unknown InfiniBand counter was returned by perfquery: '%s'" % counter_name)
-                    continue
-
-                try:
-                    counter_value = float(nextline.split('.')[-1])
-                except KeyError, ValueError:
-                    # If there is a parsing error, report 0
-                    counter_value = 0
-                    print("Unable to read a value from InfiniBand counter %s" % counter_name)
-
-                metric_name = "%s_%s_port%s" % (counter_name_prefix, current_device, current_port)
-                process_metric_value(metric_name, counter_value)
-
-        output, error = process.communicate()
-
-    except:
-        # Catch all other exceptions here. Exceptions within this thread
-        # will not be passed up to the parent thread.
-        error = traceback.format_exc()
-
-    if error:
-        print("An error occured while running perfquery:\n\n%s" % error)
-
+            metric_name = "%s_%s_port%s" % (counter_name_prefix, current_device, current_port)
+            process_metric_value(metric_name, counter_value)
 
     METRICS['time'] = current_time
 
 
+##############################
 # This module may be run as an executable when debugging
 if __name__ == "__main__":
     params = {}
