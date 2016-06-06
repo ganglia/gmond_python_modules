@@ -65,6 +65,13 @@ def build_descriptor(name, call_back, time_max, value_type, units, slope, format
 
 def get_gpu_num():
     return int(nvmlDeviceGetCount())
+def get_gpu_use_num(name):
+    use_num = 0
+    for i in range(get_gpu_num()):
+         is_use = gpu_device_handler('gpu%s_process' %i)
+         if(int(is_use)):
+            use_num += 1
+    return use_num
 
 def gpu_num_handler(name):
     return get_gpu_num()
@@ -187,6 +194,9 @@ def gpu_device_handler(name):
        violation_dur[gpu_id] = newTime
        print rate
        return rate
+    elif (metric == 'process'):
+        procs = nvmlDeviceGetComputeRunningProcesses(gpu_device)
+        return len(procs)
     else:
         print "Handler for %s not implemented, please fix in gpu_device_handler()" % metric
         os._exit(1)
@@ -204,6 +214,7 @@ def metric_init(params):
     default_time_max = 90
 
     build_descriptor('gpu_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of GPUs', 'gpu')
+    build_descriptor('gpu_use_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of Use  GPUs', 'gpu')
     build_descriptor('gpu_driver', gpu_driver_version_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU Driver Version', 'gpu')
 
     for i in range(get_gpu_num()):
