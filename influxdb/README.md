@@ -1,4 +1,10 @@
 Python module for Ganglia 3.4
-InfluxDB metrics. Compatible with version 0.9.4 and above.
+
+This module is compatible with influxDB version 0.9.4 and above.
+
+Additional python package: influxdb
+
+    $ pip install influxdb
+    $ pip install --upgrade influxdb
 
 Author: aerofoil-kite
