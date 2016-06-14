@@ -1,0 +1,27 @@
+modules {
+   module {
+     name = "influx"
+     language = "python"
+     param host {
+       value = "hostname_goes_here"
+     }
+     param port {
+       value = "port_goes_here"
+     }
+     param username {
+       value = "username_goes_here"
+     }
+     param password {
+       value = "password_goes_here"
+     }
+   }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name_match = "influx/(.+)"
+  }
+}
