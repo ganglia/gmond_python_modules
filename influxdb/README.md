@@ -7,4 +7,4 @@ Additional python package: influxdb
     $ pip install influxdb
     $ pip install --upgrade influxdb
 
-Author: aerofoil-kite
+Author: [aerofoil-kite](https://github.com/aerofoil-kite)
