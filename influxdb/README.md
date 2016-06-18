@@ -7,4 +7,4 @@ Additional python package: influxdb
     $ pip install influxdb
     $ pip install --upgrade influxdb
 
-Author: [AeroKite](https://github.com/aerokite)
+Author: [aerokite](https://github.com/aerokite)
