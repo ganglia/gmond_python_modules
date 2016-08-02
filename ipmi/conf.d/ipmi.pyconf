@@ -8,22 +8,30 @@ modules {
       value = "ipmi"
     }
 
-    # IP of rhe IPMI
-    param ipmi_ip {
-      value = "10.1.2.3"
-    }
-    
-    param username {
-      value = "admin"
-    }
-    
-    param password {
-      value = "secret"
+    # use sudo
+    param use_sudo {
+      value = False
     }
 
-    param level {
-      value = "USER"
-    }
+    # IP of the IPMI (optional)
+    #param ipmi_ip {
+    #  value = "10.1.2.3"
+    #}
+    
+    # IPMI username (optional)
+    #param username {
+    #  value = "admin"
+    #}
+    
+    # IPMI password (optional)
+    #param password {
+    #  value = "secret"
+    #}
+
+    # IPMI auth level (optional)
+    #param level {
+    #  value = "USER"
+    #}
 
     # Location of timeout binary
     param timeout_bin {
