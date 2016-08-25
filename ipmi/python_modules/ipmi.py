@@ -41,16 +41,18 @@ unified_metric_names = {
     "Fan5": "Fan 5",
     "Fan6": "Fan 6"
 }
-def mangle_metric_name(metric_name):
+def mangle_metric_name(metric_name,prefix):
     name = metric_name
     if ( metric_name.strip() in unified_metric_names.keys() ):
         name = unified_metric_names[metric_name.strip()]
-    return name.strip().lower().replace("+","").replace(" ","_").replace("-","_")
+    return prefix+"_"+name.strip().lower().replace("+","").replace(" ","_").replace("-","_")
 
-def get_metrics(params):
+def get_metrics():
     """Return all metrics"""
 
     global METRICS
+
+    params = global_params
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
@@ -60,7 +62,7 @@ def get_metrics(params):
 	command = [ params['timeout_bin'],
 	"3", params['ipmitool_bin']]
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
-            command.insert(0,'sudo')
+            command.insert(2,'sudo')
         if ( 'ipmi_ip' in params.keys() ):
             command.append("-H")
             command.append(params['ipmi_ip'])
@@ -86,10 +88,10 @@ def get_metrics(params):
                     # Dell names all CPU temperature sensors "Temp";
                     # thus, the following stupidity:
                     tempname = "CPU "+str(dell_temp_count)+" Temp"
-                    metric_name = mangle_metric_name(tempname)
+                    metric_name = mangle_metric_name(tempname,params['metric_prefix'])
                     dell_temp_count = dell_temp_count+1
                 else:
-                    metric_name = mangle_metric_name(data[0])
+                    metric_name = mangle_metric_name(data[0],params['metric_prefix'])
                 value = data[1].strip()
 
                 # Skip missing sensors
@@ -123,14 +125,15 @@ def get_value(name):
     """Return a value for the requested metric"""
 
     try:
+        
+        metrics = get_metrics()[0]
 
-	metrics = get_metrics()[0]
+        if ( name in metrics['data'].keys() ):
+            result = metrics['data'][name]
+        else:
+            result = 0
 
-	name = name.lstrip('ipmi_')
-
-	result = metrics['data'][name]
-
-    except Exception:
+    except Exception as e:
         result = 0
 
     return result
@@ -142,7 +145,7 @@ def create_desc(skel, prop):
     return d
 
 def metric_init(params):
-    global descriptors, metric_map, Desc_Skel
+    global descriptors, metric_map, Desc_Skel, global_params
 
     descriptors = []
 
@@ -158,11 +161,13 @@ def metric_init(params):
         'groups'      : 'XXX',
         }
 
-    metrics = get_metrics(params)[0]
+    global_params = params
+
+    metrics = get_metrics()[0]
     
     for item in metrics['data']:
 	descriptors.append(create_desc(Desc_Skel, {
-		"name"       	: params['metric_prefix'] + "_" + item,
+		"name"       	: item,
 		'groups'	: params['metric_prefix'],
 		'units'		: metrics['units'][item]
 		}))
