@@ -46,6 +46,11 @@ def mangle_metric_name(metric_name,prefix):
     if ( metric_name.strip() in unified_metric_names.keys() ):
         name = unified_metric_names[metric_name.strip()]
     return prefix+"_"+name.strip().lower().replace("+","").replace(" ","_").replace("-","_")
+def metric_description(metric_name):
+    if ( metric_name.strip() in unified_metric_names.keys() ):
+        return unified_metric_names[metric_name.strip()]
+    else:
+        return metric_name.strip()
 
 def get_metrics():
     """Return all metrics"""
@@ -56,13 +61,14 @@ def get_metrics():
 
     if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
 
-	new_metrics = {}
-	units = {}
+        new_metrics = {}
+        units = {}
+        descr = {}
 
-	command = [ params['timeout_bin'],
-	"3", params['ipmitool_bin']]
+	command = [ params['timeout_bin'], "3" ]
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
-            command.insert(2,'sudo')
+            command.append('sudo')
+        command.append(params['ipmitool_bin'])
         if ( 'ipmi_ip' in params.keys() ):
             command.append("-H")
             command.append(params['ipmi_ip'])
@@ -75,7 +81,7 @@ def get_metrics():
 	if ('level' in params.keys() ):
             command.append('-L')
             command.append(params['level'])
-	command.append('sensor')
+        command.append('sensor')
 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
@@ -87,10 +93,11 @@ def get_metrics():
                 if ( data[0].strip()=="Temp" ):
                     # Dell names all CPU temperature sensors "Temp";
                     # thus, the following stupidity:
-                    tempname = "CPU "+str(dell_temp_count)+" Temp"
-                    metric_name = mangle_metric_name(tempname,params['metric_prefix'])
+                    description = "CPU "+str(dell_temp_count)+" Temp"
+                    metric_name = mangle_metric_name(description,params['metric_prefix'])
                     dell_temp_count = dell_temp_count+1
                 else:
+                    description = metric_description(data[0])
                     metric_name = mangle_metric_name(data[0],params['metric_prefix'])
                 value = data[1].strip()
 
@@ -106,6 +113,7 @@ def get_metrics():
 
                 new_metrics[metric_name] = metric_value
                 units[metric_name] = data[2].strip().replace("degrees C", "C")
+                descr[metric_name] = description
 		
             except ValueError:
                 continue
@@ -116,6 +124,7 @@ def get_metrics():
             'time': time.time(),
             'data': new_metrics,
             'units': units
+            'descr': descr
         }
 
     return [METRICS]
@@ -167,17 +176,20 @@ def metric_init(params):
     
     for item in metrics['data']:
 	descriptors.append(create_desc(Desc_Skel, {
-		"name"       	: item,
-		'groups'	: params['metric_prefix'],
-		'units'		: metrics['units'][item]
+                'name'          : item,
+                'description'   : metrics['descr'][item],
+                'groups'        : params['metric_prefix'],
+                'units'         : metrics['units'][item]
 		}))
 
 
     return descriptors
 
+
 def metric_cleanup():
     '''Clean up the metric module.'''
     pass
+
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
