@@ -39,7 +39,7 @@ modules {
     }
     
     # Location of ipmitool binary
-    param timeout_bin {
+    param ipmitool_bin {
       value = "/usr/bin/ipmitool"
     }
     
