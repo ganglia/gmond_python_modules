@@ -123,7 +123,7 @@ def get_metrics():
 	METRICS = {
             'time': time.time(),
             'data': new_metrics,
-            'units': units
+            'units': units,
             'descr': descr
         }
 
