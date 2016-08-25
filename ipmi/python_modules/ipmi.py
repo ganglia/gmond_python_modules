@@ -65,7 +65,7 @@ def get_metrics():
         units = {}
         descr = {}
 
-	command = [ params['timeout_bin'], "3" ]
+        command = [ params['timeout_bin'], "3" ]
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
             command.append('sudo')
         command.append(params['ipmitool_bin'])
@@ -78,7 +78,7 @@ def get_metrics():
         if ( 'password' in params.keys() ):
             command.append('-P')
             command.append(params['password'])
-	if ('level' in params.keys() ):
+        if ('level' in params.keys() ):
             command.append('-L')
             command.append(params['level'])
         command.append('sensor')
@@ -114,13 +114,13 @@ def get_metrics():
                 new_metrics[metric_name] = metric_value
                 units[metric_name] = data[2].strip().replace("degrees C", "C")
                 descr[metric_name] = description
-		
+                
             except ValueError:
                 continue
             except IndexError:
                 continue
-		
-	METRICS = {
+                
+        METRICS = {
             'time': time.time(),
             'data': new_metrics,
             'units': units,
@@ -175,12 +175,12 @@ def metric_init(params):
     metrics = get_metrics()[0]
     
     for item in metrics['data']:
-	descriptors.append(create_desc(Desc_Skel, {
+        descriptors.append(create_desc(Desc_Skel, {
                 'name'          : item,
                 'description'   : metrics['descr'][item],
                 'groups'        : params['metric_prefix'],
                 'units'         : metrics['units'][item]
-		}))
+                }))
 
 
     return descriptors
@@ -196,14 +196,14 @@ if __name__ == '__main__':
     
     params = {
         "use_sudo" : False,
-	"metric_prefix" : "ipmi",
-	#"ipmi_ip" : "10.1.2.3",
-	#"username"  : "ADMIN",
-	#"password"  : "secret",
-	#"level" : "USER",
-	"ipmitool_bin" : "/usr/bin/ipmitool",
-	"timeout_bin" : "/usr/bin/timeout"
-	}
+        "metric_prefix" : "ipmi",
+        #"ipmi_ip" : "10.1.2.3",
+        #"username"  : "ADMIN",
+        #"password"  : "secret",
+        #"level" : "USER",
+        "ipmitool_bin" : "/usr/bin/ipmitool",
+        "timeout_bin" : "/usr/bin/timeout"
+        }
     descriptors = metric_init(params)
 
     while True:
