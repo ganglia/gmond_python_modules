@@ -27,14 +27,14 @@ unified_metric_names = {
     "43-Sys Exhaust": "Exhaust Temp",
     "02-CPU 1": "CPU 1 Temp",
     "03-CPU 2": "CPU 2 Temp",
-    "04-P1 DIMM 1-4":  "CPU 1 MemBank 1 Temp",
-    "05-P1 DIMM 5-8":  "CPU 1 MemBank 2 Temp",
-    "06-P2 DIMM 1-4":  "CPU 2 MemBank 1 Temp",
-    "07-P2 DIMM 5-8":  "CPU 2 MemBank 2 Temp",
+    "04-P1 DIMM 1-4": "CPU 1 MemBank 1 Temp",
+    "05-P1 DIMM 5-8": "CPU 1 MemBank 2 Temp",
+    "06-P2 DIMM 1-4": "CPU 2 MemBank 1 Temp",
+    "07-P2 DIMM 5-8": "CPU 2 MemBank 2 Temp",
     "34-Coprocessor 1": "Coprocessor 1 Temp",
     "35-Coprocessor 2": "Coprocessor 2 Temp",
     "36-Coprocessor 3": "Coprocessor 3 Temp",
-    "42-P/S Board": "Pwr Supply Temp",
+    "42-P/S Board": "Pwr Supply 1 Temp",
     "Power Meter": "Pwr Consumption",
     "Temp 1": "Inlet Temp",
     "Temp 2 (CPU 1)": "CPU 1 Temp",
@@ -68,7 +68,16 @@ unified_metric_names = {
     "Fan7A": "Fan 7A",
     "Fan7B": "Fan 7B",
     "Fan8A": "Fan 8A",
-    "Fan8B": "Fan 8B"
+    "Fan8B": "Fan 8B",
+    # Intel(?) sensor names
+    "Front Panel Temp": "Inlet Temp",
+    "Exit Air Temp": "Exhaust Temp",
+    "System Fan 1": "Fan 1",
+    "System Fan 2": "Fan 2",
+    "Processor 1 Fan": "Fan 3",
+    "Processor 2 Fan": "Fan 4",
+    "PS1 Temperature": "Pwr Supply 1 Temp",
+    "PS2 Temperature": "Pwr Supply 2 Temp"
 }
 def mangle_metric_name(metric_name,prefix):
     name = metric_name
