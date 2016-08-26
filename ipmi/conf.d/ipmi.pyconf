@@ -33,6 +33,11 @@ modules {
     #  value = "USER"
     #}
 
+    # timeout on ipmitool command
+    param timeout {
+      value = 15
+    }
+
     # Location of timeout binary
     param timeout_bin {
       value = "/usr/bin/timeout"

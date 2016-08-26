@@ -62,10 +62,6 @@ def get_metrics():
 
     params = global_params
 
-    new_metrics = {}
-    units = {}
-    descr = {}
-
     # bail out if no ipmi ip address is set and there are no
     # ipmi device files available (i.e. ipmitool is guaranteed
     # to fail
@@ -76,7 +72,11 @@ def get_metrics():
             pass
     # otherwise, run ipmitool if we're outside the cache timeout
     elif (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
-        command = [ params['timeout_bin'], "3" ]
+        new_metrics = {}
+        units = {}
+        descr = {}
+
+        command = [ params['timeout_bin'], str(params['timeout']) ]
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
             command.append('sudo')
         command.append(params['ipmitool_bin'])
@@ -93,7 +93,7 @@ def get_metrics():
             command.append('-L')
             command.append(params['level'])
         command.append('sensor')
-
+ 
         p = subprocess.Popen(command,
                              stdout=subprocess.PIPE).communicate()[0][:-1]
 
@@ -131,12 +131,12 @@ def get_metrics():
             except IndexError:
                 continue
                 
-    METRICS = {
-        'time': time.time(),
-        'data': new_metrics,
-        'units': units,
-        'descr': descr
-    }
+        METRICS = {
+            'time': time.time(),
+            'data': new_metrics,
+            'units': units,
+            'descr': descr
+        }
 
     return [METRICS]
 
@@ -212,6 +212,7 @@ if __name__ == '__main__':
         #"username"  : "ADMIN",
         #"password"  : "secret",
         #"level" : "USER",
+        "timeout" : 15,
         "ipmitool_bin" : "/usr/bin/ipmitool",
         "timeout_bin" : "/usr/bin/timeout"
         }
