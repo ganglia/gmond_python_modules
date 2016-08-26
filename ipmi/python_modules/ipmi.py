@@ -1,3 +1,4 @@
+import os
 import sys
 import re
 import time
@@ -7,7 +8,9 @@ import subprocess
 
 METRICS = {
     'time' : 0,
-    'data' : {}
+    'data' : {},
+    'units': {},
+    'descr': {}
 }
 
 METRICS_CACHE_MAX = 5
@@ -59,12 +62,20 @@ def get_metrics():
 
     params = global_params
 
-    if (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
+    new_metrics = {}
+    units = {}
+    descr = {}
 
-        new_metrics = {}
-        units = {}
-        descr = {}
-
+    # bail out if no ipmi ip address is set and there are no
+    # ipmi device files available (i.e. ipmitool is guaranteed
+    # to fail
+    if ( 'ipmi_ip' not in params.keys() and
+         not os.path.exists('/dev/ipmi0') and
+         not os.path.exists('/dev/ipmi/0') and
+         not os.path.exists('/dev/ipmidev/0') ):
+            pass
+    # otherwise, run ipmitool if we're outside the cache timeout
+    elif (time.time() - METRICS['time']) > METRICS_CACHE_MAX:
         command = [ params['timeout_bin'], "3" ]
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
             command.append('sudo')
@@ -120,12 +131,12 @@ def get_metrics():
             except IndexError:
                 continue
                 
-        METRICS = {
-            'time': time.time(),
-            'data': new_metrics,
-            'units': units,
-            'descr': descr
-        }
+    METRICS = {
+        'time': time.time(),
+        'data': new_metrics,
+        'units': units,
+        'descr': descr
+    }
 
     return [METRICS]
 
