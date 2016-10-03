@@ -17,4 +17,5 @@ param googledns_dns_resolution {
     #   value = "google-public-dns-a.google.com google.com A"
 }
 </pre>
-Each param needs a unique name and the value should contain the name of the DNS server to query, a domain name and the type of record to check.
+Each param needs a unique name and the value should contain the name of the DNS server to query, a domain name and the type of record to check. Ganglia will then query the server and graph the time it took to resolve the name.
+
