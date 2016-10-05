@@ -1,5 +1,6 @@
 # Script: dnslatency.py
 # Author: Matty <matty91@gmail.com>
+# Date: 10-05-2016
 # Purpose:
 #   DNS latency checking module written for Ganglia.
 # Usage:
@@ -12,8 +13,16 @@
 #   argument is the record to request and the third argument
 #   is the resource record type to request. The polling interval
 #   is controlled by the .pyconf collect_every option.
-# Copyright: GPL
-# Date: 10-05-2016
+# License: 
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
 
 import sys
 import socket
