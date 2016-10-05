@@ -22,12 +22,13 @@ def lookup_failure(status_code, domain, name_server, dns_answer):
     """
        Routine to call if a DNS lookup fails.
     """
-    print "%s: Unable to resolve %s from %s at %s" % (status_code, 
-                                                      domain, 
-                                                      name_server, 
-                                                      str(datetime.now()))
-    if dns_answer:
-        dns_answer.response.to_text()
+    if DEBUG:
+        print "%s: Unable to resolve %s from %s at %s" % (status_code, 
+                                                          domain, 
+                                                          name_server, 
+                                                          str(datetime.now()))
+        if dns_answer:
+            dns_answer.response.to_text()
 
 
 def resolve_name(name):
