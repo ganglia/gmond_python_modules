@@ -110,7 +110,7 @@ def main():
        Code to test the script w/o involving ganglia
     """
     params = {
-        'googlednsa_dns_resolution': 'google-public-dns-a.google.com prefetch.net A'
+        'googlednsa_dns_resolution': 'google-public-dns-a.google.com prefetch.net A',
         'googlednsb_dns_resolution': 'google-public-dns-b.google.com google.prefetch.net A',
     }
     descriptors = metric_init(params)
