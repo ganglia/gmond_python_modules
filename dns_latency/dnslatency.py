@@ -1,8 +1,8 @@
 # Script: dnslatency.py
 # Author: Matty <matty91@gmail.com>
-# Purpose: 
-#   DNS latency checking module written for Ganglia. 
-# Usage: 
+# Purpose:
+#   DNS latency checking module written for Ganglia.
+# Usage:
 #   The dnslatency script takes one or more DNS strings similar
 #   to the following as arguments:
 #
@@ -13,7 +13,7 @@
 #   is the resource record type to request. The polling interval
 #   is controlled by the .pyconf collect_every option.
 # Copyright: GPL
-# Date: 10-05-2016       
+# Date: 10-05-2016
 
 import sys
 import socket
@@ -22,17 +22,15 @@ from datetime import datetime
 from timeit import default_timer as timer
 
 DEBUG = 0
-descriptors = []
-
 
 def lookup_failure(status_code, domain, name_server, dns_answer):
     """
        Routine to call if a DNS lookup fails.
     """
     if DEBUG:
-        print "%s: Unable to resolve %s from %s at %s" % (status_code, 
-                                                          domain, 
-                                                          name_server, 
+        print "%s: Unable to resolve %s from %s at %s" % (status_code,
+                                                          domain,
+                                                          name_server,
                                                           str(datetime.now()))
         if dns_answer:
             dns_answer.response.to_text()
@@ -78,7 +76,7 @@ def query_handler(name):
        Callback invoked by ganglia to ocollect metrics
     """
     name_servers = []
-    metric, dns_server_name, domain, rrec = name.split('_')
+    _, dns_server_name, domain, rrec = name.split('_')
     name_servers.append(resolve_name(dns_server_name))
     resolution_time = time_name_resolution(name_servers, domain, rrec)
 
@@ -94,6 +92,11 @@ def query_handler(name):
 
 
 def metric_init(params):
+    """
+       Initializes the Ganglia descriptor table
+    """
+    descriptors = []
+
     for param_name, values in params.items():
         dns_server_name, domain, rrec = values.split()
 
@@ -112,6 +115,12 @@ def metric_init(params):
         descriptors.append(desc)
 
     return descriptors
+
+def metric_cleanup():
+    """
+       Function used to perform cleanup when ganglia exit()'s
+    """
+    pass
 
 def main():
     """
