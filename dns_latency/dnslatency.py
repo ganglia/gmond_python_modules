@@ -1,4 +1,12 @@
-""" DNS latency checking module written for Ganglia. """
+# Script: dnslatency.py
+# Author: Matty <matty91@gmail.com>
+# Purpose: 
+#   DNS latency checking module written for Ganglia. 
+# Usage: 
+#   The dnslatency script takes one or more DNS strings similar
+#   to the following as arguments:
+# Copyright: GPL
+# Date: 10-05-2016       
 
 import sys
 import socket
