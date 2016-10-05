@@ -5,6 +5,13 @@
 # Usage: 
 #   The dnslatency script takes one or more DNS strings similar
 #   to the following as arguments:
+#
+#       google-public-dns-a.google.com google.com A
+#
+#   THe first argument is the DNS server to query, the second
+#   argument is the record to request and the third argument
+#   is the resource record type to request. The polling interval
+#   is controlled by the .pyconf collect_every option.
 # Copyright: GPL
 # Date: 10-05-2016       
 
