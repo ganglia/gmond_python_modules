@@ -47,6 +47,7 @@ def resolve_name(name):
         sys.exit(1)
     return ip_addr
 
+
 def time_name_resolution(name_server, domain, rr_type):
     """
        Calculate the time it takes to resolve a domain name
@@ -70,6 +71,7 @@ def time_name_resolution(name_server, domain, rr_type):
 
     end_time = timer()
     return end_time - start_time
+
 
 def query_handler(name):
     """
@@ -97,7 +99,7 @@ def metric_init(params):
     """
     descriptors = []
 
-    for param_name, values in params.items():
+    for _, values in params.items():
         dns_server_name, domain, rrec = values.split()
 
         desc = {
@@ -116,11 +118,13 @@ def metric_init(params):
 
     return descriptors
 
+
 def metric_cleanup():
     """
        Function used to perform cleanup when ganglia exit()'s
     """
     pass
+
 
 def main():
     """
@@ -133,7 +137,7 @@ def main():
     descriptors = metric_init(params)
     for desc in descriptors:
         latency = desc['call_back'](desc['name'])
-        metric, dns_server, domain, rrec = desc['name'].split("_")
+        _, dns_server, domain, _ = desc['name'].split("_")
         print "It took %f to resolve %s on %s" % (latency, domain, dns_server)
 
 
