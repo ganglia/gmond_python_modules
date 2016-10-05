@@ -1,7 +1,7 @@
 # Script: dnslatency.py
+# Author: Matty <matty91@gmail.com>
 # Purpose: 
 #   DNS latency checking module written for Ganglia. 
-# Author: Matty <matty91@gmail.com>
 # Usage: 
 #   The dnslatency script takes one or more DNS strings similar
 #   to the following as arguments:
