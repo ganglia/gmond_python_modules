@@ -1,0 +1,113 @@
+modules {
+    module {
+        name = "xrootd_stats"
+        language = "python"
+
+        param host {
+            value = "localhost"
+        }
+
+        param port {
+            value = 1094
+        }
+    }
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_sys_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_info_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_link_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_poll_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_buff_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_proc_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_xrootd_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_ofs_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_oss_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_sgen_(.+)"
+	}
+}
+
+collection_group {
+    collect_every = 30
+    time_threshold = 120
+
+	metric {
+	    name_match = "xrd_sched_(.+)"
+	}
+}
