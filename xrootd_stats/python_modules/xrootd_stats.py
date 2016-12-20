@@ -162,11 +162,11 @@ def get_xml_info():
 
 
 def get_fresh_data():
-    # cmd = 'xrdfs storage02.spacescience.ro query stats a'
-    # process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    # output, error = process.communicate()
+    cmd = 'xrdfs storage02.spacescience.ro query stats a'
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
 
-    data['xml'] = '<statistics tod="1482242534" ver="v4.4.1" src="storage02.spacescience.ro:1094" tos="1482168145" pgm="xrootd" ins="server" pid="6591" site="ALICE::ISS::FILE"><stats id="info"><host>storage02.spacescience.ro</host><port>1094</port><name>server</name></stats><stats id="buff"><reqs>3780</reqs><mem>41691136</mem><buffs>43</buffs><adj>0</adj><xlreqs>0</xlreqs><xlmem>0</xlmem><xlbuffs>0</xlbuffs></stats><stats id="link"><num>1</num><maxn>21</maxn><tot>2100</tot><in>12958324</in><out>96296489162</out><ctime>85405</ctime><tmo>1937</tmo><stall>0</stall><sfps>0</sfps></stats><stats id="poll"><att>1</att><en>1937</en><ev>1935</ev><int>0</int></stats><stats id="proc"><usr><s>1</s><u>999000</u></usr><sys><s>53</s><u>638000</u></sys></stats><stats id="xrootd"><num>2100</num><ops><open>1478</open><rf>0</rf><rd>71643</rd><pr>0</pr><rv>4194</rv><rs>513222</rs><wr>20</wr><sync>0</sync><getf>0</getf><putf>0</putf><misc>5535</misc></ops><aio><num>0</num><max>0</max><rej>0</rej></aio><err>38</err><rdr>0</rdr><dly>0</dly><lgn><num>2100</num><af>0</af><au>2099</au><ua>0</ua></lgn></stats><stats id="ofs"><role>server</role><opr>0</opr><opw>0</opw><opp>0</opp><ups>0</ups><han>0</han><rdr>0</rdr><bxq>0</bxq><rep>0</rep><err>0</err><dly>0</dly><sok>0</sok><ser>0</ser><tpc><grnt>0</grnt><deny>0</deny><err>0</err><exp>0</exp></tpc></stats><stats id="oss" v="2"><paths>1<stats id="0"><lp>"/"</lp><rp>"/storage01/xrdnamespace/home/aliprod/data/"</rp><tot>9612255148</tot><free>2483991920</free><ino>1220706304</ino><ifr>1220317503</ifr></stats></paths><space>1<stats id="0"><name>public</name><tot>19224510296</tot><free>5067797772</free><maxf>2583805852</maxf><fsn>2</fsn><usg>0</usg></stats></space></stats><stats id="sched"><jobs>6735</jobs><inq>0</inq><maxinq>4</maxinq><threads>11</threads><idle>9</idle><tcr>11</tcr><tde>0</tde><tlimr>0</tlimr></stats><stats id="sgen"><as>1</as><et>0</et><toe>1482242534</toe></stats></statistics>'
+    data['xml'] = output
     data['time'] = int(time.time())
 
 
