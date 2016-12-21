@@ -21,7 +21,6 @@ Desc_Skel = {}
 descriptors = []
 test_descriptor = []
 data = {'xml': '', 'time': ''}
-_port = 1094
 
 root_metric_list = {
     NAME_PREFIX+'sys_src': {'type': 'string', 'format': '%s', 'description': 'Host/post reporting data'},
@@ -40,32 +39,32 @@ info_metric_list = {
 }
 
 link_metric_list = {
-    NAME_PREFIX + 'link_num': {'type': 'uint', 'format': '%u', 'description': 'Current connections', 'units': '#'},
-    NAME_PREFIX + 'link_maxn': {'type': 'uint', 'format': '%u', 'description': 'Max # of simultaneous connections', 'units': '#'},
-    NAME_PREFIX + 'link_tot': {'type': 'uint', 'format': '%u', 'description': 'Connections since start-up', 'units': '#'},
+    NAME_PREFIX + 'link_num': {'type': 'uint', 'format': '%u', 'description': 'Current connections', 'units': 'link_num'},
+    NAME_PREFIX + 'link_maxn': {'type': 'uint', 'format': '%u', 'description': 'Max # of simultaneous connections', 'units': 'link_maxn'},
+    NAME_PREFIX + 'link_tot': {'type': 'uint', 'format': '%u', 'description': 'Connections since start-up', 'units': 'link_tot'},
     NAME_PREFIX + 'link_in': {'type': 'uint', 'format': '%u', 'description': 'Bytes received', 'units': 'bytes/sec'},
     NAME_PREFIX + 'link_out': {'type': 'uint', 'format': '%u', 'description': 'Bytes sent', 'units': 'bytes/sec'},
-    NAME_PREFIX + 'link_ctime': {'type': 'uint', 'format': '%u', 'description': 'Cumulative # of connect seconds', 'units': '#'},
-    NAME_PREFIX + 'link_tmo': {'type': 'uint', 'format': '%u', 'description': 'Read request timeouts', 'units': 'u'},
-    NAME_PREFIX + 'link_stall': {'type': 'uint', 'format': '%u', 'description': '# of times partial data was received', 'units': 'u'},
-    NAME_PREFIX + 'link_sfps': {'type': 'uint', 'format': '%u', 'description': 'Partial sendfile ops', 'units': 'u'},
+    NAME_PREFIX + 'link_ctime': {'type': 'uint', 'format': '%u', 'description': 'Cumulative # of connect seconds', 'units': 'link_ctime'},
+    NAME_PREFIX + 'link_tmo': {'type': 'uint', 'format': '%u', 'description': 'Read request timeouts', 'units': 'link_tmo'},
+    NAME_PREFIX + 'link_stall': {'type': 'uint', 'format': '%u', 'description': '# of times partial data was received', 'units': 'link_stall'},
+    NAME_PREFIX + 'link_sfps': {'type': 'uint', 'format': '%u', 'description': 'Partial sendfile ops', 'units': 'link_sfps'},
 }
 
 poll_metric_list = {
-    NAME_PREFIX + 'poll_att'	: {'type': 'uint', 'format': '%u', 'description': 'File descriptors attached for polling', 'units': ''},
-    NAME_PREFIX + 'poll_en'		: {'type': 'uint', 'format': '%u', 'description': 'Poll enable operations', 'units': '#'},
-    NAME_PREFIX + 'poll_ev'		: {'type': 'uint', 'format': '%u', 'description': 'Polling events', 'units': '#'},
-    NAME_PREFIX + 'poll_int'	: {'type': 'uint', 'format': '%u', 'description': 'Unsolicited polling events', 'units': '#'},
+    NAME_PREFIX + 'poll_att'	: {'type': 'uint', 'format': '%u', 'description': 'File descriptors attached for polling', 'units': 'poll_att'},
+    NAME_PREFIX + 'poll_en'		: {'type': 'uint', 'format': '%u', 'description': 'Poll enable operations', 'units': 'poll_en'},
+    NAME_PREFIX + 'poll_ev'		: {'type': 'uint', 'format': '%u', 'description': 'Polling events', 'units': 'poll_ev'},
+    NAME_PREFIX + 'poll_int'	: {'type': 'uint', 'format': '%u', 'description': 'Unsolicited polling events', 'units': 'poll_int'},
 }
 
 buff_metric_list = {
-    NAME_PREFIX+'buff_reqs': {'type': 'uint', 'format': '%u', 'description': 'Requests for a buffer', 'units': '#'},
+    NAME_PREFIX+'buff_reqs': {'type': 'uint', 'format': '%u', 'description': 'Requests for a buffer', 'units': 'buff_reqs'},
     NAME_PREFIX+'buff_mem': {'type': 'uint', 'format': '%u', 'description': 'Bytes allocated to buffers', 'units': 'bytes'},
-    NAME_PREFIX+'buff_buffs': {'type': 'uint', 'format': '%u', 'description': 'No of allocated buffer profile', 'units': '#'},
-    NAME_PREFIX+'buff_adj': {'type': 'uint', 'format': '%u', 'description': 'Adjustments to the buffer profile', 'units': '#'},
-    NAME_PREFIX+'buff_xlreqs': {'type': 'uint', 'format': '%u', 'description': 'xlreqs', 'units': 'u'},
-    NAME_PREFIX+'buff_xlmem': {'type': 'uint', 'format': '%u', 'description': 'xlmem', 'units': 'u'},
-    NAME_PREFIX+'buff_xlbuffs': {'type': 'uint', 'format': '%u', 'description': 'xlbuffs', 'units': 'u'},
+    NAME_PREFIX+'buff_buffs': {'type': 'uint', 'format': '%u', 'description': 'No of allocated buffer profile', 'units': 'buff_buffs'},
+    NAME_PREFIX+'buff_adj': {'type': 'uint', 'format': '%u', 'description': 'Adjustments to the buffer profile', 'units': 'buff_adj'},
+    NAME_PREFIX+'buff_xlreqs': {'type': 'uint', 'format': '%u', 'description': 'xlreqs', 'units': 'buff_xlreqs'},
+    NAME_PREFIX+'buff_xlmem': {'type': 'uint', 'format': '%u', 'description': 'xlmem', 'units': 'buff_xlem'},
+    NAME_PREFIX+'buff_xlbuffs': {'type': 'uint', 'format': '%u', 'description': 'xlbuffs', 'units': 'buff_xlbuffs'},
 }
 
 proc_metric_list = {
@@ -76,63 +75,63 @@ proc_metric_list = {
 }
 
 ofs_metric_list = {
-    NAME_PREFIX + 'ofs_role': {'type': 'string', 	'format': '%s', 'description': 'Reporter\'s role', 'units': ''},
-    NAME_PREFIX + 'ofs_opr'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read-mode', 'units': '#'},
-    NAME_PREFIX + 'ofs_opw'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read/write mode', 'units': '#'},
-    NAME_PREFIX + 'ofs_opp'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read/write POSC mode', 'units': '#'},
-    NAME_PREFIX + 'ofs_ups'	: {'type': 'uint', 	'format': '%u', 'description': 'Number of times a POSC mode file was un-persisted', 'units': '#'},
-    NAME_PREFIX + 'ofs_han'	: {'type': 'uint', 	'format': '%u', 'description': 'Active file handlers', 'units': '#'},
-    NAME_PREFIX + 'ofs_rdr'	: {'type': 'uint', 	'format': '%u', 'description': 'Redirects processed', 'units': '#'},
-    NAME_PREFIX + 'ofs_bxq'	: {'type': 'uint', 	'format': '%u', 'description': 'Background tasks processed', 'units': '#'},
-    NAME_PREFIX + 'ofs_rep'	: {'type': 'uint',	    'format': '%u', 'description': 'Background replies processed', 'units': '#'},
-    NAME_PREFIX + 'ofs_err'	: {'type': 'uint', 	'format': '%u', 'description': 'Errors encountered', 'units': '#'},
-    NAME_PREFIX + 'ofs_dly'	: {'type': 'uint', 	'format': '%u', 'description': 'Delays imposed', 'units': '#'},
-    NAME_PREFIX + 'ofs_sok'	: {'type': 'uint', 	'format': '%u', 'description': 'Events received that indicated success', 'units': '#'},
-    NAME_PREFIX + 'ofs_ser'	: {'type': 'uint', 	'format': '%u', 'description': 'Events received that indicated failure', 'units': '#'},
-    NAME_PREFIX + 'ofs_grnt': {'type': 'uint', 	'format': '%u', 'description': '# of thid party copies allowed', 'units': '#'},
-    NAME_PREFIX + 'ofs_deny': {'type': 'uint', 	'format': '%u', 'description': '# of third party copies denied', 'units': '#'},
-    NAME_PREFIX + 'ofs_err'	: {'type': 'uint', 	'format': '%u', 'description': '# of third party copies that failed', 'units': '#'},
-    NAME_PREFIX + 'ofs_exp'	: {'type': 'uint', 	'format': '%u', 'description': '# of third party copies whose auth expired', 'units': '#'},
+    NAME_PREFIX + 'ofs_role': {'type': 'string', 	'format': '%s', 'description': 'Reporter\'s role', 'units': 'ofs_role'},
+    NAME_PREFIX + 'ofs_opr'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read-mode', 'units': 'ofs_opr'},
+    NAME_PREFIX + 'ofs_opw'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read/write mode', 'units': 'ofs_opw'},
+    NAME_PREFIX + 'ofs_opp'	: {'type': 'uint', 	'format': '%u', 'description': 'Files open in read/write POSC mode', 'units': 'ofs_opp'},
+    NAME_PREFIX + 'ofs_ups'	: {'type': 'uint', 	'format': '%u', 'description': 'Number of times a POSC mode file was un-persisted', 'units': 'ofs_ups'},
+    NAME_PREFIX + 'ofs_han'	: {'type': 'uint', 	'format': '%u', 'description': 'Active file handlers', 'units': 'ofs_han'},
+    NAME_PREFIX + 'ofs_rdr'	: {'type': 'uint', 	'format': '%u', 'description': 'Redirects processed', 'units': 'ofs_rdr'},
+    NAME_PREFIX + 'ofs_bxq'	: {'type': 'uint', 	'format': '%u', 'description': 'Background tasks processed', 'units': 'ofs_bxq'},
+    NAME_PREFIX + 'ofs_rep'	: {'type': 'uint',	    'format': '%u', 'description': 'Background replies processed', 'units': 'ofs_rep'},
+    NAME_PREFIX + 'ofs_err'	: {'type': 'uint', 	'format': '%u', 'description': 'Errors encountered', 'units': 'ofs_err'},
+    NAME_PREFIX + 'ofs_dly'	: {'type': 'uint', 	'format': '%u', 'description': 'Delays imposed', 'units': 'ofs_dly'},
+    NAME_PREFIX + 'ofs_sok'	: {'type': 'uint', 	'format': '%u', 'description': 'Events received that indicated success', 'units': 'ofs_sok'},
+    NAME_PREFIX + 'ofs_ser'	: {'type': 'uint', 	'format': '%u', 'description': 'Events received that indicated failure', 'units': 'ofs_ser'},
+    NAME_PREFIX + 'ofs_grnt': {'type': 'uint', 	'format': '%u', 'description': '# of thid party copies allowed', 'units': 'ofs_grnt'},
+    NAME_PREFIX + 'ofs_deny': {'type': 'uint', 	'format': '%u', 'description': '# of third party copies denied', 'units': 'ofs_deny'},
+    NAME_PREFIX + 'ofs_err'	: {'type': 'uint', 	'format': '%u', 'description': '# of third party copies that failed', 'units': 'ofs_err'},
+    NAME_PREFIX + 'ofs_exp'	: {'type': 'uint', 	'format': '%u', 'description': '# of third party copies whose auth expired', 'units': 'ofs_exp'},
 }
 
 oss_metric_list = {
-    NAME_PREFIX + 'oss_paths_lp': {'type': 'string', 'format': '%s', 'description': 'The minimally reduced logical file system path', 'units': ''},
-    NAME_PREFIX + 'oss_paths_rp': {'type': 'string', 'format': '%s', 'description': 'The minimally reduced real file system path', 'units': ''},
+    #NAME_PREFIX + 'oss_paths_lp': {'type': 'string', 'format': '%s', 'description': 'The minimally reduced logical file system path', 'units': 'oss_paths_lp'},
+    #NAME_PREFIX + 'oss_paths_rp': {'type': 'string', 'format': '%s', 'description': 'The minimally reduced real file system path', 'units': 'oss_paths_rp'},
     NAME_PREFIX + 'oss_paths_tot': {'type': 'uint', 'format': '%u', 'description': 'Kilobytes allocated', 'units': 'bytes/sec'},
     NAME_PREFIX + 'oss_paths_free': {'type': 'uint', 'format': '%u', 'description': 'Kilobytes available', 'units': 'bytes/sec'},
-    NAME_PREFIX + 'oss_paths_ino': {'type': 'uint', 'format': '%u', 'description': '# of inodes', 'units': '#'},
-    NAME_PREFIX + 'oss_paths_ifr': {'type': 'uint', 'format': '%u', 'description': '# of free inodes', 'units': '#'},
-    NAME_PREFIX + 'oss_space_name': {'type': 'string', 'format': '%s', 'description': 'Name for the space', 'units': ''},
+    NAME_PREFIX + 'oss_paths_ino': {'type': 'uint', 'format': '%u', 'description': '# of inodes', 'units': 'oss_paths_ino'},
+    NAME_PREFIX + 'oss_paths_ifr': {'type': 'uint', 'format': '%u', 'description': '# of free inodes', 'units': 'oss_paths_ifr'},
+    NAME_PREFIX + 'oss_space_name': {'type': 'string', 'format': '%s', 'description': 'Name for the space', 'units': 'oss_space_name'},
     NAME_PREFIX + 'oss_space_tot': {'type': 'uint', 'format': '%u', 'description': 'Kilobytes allocated', 'units': 'bytes/sec'},
     NAME_PREFIX + 'oss_space_free': {'type': 'uint', 'format': '%u', 'description': 'Kilobytes available', 'units': 'bytes/sec'},
     NAME_PREFIX + 'oss_space_maxf': {'type': 'uint', 'format': '%u', 'description': 'Max kilobytes available in a filesystem extent', 'units': 'bytes'},
-    NAME_PREFIX + 'oss_space_fsn': {'type': 'uint', 'format': '%u', 'description': '# of file system extents', 'units': '#'},
-    NAME_PREFIX + 'oss_space_usg': {'type': 'uint', 'format': '%u', 'description': 'Usage associated with space name', 'units': '#'},
+    NAME_PREFIX + 'oss_space_fsn': {'type': 'uint', 'format': '%u', 'description': '# of file system extents', 'units': 'oss_space_fsn'},
+    NAME_PREFIX + 'oss_space_usg': {'type': 'uint', 'format': '%u', 'description': 'Usage associated with space name', 'units': 'oss_space_usg'},
 }
 
 xrootd_metric_list = {
-    NAME_PREFIX+'xrootd_num': {'type': 'uint', 'format': '%u', 'description': '# of times the protocol was selected', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_open': {'type': 'uint', 'format': '%u', 'description': 'File open reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_rf': {'type': 'uint', 'format': '%u', 'description': 'Cache refresh reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_rd': {'type': 'uint', 'format': '%u', 'description': 'Read reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_pr': {'type': 'uint', 'format': '%u', 'description': 'Pre-read reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_rv': {'type': 'uint', 'format': '%u', 'description': 'Readv reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_rs': {'type': 'uint', 'format': '%u', 'description': 'Readv segments', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_wr': {'type': 'uint', 'format': '%u', 'description': 'Write reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_sync': {'type': 'uint', 'format': '%u', 'description': 'Sync reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_getf': {'type': 'uint', 'format': '%u', 'description': 'Getfile reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_putf': {'type': 'uint', 'format': '%u', 'description': 'Putfile reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_ops_misc': {'type': 'uint', 'format': '%u', 'description': '# of other reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_aio_num': {'type': 'uint', 'format': '%u', 'description': 'Async I/O reqs processed', 'units': '#'},
-    NAME_PREFIX+'xrootd_aio_max': {'type': 'uint', 'format': '%u', 'description': 'Max simultaneous asyc I/O reqs', 'units': '#'},
-    NAME_PREFIX+'xrootd_aio_rej': {'type': 'uint', 'format': '%u', 'description': 'Async I/O reqs converted to sync I/O', 'units': '#'},
-    NAME_PREFIX+'xrootd_err': {'type': 'uint', 'format': '%u', 'description': '# of reqs that ended with an error', 'units': '#'},
-    NAME_PREFIX+'xrootd_rdr': {'type': 'uint', 'format': '%u', 'description': '# of reqs that were redirected', 'units': '#'},
-    NAME_PREFIX+'xrootd_dly': {'type': 'uint', 'format': '%u', 'description': '# of reqs that ended with a delay', 'units': '#'},
-    NAME_PREFIX+'xrootd_lgn_num': {'type': 'uint', 'format': '%u', 'description': '# of login attempts', 'units': '#'},
-    NAME_PREFIX+'xrootd_lgn_af': {'type': 'uint', 'format': '%u', 'description': '# of authentication attempts', 'units': '#'},
-    NAME_PREFIX+'xrootd_lgn_au': {'type': 'uint', 'format': '%u', 'description': '# of successful authenticated logins', 'units': '#'},
-    NAME_PREFIX+'xrootd_lgn_ua': {'type': 'uint', 'format': '%u', 'description': '# of successful un-authentication logins', 'units': '#'},
+    NAME_PREFIX+'xrootd_num': {'type': 'uint', 'format': '%u', 'description': '# of times the protocol was selected', 'units': 'xrootd_num'},
+    NAME_PREFIX+'xrootd_ops_open': {'type': 'uint', 'format': '%u', 'description': 'File open reqs', 'units': 'xrootd_ops_open'},
+    NAME_PREFIX+'xrootd_ops_rf': {'type': 'uint', 'format': '%u', 'description': 'Cache refresh reqs', 'units': 'xrootd_ops_rf'},
+    NAME_PREFIX+'xrootd_ops_rd': {'type': 'uint', 'format': '%u', 'description': 'Read reqs', 'units': 'xrootd_ops_rd'},
+    NAME_PREFIX+'xrootd_ops_pr': {'type': 'uint', 'format': '%u', 'description': 'Pre-read reqs', 'units': 'xrootd_ops_pr'},
+    NAME_PREFIX+'xrootd_ops_rv': {'type': 'uint', 'format': '%u', 'description': 'Readv reqs', 'units': 'xrootd_ops_rv'},
+    NAME_PREFIX+'xrootd_ops_rs': {'type': 'uint', 'format': '%u', 'description': 'Readv segments', 'units': 'xrootd_ops_rs'},
+    NAME_PREFIX+'xrootd_ops_wr': {'type': 'uint', 'format': '%u', 'description': 'Write reqs', 'units': 'xrootd_ops_wr'},
+    NAME_PREFIX+'xrootd_ops_sync': {'type': 'uint', 'format': '%u', 'description': 'Sync reqs', 'units': 'xrootd_ops_sync'},
+    NAME_PREFIX+'xrootd_ops_getf': {'type': 'uint', 'format': '%u', 'description': 'Getfile reqs', 'units': 'xrootd_ops_getf'},
+    NAME_PREFIX+'xrootd_ops_putf': {'type': 'uint', 'format': '%u', 'description': 'Putfile reqs', 'units': 'xrootd_ops_putf'},
+    NAME_PREFIX+'xrootd_ops_misc': {'type': 'uint', 'format': '%u', 'description': '# of other reqs', 'units': 'xrootd_ops_misc'},
+    NAME_PREFIX+'xrootd_aio_num': {'type': 'uint', 'format': '%u', 'description': 'Async I/O reqs processed', 'units': 'xrootd_aio_num'},
+    NAME_PREFIX+'xrootd_aio_max': {'type': 'uint', 'format': '%u', 'description': 'Max simultaneous asyc I/O reqs', 'units': 'xrootd_aio_max'},
+    NAME_PREFIX+'xrootd_aio_rej': {'type': 'uint', 'format': '%u', 'description': 'Async I/O reqs converted to sync I/O', 'units': 'xrootd_aio_rej'},
+    NAME_PREFIX+'xrootd_err': {'type': 'uint', 'format': '%u', 'description': '# of reqs that ended with an error', 'units': 'xrootd_aio_err'},
+    NAME_PREFIX+'xrootd_rdr': {'type': 'uint', 'format': '%u', 'description': '# of reqs that were redirected', 'units': 'xrootd_aio_rdr'},
+    NAME_PREFIX+'xrootd_dly': {'type': 'uint', 'format': '%u', 'description': '# of reqs that ended with a delay', 'units': 'xrootd_aio_dly'},
+    NAME_PREFIX+'xrootd_lgn_num': {'type': 'uint', 'format': '%u', 'description': '# of login attempts', 'units': 'xrootd_lgn_num'},
+    NAME_PREFIX+'xrootd_lgn_af': {'type': 'uint', 'format': '%u', 'description': '# of authentication attempts', 'units': 'xrootd_lgn_af'},
+    NAME_PREFIX+'xrootd_lgn_au': {'type': 'uint', 'format': '%u', 'description': '# of successful authenticated logins', 'units': 'xrootd_lgn_au'},
+    NAME_PREFIX+'xrootd_lgn_ua': {'type': 'uint', 'format': '%u', 'description': '# of successful un-authentication logins', 'units': 'xrootd_lgn_ua'},
 }
 
 sgen_metric_list = {
@@ -142,14 +141,14 @@ sgen_metric_list = {
 }
 
 sched_metric_list = {
-    NAME_PREFIX + 'sched_jobs': {'type': 'uint', 'format': '%u', 'description': 'Jobs requiring a thread', 'units': '#'},
-    NAME_PREFIX + 'sched_inq': {'type': 'uint', 'format': '%u', 'description': 'Number of jobs that are currently in run-queue', 'units': '#'},
-    NAME_PREFIX + 'sched_maxinq': {'type': 'uint', 'format': '%u', 'description': 'Longest run-queue length', 'units': '#'},
-    NAME_PREFIX + 'sched_threads': {'type': 'uint', 'format': '%u', 'description': '# of current scheduler threads', 'units': '#'},
-    NAME_PREFIX + 'sched_idle': {'type': 'uint', 'format': '%u', 'description': '# of scheduler threads waiting for work', 'units': '#'},
-    NAME_PREFIX + 'sched_tcr': {'type': 'uint', 'format': '%u', 'description': 'Thread creations', 'units': '#'},
-    NAME_PREFIX + 'sched_tde': {'type': 'uint', 'format': '%u', 'description': 'Thread destruction', 'units': '#'},
-    NAME_PREFIX + 'sched_tlimr': {'type': 'uint', 'format': '%u', 'description': '# of times the thread limit was reached', 'units': '#'},
+    NAME_PREFIX + 'sched_jobs': {'type': 'uint', 'format': '%u', 'description': 'Jobs requiring a thread', 'units': 'sched_jobs'},
+    NAME_PREFIX + 'sched_inq': {'type': 'uint', 'format': '%u', 'description': 'Number of jobs that are currently in run-queue', 'units': 'sched_inq'},
+    NAME_PREFIX + 'sched_maxinq': {'type': 'uint', 'format': '%u', 'description': 'Longest run-queue length', 'units': 'sched_maxinq'},
+    NAME_PREFIX + 'sched_threads': {'type': 'uint', 'format': '%u', 'description': '# of current scheduler threads', 'units': 'sched_threads'},
+    NAME_PREFIX + 'sched_idle': {'type': 'uint', 'format': '%u', 'description': '# of scheduler threads waiting for work', 'units': 'sched_idle'},
+    NAME_PREFIX + 'sched_tcr': {'type': 'uint', 'format': '%u', 'description': 'Thread creations', 'units': 'sched_tct'},
+    NAME_PREFIX + 'sched_tde': {'type': 'uint', 'format': '%u', 'description': 'Thread destruction', 'units': 'sched_tde'},
+    NAME_PREFIX + 'sched_tlimr': {'type': 'uint', 'format': '%u', 'description': '# of times the thread limit was reached', 'units': 'sched_tlmir'},
 }
 
 
@@ -322,7 +321,7 @@ def get_sched_metrics(name):
 
 
 def metric_init(params):
-    global descriptors, Desc_Skel, _port
+    global descriptors, Desc_Skel
 
     if 'port' in params:
         _port = params['port']
@@ -332,7 +331,7 @@ def metric_init(params):
     if result == 0:
         get_xml_info()
     else:
-        s = '<statistics tod="1482142725" ver="v4.4.1" src="storage02.spacescience.ro:1094" tos="1481998215" pgm="xrootd" ins="server" pid="10812" site="ALICE::ISS::FILE"><stats id="info"><host>storage02.spacescience.ro</host><port>1094</port><name>server</name></stats><stats id="buff"><reqs>0</reqs><mem>0</mem><buffs>0</buffs><adj>0</adj><xlreqs>0</xlreqs><xlmem>0</xlmem><xlbuffs>0</xlbuffs></stats><stats id="link"><num>0</num><maxn>0</maxn><tot>0</tot><in>0</in><out>0</out><ctime>0</ctime><tmo>0</tmo><stall>0</stall><sfps>0</sfps></stats><stats id="poll"><att>0</att><en>0</en><ev>0</ev><int>0</int></stats><stats id="proc"><usr><s>0</s><u>0</u></usr><sys><s>0</s><u>0</u></sys></stats><stats id="xrootd"><num>0</num><ops><open>0</open><rf>0</rf><rd>0</rd><pr>0</pr><rv>0</rv><rs>0</rs><wr>0</wr><sync>0</sync><getf>0</getf><putf>0</putf><misc>0</misc></ops><aio><num>0</num><max>0</max><rej>0</rej></aio><err>0</err><rdr>0</rdr><dly>0</dly><lgn><num>0</num><af>0</af><au>0</au><ua>0</ua></lgn></stats><stats id="ofs"><role>server</role><opr>0</opr><opw>0</opw><opp>0</opp><ups>0</ups><han>0</han><rdr>0</rdr><bxq>0</bxq><rep>0</rep><err>0</err><dly>0</dly><sok>0</sok><ser>0</ser><tpc><grnt>0</grnt><deny>0</deny><err>0</err><exp>0</exp></tpc></stats><stats id="oss" v="2"><paths>1<stats id="0"><lp>0</lp><rp>0</rp><tot>0</tot><free>0</free><ino>0</ino><ifr>0</ifr></stats></paths><space>1<stats id="0"><name>0</name><tot>0</tot><free>0</free><maxf>0</maxf><fsn>0</fsn><usg>0</usg></stats></space></stats><stats id="sched"><jobs>0</jobs><inq>0</inq><maxinq>0</maxinq><threads>0</threads><idle>0</idle><tcr>0</tcr><tde>0</tde><tlimr>0</tlimr></stats><stats id="sgen"><as>0</as><et>0</et><toe>0</toe></stats></statistics>'
+        s = '<statistics tod="0" ver="0" src="0" tos="0" pgm="0" ins="0" pid="0" site="ALICE::ISS::FILE"><stats id="info"><host>0</host><port>0</port><name>0</name></stats><stats id="buff"><reqs>0</reqs><mem>0</mem><buffs>0</buffs><adj>0</adj><xlreqs>0</xlreqs><xlmem>0</xlmem><xlbuffs>0</xlbuffs></stats><stats id="link"><num>0</num><maxn>0</maxn><tot>0</tot><in>0</in><out>0</out><ctime>0</ctime><tmo>0</tmo><stall>0</stall><sfps>0</sfps></stats><stats id="poll"><att>0</att><en>0</en><ev>0</ev><int>0</int></stats><stats id="proc"><usr><s>0</s><u>0</u></usr><sys><s>0</s><u>0</u></sys></stats><stats id="xrootd"><num>0</num><ops><open>0</open><rf>0</rf><rd>0</rd><pr>0</pr><rv>0</rv><rs>0</rs><wr>0</wr><sync>0</sync><getf>0</getf><putf>0</putf><misc>0</misc></ops><aio><num>0</num><max>0</max><rej>0</rej></aio><err>0</err><rdr>0</rdr><dly>0</dly><lgn><num>0</num><af>0</af><au>0</au><ua>0</ua></lgn></stats><stats id="ofs"><role>server</role><opr>0</opr><opw>0</opw><opp>0</opp><ups>0</ups><han>0</han><rdr>0</rdr><bxq>0</bxq><rep>0</rep><err>0</err><dly>0</dly><sok>0</sok><ser>0</ser><tpc><grnt>0</grnt><deny>0</deny><err>0</err><exp>0</exp></tpc></stats><stats id="oss" v="2"><paths>1<stats id="0"><lp>0</lp><rp>0</rp><tot>0</tot><free>0</free><ino>0</ino><ifr>0</ifr></stats></paths><space>1<stats id="0"><name>0</name><tot>0</tot><free>0</free><maxf>0</maxf><fsn>0</fsn><usg>0</usg></stats></space></stats><stats id="sched"><jobs>0</jobs><inq>0</inq><maxinq>0</maxinq><threads>0</threads><idle>0</idle><tcr>0</tcr><tde>0</tde><tlimr>0</tlimr></stats><stats id="sgen"><as>0</as><et>0</et><toe>0</toe></stats></statistics>'
         data['xml'] = s
 
     Desc_Skel = {
