@@ -45,7 +45,7 @@ collection_group {
   time_threshold = 90
 
   metric {
-      name_match = "ipmi_(.+)"
+      name_match = "moab_(.+)"
       value_threshold = 1.0
   }
 
