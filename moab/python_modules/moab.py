@@ -33,9 +33,9 @@ def get_metrics():
         if ( 'moab_server' in params ):
             command.append("--host=%s" % params['moab_server'])
         if ( 'moab_port' in params ):
-            command.append("--port=%d" % params['moab_port'])
+            command.append("--port=%s" % str(params['moab_port']))
         if ( 'timeout' in params ):
-            command.append("--timeout=%d" % params['timeout'])
+            command.append("--timeout=%s" % str(params['timeout']))
         if ( 'debug' in params ):
             print str(command)
 
