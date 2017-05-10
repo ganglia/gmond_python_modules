@@ -26,6 +26,9 @@ def get_metrics():
         new_metrics = {}
         units = {}
         descr = {}
+        prefix=""
+        if ( "metric_prefix" in params ):
+            prefix = params["metric_prefix"]+"_"
         
         if ( 'moab_home_dir' in params ):
             os.environ['MOABHOMEDIR'] = params['moab_home_dir']
@@ -55,32 +58,32 @@ def get_metrics():
                     metric_units = None
                     for attr in xmlcluster.attributes.keys():
                         if ( attr=="LocalActiveNodes"  ):
-                            metric_name = "allocated_nodes"
+                            metric_name = prefix+"allocated_nodes"
                             metric_value = int(xmlcluster.attributes["LocalActiveNodes"].value)
                             metric_units = "nodes"
                             metric_descr = "Allocated Nodes"
                         elif ( attr=="LocalIdleNodes"  ):
-                            metric_name = "idle_nodes"
+                            metric_name = prefix+"idle_nodes"
                             metric_value = int(xmlcluster.attributes["LocalIdleNodes"].value)
                             metric_units = "nodes"
                             metric_descr = "Idle Nodes"
                         elif ( attr=="LocalUpNodes"  ):
-                            metric_name = "up_nodes"
+                            metric_name = prefix+"up_nodes"
                             metric_value = int(xmlcluster.attributes["LocalUpNodes"].value)
                             metric_descr = "Up Nodes"
                             metric_units = "nodes"
                         elif ( attr=="LocalAllocProcs" ):
-                            metric_name = "allocated_cores"
+                            metric_name = prefix+"allocated_cores"
                             metric_value = int(xmlcluster.attributes["LocalAllocProcs"].value)
                             metric_units = "cores"
                             metric_descr = "Allocated Processor Cores"
                         elif ( attr=="LocalIdleProcs" ):
-                            metric_name = "idle_cores"
+                            metric_name = prefix+"idle_cores"
                             metric_value = int(xmlcluster.attributes["LocalIdleProcs"].value)
                             metric_units = "cores"
                             metric_descr = "Idle Processor Cores"
                         elif ( attr=="LocalUpProcs" ):
-                            metric_name = "up_cores"
+                            metric_name = prefix+"up_cores"
                             metric_value = int(xmlcluster.attributes["LocalUpProcs"].value)
                             metric_units = "cores"
                             metric_descr = "Up Processor Cores"
@@ -98,17 +101,17 @@ def get_metrics():
                     if ( "option" in xmlqueue.attributes.keys() and 
                          "count" in xmlqueue.attributes.keys() ):
                         if ( xmlqueue.attributes["option"].value=="active" ):
-                            metric_name = "running_jobs"
+                            metric_name = prefix+"running_jobs"
                             new_metrics[metric_name]  = int(xmlqueue.attributes["count"].value)
                             units[metric_name] = "jobs"
                             descr[metric_name] = "Running Jobs"
                         elif ( xmlqueue.attributes["option"].value=="eligible" ):
-                            metric_name = "eligible_jobs"
+                            metric_name = prefix+"eligible_jobs"
                             new_metrics[metric_name]  = int(xmlqueue.attributes["count"].value)
                             units[metric_name] = "jobs"
                             descr[metric_name] = "Eligible Jobs"
                         elif ( xmlqueue.attributes["option"].value=="blocked" ):
-                            metric_name = "blocked_jobs"
+                            metric_name = prefix+"blocked_jobs"
                             new_metrics[metric_name]  = int(xmlqueue.attributes["count"].value)
                             units[metric_name] = "jobs"
                             descr[metric_name] = "Blocked Jobs"
