@@ -1,0 +1,52 @@
+modules {
+  module {
+    name = "moab"
+    language = "python"
+
+    # If you change this entry make sure you put it under name_match section
+    param metric_prefix {
+      value = "moab"
+    }
+
+    # Debug flag
+    param debug {
+      value = False
+    }
+
+    # location of Moab config files
+    param moab_home_dir {
+      value = "/var/spool/moab"
+    }
+
+    # Moab server host
+    #param moab_server {
+    #  value = "moabsrv.mydomain.org"
+    #}
+
+    # Moab server port
+    #param moab_port {
+    #  value = 42559
+    #}
+
+    # Location of showq binary
+    param showq_bin {
+      value = "/opt/moab/bin/showq"
+    }
+    
+    # timeout on Moab client commands
+    param timeout {
+      value = 15
+    }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 90
+
+  metric {
+      name_match = "moab_(.+)"
+      value_threshold = 1.0
+  }
+
+}
