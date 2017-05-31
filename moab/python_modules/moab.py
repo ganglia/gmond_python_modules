@@ -27,9 +27,10 @@ def get_metrics():
         units = {}
         descr = {}
         prefix=""
+        query_gres = False
+        mdiag = None
         if ( "metric_prefix" in params ):
             prefix = params["metric_prefix"]+"_"
-        
         if ( 'moab_home_dir' in params ):
             os.environ['MOABHOMEDIR'] = params['moab_home_dir']
         command = [ params['showq_bin'], "-s", "--xml" ]
@@ -39,14 +40,18 @@ def get_metrics():
             command.append("--port=%s" % str(params['moab_port']))
         if ( 'timeout' in params ):
             command.append("--timeout=%s" % str(params['timeout']))
+        if ( 'query_gres' in params ):
+            query_gres = params['query_gres']
+            if ( 'mdiag_bin' in params ):
+                mdiag = params['mdiag_bin']
         if ( 'debug' in params ):
             print str(command)
 
-        p = subprocess.Popen(command,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT,
-                             close_fds=True)
         try:
+            p = subprocess.Popen(command,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
+                                 close_fds=True)
             xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
             p.stdout.close()
             xmlclusters = xmldoc.getElementsByTagName("cluster")
@@ -115,7 +120,59 @@ def get_metrics():
                             new_metrics[metric_name]  = int(xmlqueue.attributes["count"].value)
                             units[metric_name] = "jobs"
                             descr[metric_name] = "Blocked Jobs"
-                
+
+            if ( query_gres and mdiag is not None ):
+                try:
+                    command = [ mdiag,"-n","GLOBAL","--xml" ]
+                    if ( 'moab_server' in params ):
+                        command.append("--host=%s" % params['moab_server'])
+                    if ( 'moab_port' in params ):
+                        command.append("--port=%s" % str(params['moab_port']))
+                    if ( 'timeout' in params ):
+                        command.append("--timeout=%s" % str(params['timeout']))
+                    if ( 'debug' in params ):
+                        print str(command)
+                    p = subprocess.Popen(command,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.STDOUT,
+                                         close_fds=True)
+                    xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
+                    p.stdout.close()
+                    xmlnodes = xmldoc.getElementsByTagName("node")
+                    for xmlnode in xmlnodes:
+                        if ( xmlnode.hasAttributes() ):
+                            if ( "GRES" in xmlnode.attributes.keys() ):
+                                greses = xmlnode.attributes["GRES"].value
+                                for gres in greses.split(";"):
+                                    (name,value) = gres.split("=")
+                                    metric_name = "%s%s_gres_total" % (prefix,name.lower())
+                                    new_metrics[metric_name]  = int(value)
+                                    units[metric_name] = "count"
+                                    descr[metric_name] = "%s GRES Total" % name.lower()
+                                    # zero out things that might get updated later
+                                    metric_name = "%s%s_gres_used" % (prefix,name.lower())
+                                    new_metrics[metric_name]  = 0
+                                    units[metric_name] = "count"
+                                    descr[metric_name] = "%s GRES Used" % name.lower()
+                                    metric_name = "%s%s_gres_avail" % (prefix,name.lower())
+                                    new_metrics[metric_name]  = 0
+                                    units[metric_name] = "count"
+                                    descr[metric_name] = "%s GRES Available" % name.lower()
+                            if ( "AGRES" in xmlnode.attributes.keys() ):
+                                greses = xmlnode.attributes["AGRES"].value
+                                for gres in greses.split(";"):
+                                    (name,value) = gres.split("=")
+                                    metric_name = "%s%s_gres_avail" % (prefix,name.lower())
+                                    new_metrics[metric_name]  = int(value)
+                            if ( "DEDGRES" in xmlnode.attributes.keys() ):
+                                greses = xmlnode.attributes["DEDGRES"].value
+                                for gres in greses.split(";"):
+                                    (name,value) = gres.split("=")
+                                    metric_name = "%s%s_gres_used" % (prefix,name.lower())
+                                    new_metrics[metric_name]  = int(value)
+                except Exception as e:
+                    sys.stderr.write("WARNING:  %s\n" % str(e))
+                    pass
             METRICS = {
                 'time': time.time(),
                 'data': new_metrics,
@@ -195,10 +252,14 @@ if __name__ == '__main__':
     params = {
         "metric_prefix" : "moab",
         #"debug"         : True,
+        "mdiag_bin"     : "/opt/moab/bin/mdiag",
+        #"mdiag_bin"     : "/usr/local/moab/default/bin/mdiag",
         "moab_home_dir" : "/var/spool/moab",
         #"moab_server"   : "moabsrv.mydomain.org",
         #"moab_port"     : 42559,
+        #"query_gres"    : True,
         "showq_bin"     : "/opt/moab/bin/showq",
+        #"showq_bin"     : "/usr/local/moab/default/bin/showq",
         "timeout"       : 30,
     }
     

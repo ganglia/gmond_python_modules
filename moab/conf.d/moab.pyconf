@@ -13,6 +13,11 @@ modules {
       value = False
     }
 
+    # Location of mdiag binary
+    param mdiag_bin {
+      value = "/opt/moab/bin/mdiag"
+    }
+
     # location of Moab config files
     param moab_home_dir {
       value = "/var/spool/moab"
@@ -27,6 +32,14 @@ modules {
     #param moab_port {
     #  value = 42559
     #}
+
+    # Whether to query GRESes
+    # if this is true, make sure mdiag_bin is set
+    # and the gmond user is authorized to run
+    # mdiag -n GLOBAL
+    param query_gres {
+      value = False
+    }
 
     # Location of showq binary
     param showq_bin {
