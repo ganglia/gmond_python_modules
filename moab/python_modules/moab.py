@@ -1,3 +1,5 @@
+import logging
+import logging.handlers
 import os
 import subprocess
 import sys
@@ -44,9 +46,7 @@ def get_metrics():
             query_gres = params['query_gres']
             if ( 'mdiag_bin' in params ):
                 mdiag = params['mdiag_bin']
-        if ( 'debug' in params ):
-            print str(command)
-
+        logging.debug(" ".join(command))
         try:
             p = subprocess.Popen(command,
                                  stdout=subprocess.PIPE,
@@ -54,6 +54,7 @@ def get_metrics():
                                  close_fds=True)
             xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
             p.stdout.close()
+            logging.debug(xmldoc.toxml())
             xmlclusters = xmldoc.getElementsByTagName("cluster")
             for xmlcluster in xmlclusters:
                 if ( xmlcluster.hasAttributes() ):
@@ -130,14 +131,14 @@ def get_metrics():
                         command.append("--port=%s" % str(params['moab_port']))
                     if ( 'timeout' in params ):
                         command.append("--timeout=%s" % str(params['timeout']))
-                    if ( 'debug' in params ):
-                        print str(command)
+                    logging.debug(" ".join(command))
                     p = subprocess.Popen(command,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT,
                                          close_fds=True)
                     xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
                     p.stdout.close()
+                    logging.debug(xmldoc.toxml())
                     xmlnodes = xmldoc.getElementsByTagName("node")
                     for xmlnode in xmlnodes:
                         if ( xmlnode.hasAttributes() ):
@@ -147,16 +148,16 @@ def get_metrics():
                                     (name,value) = gres.split("=")
                                     metric_name = "%s%s_gres_total" % (prefix,name.lower())
                                     new_metrics[metric_name]  = int(value)
-                                    units[metric_name] = "count"
+                                    units[metric_name] = "GRES"
                                     descr[metric_name] = "%s GRES Total" % name.lower()
                                     # zero out things that might get updated later
                                     metric_name = "%s%s_gres_used" % (prefix,name.lower())
                                     new_metrics[metric_name]  = 0
-                                    units[metric_name] = "count"
+                                    units[metric_name] = "GRES"
                                     descr[metric_name] = "%s GRES Used" % name.lower()
                                     metric_name = "%s%s_gres_avail" % (prefix,name.lower())
                                     new_metrics[metric_name]  = 0
-                                    units[metric_name] = "count"
+                                    units[metric_name] = "GRES"
                                     descr[metric_name] = "%s GRES Available" % name.lower()
                             if ( "AGRES" in xmlnode.attributes.keys() ):
                                 greses = xmlnode.attributes["AGRES"].value
@@ -171,7 +172,7 @@ def get_metrics():
                                     metric_name = "%s%s_gres_used" % (prefix,name.lower())
                                     new_metrics[metric_name]  = int(value)
                 except Exception as e:
-                    sys.stderr.write("WARNING:  %s\n" % str(e))
+                    logging.warning(str(e))
                     pass
             METRICS = {
                 'time': time.time(),
@@ -180,7 +181,7 @@ def get_metrics():
                 'descr': descr
             }
         except Exception as e:
-            sys.stderr.write("WARNING:  %s\n" % str(e))
+            logging.warning(str(e))
             pass
 
     return [METRICS]
@@ -228,6 +229,37 @@ def metric_init(params):
 
     global_params = params
 
+    # configure logging
+    if ( 'logfile' in params ):
+        if ( params['logfile'].upper() in ["SYSLOG"] ):
+            logging.basicConfig(level=logging.INFO)
+            logfac = "user"
+            if ( 'logfacility' in params ):
+                logfac = params['logfacility'].lower()
+            logaddr = ('localhost',logging.handlers.SYSLOG_UDP_PORT)
+            if ( 'logdevice' in params ):
+                logaddr = params['logdevice']
+            logging.getLogger().addHandler(logging.handlers.SysLogHandler(address=logaddr,facility=logfac))
+        else:
+            logging.basicConfig(filename=params['logfile'],level=logging.INFO)
+    else:
+        logging.basicConfig(level=logging.INFO)
+    if ( 'loglevel' in params ):
+        if ( params['loglevel'].upper() in ["CRITICAL"] ):
+            logging.getLogger().setLevel(logging.CRITICAL)
+        elif ( params['loglevel'].upper() in ["DEBUG"] ):
+            logging.getLogger().setLevel(logging.DEBUG)
+        elif ( params['loglevel'].upper() in ["ERROR"] ):
+            logging.getLogger().setLevel(logging.ERROR)
+        elif ( params['loglevel'].upper() in ["FATAL"] ):
+            logging.getLogger().setLevel(logging.FATAL)
+        elif ( params['loglevel'].upper() in ["INFO"] ):
+            logging.getLogger().setLevel(logging.INFO)
+        elif ( params['loglevel'].upper() in ["WARN","WARNING"] ):
+            logging.getLogger().setLevel(logging.WARN)
+        else:
+            raise RuntimeError("Unknown loglevel \"%s\"" % params['loglevel'])
+
     metrics = get_metrics()[0]
 
     for item in metrics['data']:
@@ -237,6 +269,8 @@ def metric_init(params):
                 'groups'        : params['metric_prefix'],
                 'units'         : metrics['units'][item]
                 }))
+
+    logging.debug(str(descriptors))
 
     return descriptors
 
@@ -251,7 +285,10 @@ if __name__ == '__main__':
     
     params = {
         "metric_prefix" : "moab",
-        #"debug"         : True,
+        #"logdevice"     : "/dev/log",
+        #"loglevel"      : "DEBUG",
+        #"logfile"       : "SYSLOG",
+        #"logfacility"   : "user",
         "mdiag_bin"     : "/opt/moab/bin/mdiag",
         #"mdiag_bin"     : "/usr/local/moab/default/bin/mdiag",
         "moab_home_dir" : "/var/spool/moab",
@@ -268,7 +305,7 @@ if __name__ == '__main__':
     while True:
         for d in descriptors:
             v = d['call_back'](d['name'])
-            print '%s = %s' % (d['name'],  v)
+            print '%s (%s) = %s %s' % (d['description'],  d['name'],  v, d['units'])
         print 'Sleeping %d seconds\n' % METRICS_CACHE_MAX
         time.sleep(METRICS_CACHE_MAX)
 
