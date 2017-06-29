@@ -8,9 +8,19 @@ modules {
       value = "moab"
     }
 
-    # Debug flag
-    param debug {
-      value = False
+    # Logging
+    param loglevel {
+      value = "INFO"
+    }
+    # The logfile parameter can be either a file name or "SYSLOG"
+    #param logfile {
+    #  value = "SYSLOG"
+    #}
+    param logfacility {
+      value = "user"
+    }
+    param logdevice {
+      value = "/dev/log"
     }
 
     # Location of mdiag binary
