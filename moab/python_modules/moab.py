@@ -78,6 +78,11 @@ def get_metrics():
                             metric_value = int(xmlcluster.attributes["LocalUpNodes"].value)
                             metric_descr = "Up Nodes"
                             metric_units = "nodes"
+                        elif ( attr=="LocalConfigNodes"  ):
+                            metric_name = prefix+"total_nodes"
+                            metric_value = int(xmlcluster.attributes["LocalConfigNodes"].value)
+                            metric_descr = "Total Nodes"
+                            metric_units = "nodes"
                         elif ( attr=="LocalAllocProcs" ):
                             metric_name = prefix+"allocated_cores"
                             metric_value = int(xmlcluster.attributes["LocalAllocProcs"].value)
