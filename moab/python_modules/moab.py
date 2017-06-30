@@ -20,6 +20,8 @@ def get_metrics():
     """Return all metrics"""
     global METRICS
 
+    logging.debug("Entering moab::get_metrics")
+
     params = global_params
 
     if ( 'showq_bin' not in params ):
@@ -189,29 +191,33 @@ def get_metrics():
             logging.warning(str(e))
             pass
 
+    logging.debug("Leaving moab::get_metrics")
+
     return [METRICS]
 
 
 def get_value(name):
     """Return a value for the requested metric"""
+    logging.debug("Entering moab::get_value")
     try:
-        
         metrics = get_metrics()[0]
-
         if ( name in metrics['data'].keys() ):
             result = metrics['data'][name]
         else:
             result = 0
-
     except Exception as e:
         result = 0
 
+    logging.debug("Leaving moab::get_value")
     return result
 
+
 def create_desc(skel, prop):
+    #logging.debug("Entering moab::create_desc")
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
+    #logging.debug("Leaving moab::create_desc")
     return d
 
 
@@ -240,7 +246,8 @@ def metric_init(params):
         logfmt = params['logformat']
     if ( 'logfile' in params ):
         if ( params['logfile'].upper() in ["SYSLOG"] ):
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=logging.INFO,
+                                format=logfmt)
             logfac = "user"
             if ( 'logfacility' in params ):
                 logfac = params['logfacility'].lower()
@@ -249,9 +256,12 @@ def metric_init(params):
                 logaddr = params['logdevice']
             logging.getLogger().addHandler(logging.handlers.SysLogHandler(address=logaddr,facility=logfac))
         else:
-            logging.basicConfig(filename=params['logfile'],level=logging.INFO)
+            logging.basicConfig(filename=params['logfile'],
+                                level=logging.INFO,
+                                format=logfmt)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+                            format=logfmt)
     if ( 'loglevel' in params ):
         if ( params['loglevel'].upper() in ["CRITICAL"] ):
             logging.getLogger().setLevel(logging.CRITICAL)
@@ -267,7 +277,7 @@ def metric_init(params):
             logging.getLogger().setLevel(logging.WARN)
         else:
             raise RuntimeError("Unknown loglevel \"%s\"" % params['loglevel'])
-    logging.debug(str(logging.getLogger().handlers))
+    logging.debug("Finished configuring logging in moab::metric_init")
 
     metrics = get_metrics()[0]
     logging.debug("METRICS:  "+str(metrics))
@@ -282,6 +292,7 @@ def metric_init(params):
 
     logging.debug("DESCRIPTORS:  "+str(descriptors))
 
+    logging.debug("Leaving moab::metric_init")
     return descriptors
 
 
