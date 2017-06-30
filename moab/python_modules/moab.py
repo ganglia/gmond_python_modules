@@ -230,6 +230,9 @@ def metric_init(params):
     global_params = params
 
     # configure logging
+    logfmt = "%(asctime)s gmond-moab %(levelname)s: %(message)s"
+    if ( 'logformat' in params ):
+        logfmt = params['logformat']
     if ( 'logfile' in params ):
         if ( params['logfile'].upper() in ["SYSLOG"] ):
             logging.basicConfig(level=logging.INFO)
@@ -259,8 +262,10 @@ def metric_init(params):
             logging.getLogger().setLevel(logging.WARN)
         else:
             raise RuntimeError("Unknown loglevel \"%s\"" % params['loglevel'])
+    logging.debug(str(logging.getLogger().handlers))
 
     metrics = get_metrics()[0]
+    logging.debug("METRICS:  "+str(metrics))
 
     for item in metrics['data']:
         descriptors.append(create_desc(Desc_Skel, {
@@ -270,7 +275,7 @@ def metric_init(params):
                 'units'         : metrics['units'][item]
                 }))
 
-    logging.debug(str(descriptors))
+    logging.debug("DESCRIPTORS:  "+str(descriptors))
 
     return descriptors
 
