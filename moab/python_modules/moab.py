@@ -20,7 +20,7 @@ def get_metrics():
     """Return all metrics"""
     global METRICS
 
-    logging.debug("Entering moab::get_metrics")
+    logging.debug("ganglia_moab: Entering moab::get_metrics")
 
     params = global_params
 
@@ -48,7 +48,7 @@ def get_metrics():
             query_gres = params['query_gres']
             if ( 'mdiag_bin' in params ):
                 mdiag = params['mdiag_bin']
-        logging.debug(" ".join(command))
+        logging.debug("ganglia_moab: %s" % " ".join(command))
         try:
             p = subprocess.Popen(command,
                                  stdout=subprocess.PIPE,
@@ -56,7 +56,7 @@ def get_metrics():
                                  close_fds=True)
             xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
             p.stdout.close()
-            logging.debug(xmldoc.toxml())
+            logging.debug("ganglia_moab: %s" % xmldoc.toxml())
             xmlclusters = xmldoc.getElementsByTagName("cluster")
             for xmlcluster in xmlclusters:
                 if ( xmlcluster.hasAttributes() ):
@@ -138,14 +138,14 @@ def get_metrics():
                         command.append("--port=%s" % str(params['moab_port']))
                     if ( 'timeout' in params ):
                         command.append("--timeout=%s" % str(params['timeout']))
-                    logging.debug(" ".join(command))
+                    logging.debug("ganglia_moab: %s" % " ".join(command))
                     p = subprocess.Popen(command,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT,
                                          close_fds=True)
                     xmldoc = minidom.parseString("\n".join(p.stdout.readlines()))
                     p.stdout.close()
-                    logging.debug(xmldoc.toxml())
+                    logging.debug("ganglia_moab: %s" % xmldoc.toxml())
                     xmlnodes = xmldoc.getElementsByTagName("node")
                     for xmlnode in xmlnodes:
                         if ( xmlnode.hasAttributes() ):
@@ -179,7 +179,7 @@ def get_metrics():
                                     metric_name = "%s%s_gres_used" % (prefix,name.lower())
                                     new_metrics[metric_name]  = int(value)
                 except Exception as e:
-                    logging.warning(str(e))
+                    logging.warning("ganglia_moab: %s" % str(e))
                     pass
             METRICS = {
                 'time': time.time(),
@@ -188,17 +188,17 @@ def get_metrics():
                 'descr': descr
             }
         except Exception as e:
-            logging.warning(str(e))
+            logging.warning("ganglia_moab: %s" % str(e))
             pass
 
-    logging.debug("Leaving moab::get_metrics")
+    logging.debug("ganglia_moab: %s" % "Leaving moab::get_metrics")
 
     return [METRICS]
 
 
 def get_value(name):
     """Return a value for the requested metric"""
-    logging.debug("Entering moab::get_value")
+    logging.debug("ganglia_moab: Entering moab::get_value")
     try:
         metrics = get_metrics()[0]
         if ( name in metrics['data'].keys() ):
@@ -208,16 +208,16 @@ def get_value(name):
     except Exception as e:
         result = 0
 
-    logging.debug("Leaving moab::get_value")
+    logging.debug("ganglia_moab: Leaving moab::get_value")
     return result
 
 
 def create_desc(skel, prop):
-    #logging.debug("Entering moab::create_desc")
+    #logging.debug("ganglia_moab: Entering moab::create_desc")
     d = skel.copy()
     for k,v in prop.iteritems():
         d[k] = v
-    #logging.debug("Leaving moab::create_desc")
+    #logging.debug("ganglia_moab: Leaving moab::create_desc")
     return d
 
 
@@ -277,10 +277,10 @@ def metric_init(params):
             logging.getLogger().setLevel(logging.WARN)
         else:
             raise RuntimeError("Unknown loglevel \"%s\"" % params['loglevel'])
-    logging.debug("Finished configuring logging in moab::metric_init")
+    logging.debug("ganglia_moab: Finished configuring logging in moab::metric_init")
 
     metrics = get_metrics()[0]
-    logging.debug("METRICS:  "+str(metrics))
+    logging.debug("ganglia_moab: METRICS: %s" % str(metrics))
 
     for item in metrics['data']:
         descriptors.append(create_desc(Desc_Skel, {
@@ -290,9 +290,9 @@ def metric_init(params):
                 'units'         : metrics['units'][item]
                 }))
 
-    logging.debug("DESCRIPTORS:  "+str(descriptors))
+    logging.debug("ganglia_moab: DESCRIPTORS: %s " % str(descriptors))
 
-    logging.debug("Leaving moab::metric_init")
+    logging.debug("ganglia_moab: Leaving moab::metric_init")
     return descriptors
 
 
