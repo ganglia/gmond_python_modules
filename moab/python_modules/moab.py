@@ -45,7 +45,7 @@ def get_metrics():
         if ( 'timeout' in params ):
             command.append("--timeout=%s" % str(params['timeout']))
         if ( 'query_gres' in params ):
-            query_gres = params['query_gres']
+            query_gres = str(params['query_gres'])=='True'
             if ( 'mdiag_bin' in params ):
                 mdiag = params['mdiag_bin']
         logging.debug("ganglia_moab: %s" % " ".join(command))
