@@ -315,7 +315,7 @@ if __name__ == '__main__':
         "moab_home_dir" : "/var/spool/moab",
         #"moab_server"   : "moabsrv.mydomain.org",
         #"moab_port"     : 42559,
-        #"query_gres"    : True,
+        #"query_gres"    : "True",
         "showq_bin"     : "/opt/moab/bin/showq",
         #"showq_bin"     : "/usr/local/moab/default/bin/showq",
         "timeout"       : 30,
