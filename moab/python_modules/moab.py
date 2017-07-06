@@ -191,7 +191,7 @@ def get_metrics():
             logging.warning("ganglia_moab: %s" % str(e))
             pass
 
-    logging.debug("ganglia_moab: %s" % "Leaving moab::get_metrics")
+    logging.debug("ganglia_moab: Leaving moab::get_metrics")
 
     return [METRICS]
 
