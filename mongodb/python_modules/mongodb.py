@@ -35,8 +35,8 @@ import copy
 
 NAME_PREFIX = 'mongodb_'
 PARAMS = {
-    'server_status' : '~/mongodb-osx-x86_64-1.8.1/bin/mongo --host mongodb04.example.com --port 27018 --quiet --eval "printjson(db.serverStatus())"',
-    'rs_status'     : '~/mongodb-osx-x86_64-1.8.1/bin/mongo --host mongodb04.example.com --port 27018 --quiet --eval "printjson(rs.status())"'
+    'server_status' : 'mongo --quiet --eval "printjson(db.serverStatus())"',
+    'rs_status'     : 'mongo --quiet --eval "printjson(rs.status())"'
 }
 METRICS = {
     'time' : 0,
@@ -74,14 +74,16 @@ def get_metrics():
             # clean up
             metrics_str = ''.join(io.readlines()).strip() # convert to string
             metrics_str = re.sub('\w+\((.*)\)', r"\1", metrics_str) # remove functions
-
+            metrics_str = metrics_str.replace(''', 1,''',''',''')
+            
             # convert to flattened dict
             try:
                 if status_type == 'server_status':
                     metrics.update(flatten(json.loads(metrics_str)))
                 else:
                     metrics.update(flatten(json.loads(metrics_str), pre='%s_' % status_type))
-            except ValueError:
+            except ValueError,e:
+                print e
                 metrics = {}
 
         # update cache
@@ -96,10 +98,8 @@ def get_metrics():
 
 def get_value(name):
     """Return a value for the requested metric"""
-
      # get metrics
     metrics = get_metrics()[0]
-
     # get value
     name = name[len(NAME_PREFIX):] # remove prefix from name
     try:
@@ -120,11 +120,11 @@ def get_rate(name):
     name = name[len(NAME_PREFIX):] # remove prefix from name
 
     try:
-        rate = float(curr_metrics['data'][name] - last_metrics['data'][name]) / \
-               float(curr_metrics['time'] - last_metrics['time'])
+        rate = (float(curr_metrics['data'][name]) - float(last_metrics['data'][name])) / \
+               (float(curr_metrics['time']) - float(last_metrics['time']))
         if rate < 0:
             rate = float(0)
-    except StandardError:
+    except StandardError,e:
         rate = float(0)
 
     return rate
