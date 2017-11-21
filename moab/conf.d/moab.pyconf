@@ -8,9 +8,24 @@ modules {
       value = "moab"
     }
 
-    # Debug flag
-    param debug {
-      value = False
+    # Logging
+    param loglevel {
+      value = "INFO"
+    }
+    # The logfile parameter can be either a file name or "SYSLOG"
+    #param logfile {
+    #  value = "SYSLOG"
+    #}
+    param logfacility {
+      value = "user"
+    }
+    param logdevice {
+      value = "/dev/log"
+    }
+
+    # Location of mdiag binary
+    param mdiag_bin {
+      value = "/opt/moab/bin/mdiag"
     }
 
     # location of Moab config files
@@ -27,6 +42,14 @@ modules {
     #param moab_port {
     #  value = 42559
     #}
+
+    # Whether to query GRESes
+    # if this is true, make sure mdiag_bin is set
+    # and the gmond user is authorized to run
+    # mdiag -n GLOBAL
+    param query_gres {
+      value = False
+    }
 
     # Location of showq binary
     param showq_bin {
