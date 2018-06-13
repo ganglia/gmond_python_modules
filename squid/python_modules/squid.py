@@ -551,7 +551,7 @@ def metric_init(params):
                     'time_max': 60,
                     'value_type': "float",
                     'units': stats_descriptions[label]['units'],
-                    'slope': "positive",
+                    'slope': "both",
                     'format': '%f',
                     'description': label,
                     'groups': 'squid',
