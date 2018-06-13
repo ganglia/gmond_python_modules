@@ -102,7 +102,7 @@ def get_stat(name):
         if name.startswith('squid_'):
             label = name[6:]
         else:
-            lable = name
+            label = name
             
             #logging.debug("fetching %s" % label)
         try:
