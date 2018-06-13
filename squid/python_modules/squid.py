@@ -17,6 +17,7 @@ last_update = 0
 # We get counter values back, so we have to calculate deltas for some stats
 squid_stats = {}
 squid_stats_last = {}
+tcp_port = 3128
 
 MIN_UPDATE_INTERVAL = 30          # Minimum update interval in seconds
 
@@ -24,6 +25,7 @@ def collect_stats():
     #logging.debug('collect_stats()')
     global last_update
     global squid_stats, squid_stats_last
+    global tcp_port
 
     now = time.time()
 
@@ -39,7 +41,8 @@ def collect_stats():
     # Run squidclient mgr:info to get stats
     try:
         stats = {}
-        squidclient = os.popen("squidclient mgr:info")
+        squidclient_command_str = "squidclient -p %d mgr:info" % (tcp_port)
+        squidclient = os.popen(squidclient_command_str)
     except IOError,e:
         #logging.error('error running squidclient')
         return False
@@ -128,8 +131,12 @@ def metric_init(params):
     global descriptors
     global squid_stats
     global stats_descriptions   # needed for stats extraction in collect_stat()
+    global tcp_port
 
     #logging.debug("init: " + str(params))
+
+    if 'tcp_port' in params:
+        tcp_port = int(params['tcp_port'])
 
     stats_descriptions = dict(
         cacheVersionId = {
@@ -596,7 +603,7 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
-    metric_init(None)
+    metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
         if d['value_type'] == 'string':
