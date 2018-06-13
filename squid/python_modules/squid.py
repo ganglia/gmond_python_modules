@@ -72,16 +72,23 @@ def collect_stats():
                     squid_stats[metric] = rawstat
         if squid_stats.has_key(metric): # Strip trailing non-num text
             if metric != 'cacheVersionId': # version is special case
-                match = re.match('([0-9.]+)',squid_stats[metric]);
+                match = re.match('([-]?[0-9.]+)',squid_stats[metric]);
                 squid_stats[metric] = float(match.group(1))
                 if stats_descriptions[metric]['type'] == 'integer':
                     squid_stats[metric] = int(squid_stats[metric])
+                    # Metrics shouldn't be negative; This is due to
+                    # squid SNMP being 32-bit. Add 2^32 to convert
+                    # to unsigned 32-bit integer. 
+                    if squid_stats[metric] < 0:
+                      squid_stats[metric] = (1 << 32) + squid_stats[metric]
 
         # Calculate delta for counter stats
         if metric in squid_stats_last:
             if stats_descriptions[metric]['type'] == 'counter32':
                 current = squid_stats[metric]
                 squid_stats[metric] = (squid_stats[metric] - squid_stats_last[metric]) / float(elapsed_time)
+                if squid_stats[metric] < 0.0:
+                    squid_stats[metric] = 0.0
                 squid_stats_last[metric] = current
             else:
                 squid_stats_last[metric] = squid_stats[metric]
