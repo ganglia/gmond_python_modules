@@ -589,6 +589,9 @@ def metric_init(params):
                 }
             
             d.update(stats_descriptions[label])
+            # gmond does not like lists such as the 'keys'
+            # right-hand-side
+            del d['keys']
 
             descriptors.append(d)
             
