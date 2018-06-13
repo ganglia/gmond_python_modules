@@ -470,7 +470,7 @@ def metric_init(params):
                 }
             
             d.update(stats_descriptions[label])
-            
+
             descriptors.append(d)
             
         #else:
