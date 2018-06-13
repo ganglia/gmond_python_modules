@@ -106,7 +106,7 @@ def get_stat(name):
             
             #logging.debug("fetching %s" % label)
         try:
-            #logging.info("got %4.2f" % squid_stats[label])
+            #logging.info("got " + str(squid_stats[label]))
             return squid_stats[label]
         except:
             #logging.error("failed to fetch %s" % name)
