@@ -331,7 +331,7 @@ def metric_init(params):
             'keys': [
                 'HTTP Requests (All)'
             ],
-           'match': '[0-9.]+\s+([0-9.]+)'
+            'match': '[0-9.]+\s+([0-9.]+)'
         },
         cacheHttpMissSvcTime_5 = {
             'description': 'HTTP miss service time - 5 min',
@@ -349,7 +349,7 @@ def metric_init(params):
             'keys': [
                 'Cache Misses'
             ],
-           'match': '[0-9.]+\s+([0-9.]+)'
+            'match': '[0-9.]+\s+([0-9.]+)'
         },
         cacheHttpNmSvcTime_5 = {
             'description': 'HTTP hit not-modified service time - 5 min',
