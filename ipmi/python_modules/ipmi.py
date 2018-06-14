@@ -22,6 +22,8 @@ stats_pos = {}
 # hardware and Dell's sensor names (mostly) make more sense to me than
 # HP's...  --troy
 unified_metric_names = {
+    # Cisco
+    "FP_TEMP_SENSOR": "Inlet Temp",
     # HP sensor names
     "01-Inlet Ambient": "Inlet Temp",
     "43-Sys Exhaust": "Exhaust Temp",
@@ -45,6 +47,7 @@ unified_metric_names = {
     "Temp 17 (GPU3)": "Coprocessor 3 Temp",
     "Temp 18 (GPU1)": "Coprocessor 1 Temp",
     # Dell sensor names
+    "Ambient Temp": "Inlet Temp",
     "Fan1": "Fan 1",
     "Fan2": "Fan 2",
     "Fan3": "Fan 3",
@@ -77,7 +80,15 @@ unified_metric_names = {
     "Processor 1 Fan": "Fan 3",
     "Processor 2 Fan": "Fan 4",
     "PS1 Temperature": "Pwr Supply 1 Temp",
-    "PS2 Temperature": "Pwr Supply 2 Temp"
+    "PS2 Temperature": "Pwr Supply 2 Temp",
+    # Sun
+    "VRD 0 Temp": "Inlet Temp",
+    "MB/T_VRD0": "Inlet Temp",
+    "MB/T_AMB0": "Inlet Temp",
+    "/MB/T_AMB": "Inlet Temp",
+    # Other
+    "NB Temp" : "Inlet Temp",
+    "System Temp" : "Inlet Temp"
 }
 def mangle_metric_name(metric_name,prefix):
     name = metric_name
