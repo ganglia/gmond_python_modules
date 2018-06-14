@@ -101,6 +101,9 @@ def metric_description(metric_name):
     else:
         return metric_name.strip()
 
+def c_to_f(temp):
+  return (temp * 9.0/5.0) + 32.0
+
 def get_metrics():
     """Return all metrics"""
 
@@ -167,9 +170,16 @@ def get_metrics():
                 if not vmatch:
                     continue
                 metric_value = float(vmatch.group(1))
+                if data[2].strip() == "degrees C":
+                  if 'use_fahrenheit' in params.keys() and params['use_fahrenheit']:
+                    metric_value = c_to_f(metric_value)
+                    units[metric_name] = "F"
+                  else:
+                    units[metric_name] = "C"
+                else:
+                  units[metric_name] = data[2].strip()
 
                 new_metrics[metric_name] = metric_value
-                units[metric_name] = data[2].strip().replace("degrees C", "C")
                 descr[metric_name] = description
                 
             except ValueError:
@@ -253,6 +263,7 @@ if __name__ == '__main__':
     
     params = {
         "use_sudo" : False,
+        "use_fahrenheit" : False,
         "metric_prefix" : "ipmi",
         #"ipmi_ip" : "10.1.2.3",
         #"username"  : "ADMIN",
