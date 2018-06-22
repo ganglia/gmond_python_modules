@@ -17,6 +17,7 @@ last_update = 0
 # We get counter values back, so we have to calculate deltas for some stats
 squid_stats = {}
 squid_stats_last = {}
+tcp_port = 3128
 
 MIN_UPDATE_INTERVAL = 30          # Minimum update interval in seconds
 
@@ -24,6 +25,7 @@ def collect_stats():
     #logging.debug('collect_stats()')
     global last_update
     global squid_stats, squid_stats_last
+    global tcp_port
 
     now = time.time()
 
@@ -39,7 +41,8 @@ def collect_stats():
     # Run squidclient mgr:info to get stats
     try:
         stats = {}
-        squidclient = os.popen("squidclient mgr:info")
+        squidclient_command_str = "squidclient -p %d mgr:info" % (tcp_port)
+        squidclient = os.popen(squidclient_command_str)
     except IOError,e:
         #logging.error('error running squidclient')
         return False
@@ -60,28 +63,36 @@ def collect_stats():
 
     # Use stats_descriptions to convert raw stats to real metrics
     for metric in stats_descriptions:
-        if stats_descriptions[metric].has_key('key'):
-            if rawstats.has_key(stats_descriptions[metric]['key']):
-                rawstat = rawstats[stats_descriptions[metric]['key']]
-                if stats_descriptions[metric].has_key('match'):
-                    match = re.match(stats_descriptions[metric]['match'],rawstat)
-                    if match:
-                        rawstat = match.group(1)
+        if stats_descriptions[metric].has_key('keys'):
+            for key in stats_descriptions[metric]['keys']:
+                if rawstats.has_key(key):
+                    rawstat = rawstats[key]
+                    if stats_descriptions[metric].has_key('match'):
+                        match = re.match(stats_descriptions[metric]['match'],rawstat)
+                        if match:
+                            rawstat = match.group(1)
+                            squid_stats[metric] = rawstat
+                    else:
                         squid_stats[metric] = rawstat
-                else:
-                    squid_stats[metric] = rawstat
         if squid_stats.has_key(metric): # Strip trailing non-num text
             if metric != 'cacheVersionId': # version is special case
-                match = re.match('([0-9.]+)',squid_stats[metric]);
+                match = re.match('([-]?[0-9.]+)',squid_stats[metric]);
                 squid_stats[metric] = float(match.group(1))
                 if stats_descriptions[metric]['type'] == 'integer':
                     squid_stats[metric] = int(squid_stats[metric])
+                    # Metrics shouldn't be negative; This is due to
+                    # squid SNMP being 32-bit. Add 2^32 to convert
+                    # to unsigned 32-bit integer. 
+                    if squid_stats[metric] < 0:
+                      squid_stats[metric] = (1 << 32) + squid_stats[metric]
 
         # Calculate delta for counter stats
         if metric in squid_stats_last:
             if stats_descriptions[metric]['type'] == 'counter32':
                 current = squid_stats[metric]
                 squid_stats[metric] = (squid_stats[metric] - squid_stats_last[metric]) / float(elapsed_time)
+                if squid_stats[metric] < 0.0:
+                    squid_stats[metric] = 0.0
                 squid_stats_last[metric] = current
             else:
                 squid_stats_last[metric] = squid_stats[metric]
@@ -102,11 +113,11 @@ def get_stat(name):
         if name.startswith('squid_'):
             label = name[6:]
         else:
-            lable = name
+            label = name
             
             #logging.debug("fetching %s" % label)
         try:
-            #logging.info("got %4.2f" % squid_stats[label])
+            #logging.info("got " + str(squid_stats[label]))
             return squid_stats[label]
         except:
             #logging.error("failed to fetch %s" % name)
@@ -120,296 +131,404 @@ def metric_init(params):
     global descriptors
     global squid_stats
     global stats_descriptions   # needed for stats extraction in collect_stat()
+    global tcp_port
 
     #logging.debug("init: " + str(params))
+
+    if 'tcp_port' in params:
+        tcp_port = int(params['tcp_port'])
 
     stats_descriptions = dict(
         cacheVersionId = {
             'description': 'Cache Software Version',
             'units': 'N/A',
             'type': 'string',
-            'key': 'Squid Object Cache',
-            },
+            'keys': [
+                'Squid Object Cache'
+            ]
+        },
         cacheSysVMsize = {
             'description': 'Storage Mem size in KB',
             'units': 'KB',
             'type': 'integer',
-            'key': 'Storage Mem size',
-            },
+            'keys': [
+                'Storage Mem size'
+            ]
+        },
         cacheMemUsage = {
             'description': 'Total memory accounted for KB',
             'units': 'KB',
             'type': 'integer',
-            'key': 'Total accounted',
-            },
+            'keys': [
+                'Total accounted'
+            ]
+        },
         cacheSysPageFaults = {
             'description': 'Page faults with physical i/o',
             'units': 'faults/s',
             'type': 'counter32',
-            'key': 'Page faults with physical i/o',
-            },
+            'keys': [
+                'Page faults with physical i/o'
+            ]
+        },
         cacheCpuTime = {
             'description': 'Amount of cpu seconds consumed',
             'units': 'seconds',
             'type': 'integer',
-            'key': 'CPU Time',
-            },
+            'keys': [
+                'CPU Time'
+            ]
+        },
         cacheCpuUsage = {
             'description': 'The percentage use of the CPU',
             'units': 'percent',
             'type': 'float',
-            'key': 'CPU Usage',
-            },
+            'keys': [
+                'CPU Usage'
+            ]
+        },
         cacheCpuUsage_5 = {
             'description': 'The percentage use of the CPU - 5 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'CPU Usage, 5 minute avg',
-            },
+            'keys': [
+                'CPU Usage, 5 minute avg'
+            ]
+        },
         cacheCpuUsage_60 = {
             'description': 'The percentage use of the CPU - 60 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'CPU Usage, 60 minute avg',
-            },
+            'keys': [
+                'CPU Usage, 60 minute avg'
+            ]
+        },
         cacheMaxResSize = {
             'description': 'Maximum Resident Size in KB',
             'units': 'KB',
             'type': 'integer',
-            'key': 'Maximum Resident Size',
-            },
+            'keys': [
+                'Maximum Resident Size'
+            ]
+        },
         cacheNumObjCount = {
             'description': 'Number of objects stored by the cache',
             'units': 'objects',
             'type': 'integer',
-            'key': 'StoreEntries',
-            },
+            'keys': [
+                'StoreEntries'
+            ]
+        },
         cacheNumObjCountMemObj = {
             'description': 'Number of memobjects stored by the cache',
             'units': 'objects',
             'type': 'integer',
-            'key': 'StoreEntries with MemObjects',
-            },
+            'keys': [
+                'StoreEntries with MemObjects'
+            ]
+        },
         cacheNumObjCountHot = {
             'description': 'Number of hot objects stored by the cache',
             'units': 'objects',
             'type': 'integer',
-            'key': 'Hot Object Cache Items',
-            },
+            'keys': [
+                'Hot Object Cache Items'
+            ]
+        },
         cacheNumObjCountOnDisk = {
             'description': 'Number of objects stored by the cache on-disk',
             'units': 'objects',
             'type': 'integer',
-            'key': 'on-disk objects',
-            },
+            'keys': [
+                'on-disk objects'
+            ]
+        },
         cacheCurrentUnusedFDescrCnt = {
             'description': 'Available number of file descriptors',
             'units': 'file descriptors',
             'type': 'gauge32',
-            'key': 'Maximum number of file descriptors',
-            },
+            'keys': [
+                'Maximum number of file descriptors'
+            ]
+        },
         cacheCurrentResFileDescrCnt = {
             'description': 'Reserved number of file descriptors',
             'units': 'file descriptors',
             'type': 'gauge32',
-            'key': 'Reserved number of file descriptors',
-            },
+            'keys': [
+                'Reserved number of file descriptors'
+            ]
+        },
         cacheCurrentFileDescrCnt = {
             'description': 'Number of file descriptors in use',
             'units': 'file descriptors',
             'type': 'gauge32',
-            'key': 'Number of file desc currently in use',
-            },
+            'keys': [
+                'Number of file desc currently in use'
+            ]
+        },
         cacheCurrentFileDescrMax = {
             'description': 'Highest file descriptors in use',
             'units': 'file descriptors',
             'type': 'gauge32',
-            'key': 'Largest file desc currently in use',
-            },
+            'keys': [
+                'Largest file desc currently in use'
+            ]
+        },
         cacheProtoClientHttpRequests = {
             'description': 'Number of HTTP requests received',
             'units': 'requests/s',
             'type': 'counter32',
-            'key': 'Number of HTTP requests received'
-            },
+            'keys': [
+                'Number of HTTP requests received'
+            ]
+        },
         cacheIcpPktsSent = {
             'description': 'Number of ICP messages sent',
             'units': 'messages/s',
             'type': 'counter32',
-            'key': 'Number of ICP messages sent',
-            },
+            'keys': [
+                'Number of ICP messages sent'
+            ]
+        },
         cacheIcpPktsRecv = {
             'description': 'Number of ICP messages received',
             'units': 'messages/s',
             'type': 'counter32',
-            'key': 'Number of ICP messages received',
-            },
+            'keys': [
+                'Number of ICP messages received'
+            ]
+        },
         cacheCurrentSwapSize = {
             'description': 'Storage Swap size',
             'units': 'KB',
             'type': 'gauge32',
-            'key': 'Storage Swap size',
-            },
+            'keys': [
+                'Storage Swap size'
+            ]
+        },
         cacheClients = {
             'description': 'Number of clients accessing cache',
             'units': 'clients',
             'type': 'gauge32',
-            'key': 'Number of clients accessing cache',
-            },
+            'keys': [
+                'Number of clients accessing cache'
+            ]
+        },
         cacheHttpAllSvcTime_5 = {
             'description': 'HTTP all service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'HTTP Requests (All)',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'HTTP Requests (All)'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheHttpAllSvcTime_60 = {
             'description': 'HTTP all service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'HTTP Requests (All)',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'HTTP Requests (All)'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheHttpMissSvcTime_5 = {
             'description': 'HTTP miss service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Cache Misses',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'Cache Misses'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheHttpMissSvcTime_60 = {
             'description': 'HTTP miss service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Cache Misses',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'Cache Misses'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheHttpNmSvcTime_5 = {
             'description': 'HTTP hit not-modified service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Not-Modified Replies',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'Not-Modified Replies'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheHttpNmSvcTime_60 = {
             'description': 'HTTP hit not-modified service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Not-Modified Replies',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'Not-Modified Replies'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheHttpHitSvcTime_5 = {
             'description': 'HTTP hit service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Cache Hits',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'Cache Hits'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheHttpHitSvcTime_60 = {
             'description': 'HTTP hit service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Cache Hits',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'Cache Hits'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheIcpQuerySvcTime_5 = {
             'description': 'ICP query service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'ICP Queries',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'ICP Queries'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheIcpQuerySvcTime_60 = {
             'description': 'ICP query service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'ICP Queries',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'ICP Queries'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheDnsSvcTime_5 = {
             'description': 'DNS service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'DNS Lookups',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'DNS Lookups'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheDnsSvcTime_60 = {
             'description': 'DNS service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'DNS Lookups',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'DNS Lookups'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
         cacheRequestHitRatio_5 = {
             'description': 'Request Hit Ratios - 5 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Hit Ratios',
-            'match': '5min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Hit Ratios',
+                # squidclient 3.5.20
+                'Hits as % of all requests'
+            ],
+            'match': '5min: ([0-9.]+)%'
+        },
         cacheRequestHitRatio_60 = {
             'description': 'Request Hit Ratios - 60 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Hit Ratios',
-            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Hit Ratios',
+                # squidclient 3.5.20
+                'Hits as % of all requests'
+            ],
+            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%'
+        },
         cacheRequestByteRatio_5 = {
             'description': 'Byte Hit Ratios - 5 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Byte Hit Ratios',
-            'match': '5min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Byte Hit Ratios',
+                # squidclient 3.5.20
+                'Hits as % of bytes sent'
+            ],
+            'match': '5min: ([0-9.]+)%'
+        },
         cacheRequestByteRatio_60 = {
             'description': 'Byte Hit Ratios - 60 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Byte Hit Ratios',
-            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Byte Hit Ratios',
+                # squidclient 3.5.20
+                'Hits as % of bytes sent'
+            ],
+            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%'
+        },
         cacheRequestMemRatio_5 = {
             'description': 'Memory Hit Ratios - 5 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Memory Hit Ratios',
-            'match': '5min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Memory Hit Ratios',
+                # squidclient 3.5.20
+                'Memory hits as % of hit requests'
+            ],
+            'match': '5min: ([0-9.]+)%'
+        },
         cacheRequestMemRatio_60 = {
             'description': 'Memory Hit Ratios - 60 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Memory Hit Ratios',
-            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Memory Hit Ratios',
+                # squidclient 3.5.20
+                'Memory hits as % of hit requests'
+            ],
+            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%'
+        },
         cacheRequestDiskRatio_5 = {
             'description': 'Disk Hit Ratios - 5 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Disk Hit Ratios',
-            'match': '5min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Disk Hit Ratios',
+                # squidclient 3.5.20
+                'Disk hits as % of hit requests'
+            ],
+            'match': '5min: ([0-9.]+)%'
+        },
         cacheRequestDiskRatio_60 = {
             'description': 'Disk Hit Ratios - 60 min',
             'units': 'percent',
             'type': 'float',
-            'key': 'Request Disk Hit Ratios',
-            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%',
-            },
+            'keys': [
+                'Request Disk Hit Ratios',
+                # squidclient 3.5.20
+                'Disk hits as % of hit requests'
+            ],
+            'match': '5min: [0-9.]+%,\s+60min: ([0-9.]+)%'
+        },
         cacheHttpNhSvcTime_5 = {
             'description': 'HTTP refresh hit service time - 5 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Near Hits',
-            'match': '([0-9.]+)',
-            },
+            'keys': [
+                'Near Hits'
+            ],
+            'match': '([0-9.]+)'
+        },
         cacheHttpNhSvcTime_60 = {
             'description': 'HTTP refresh hit service time - 60 min',
             'units': 'seconds',
             'type': 'float',
-            'key': 'Near Hits',
-            'match': '[0-9.]+\s+([0-9.]+)',
-            },
+            'keys': [
+                'Near Hits'
+            ],
+            'match': '[0-9.]+\s+([0-9.]+)'
+        },
     )
 
     descriptors = []
@@ -439,7 +558,7 @@ def metric_init(params):
                     'time_max': 60,
                     'value_type': "float",
                     'units': stats_descriptions[label]['units'],
-                    'slope': "positive",
+                    'slope': "both",
                     'format': '%f',
                     'description': label,
                     'groups': 'squid',
@@ -470,7 +589,10 @@ def metric_init(params):
                 }
             
             d.update(stats_descriptions[label])
-            
+            # gmond does not like lists such as the 'keys'
+            # right-hand-side
+            del d['keys']
+
             descriptors.append(d)
             
         #else:
@@ -484,7 +606,7 @@ def metric_cleanup():
 
 #This code is for debugging and unit testing
 if __name__ == '__main__':
-    metric_init(None)
+    metric_init({})
     for d in descriptors:
         v = d['call_back'](d['name'])
         if d['value_type'] == 'string':
