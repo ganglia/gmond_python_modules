@@ -1,0 +1,21 @@
+modules {
+  module {
+    name     = 'dnslatency'
+    language = 'python'
+
+    # Sample entry to show query string format
+    # param googledns_dns_resolution {
+    #   # Format: SERVER_NAME<SPACE>NAME_TO_QUERY<SPACE>RECORD_TYPE
+    #   value = "google-public-dns-a.google.com google.com A"
+    # }
+  }
+}
+
+collection_group {
+  collect_every = 60
+  time_threshold = 60
+
+  metric {
+    name_match = "dnslatency_(.+)"
+  }
+}
