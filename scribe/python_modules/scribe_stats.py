@@ -33,6 +33,10 @@ def GetOverallMessagesPerSecond(name):
     match = re.compile(r"^scribe_overall:received good: (\d+)$", re.MULTILINE).search(output)
     value = int(match.group(1))
 
+    # check if scribe was restarted and return rate from start
+    if last_mps_value > value:
+        last_mps_value = 0
+
     # save current value
     value_diff = value - last_mps_value
     last_mps_value = value
