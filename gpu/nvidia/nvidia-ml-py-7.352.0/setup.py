@@ -7,11 +7,13 @@ if version < '2.2.3':
     DistributionMetadata.classifiers = None
     DistributionMetadata.download_url = None
 
-setup(name='nvidia-ml-py',
-      version='3.295.00',
+_package_name='nvidia-ml-py'
+
+setup(name=_package_name,
+      version='7.352.0',
       description='Python Bindings for the NVIDIA Management Library',
       py_modules=['pynvml', 'nvidia_smi'],
-      package_data=['Example.txt'],
+      package_data={_package_name: ['Example.txt']},
       license="BSD",
       url="http://www.nvidia.com/",
       author="NVIDIA Corporation",

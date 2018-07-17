@@ -32,13 +32,13 @@ USAGE
     >>> from pynvml import *
     >>> nvmlInit()
     >>> print "Driver Version:", nvmlSystemGetDriverVersion()
-    Driver Version: 295.00
+    Driver Version: 352.00
     >>> deviceCount = nvmlDeviceGetCount()
     >>> for i in range(deviceCount):
     ...     handle = nvmlDeviceGetHandleByIndex(i)
     ...     print "Device", i, ":", nvmlDeviceGetName(handle)
     ... 
-    Device 0 : Tesla C2070
+    Device 0 : Tesla K40c
     
     >>> nvmlShutdown()
 
@@ -120,10 +120,23 @@ Version 3.295.0
 - Added new functions for NVML 3.295.  See NVML documentation for more information.
 - Updated nvidia_smi.py tool
   - Includes additional error handling
+Version 4.304.0
+- Added new functions for NVML 4.304.  See NVML documentation for more information.
+- Updated nvidia_smi.py tool
+Version 4.304.3
+- Fixing nvmlUnitGetDeviceCount bug
+Version 5.319.0
+- Added new functions for NVML 5.319.  See NVML documentation for more information.
+Version 6.340.0
+- Added new functions for NVML 6.340.  See NVML documentation for more information.
+Version 7.346.0
+- Added new functions for NVML 7.346.  See NVML documentation for more information.
+Version 7.352.0
+- Added new functions for NVML 7.352.  See NVML documentation for more information.
 
 COPYRIGHT
 ---------
-Copyright (c) 2011-2012, NVIDIA Corporation.  All rights reserved.
+Copyright (c) 2011-2015, NVIDIA Corporation.  All rights reserved.
 
 LICENSE
 -------
