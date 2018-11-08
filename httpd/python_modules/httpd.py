@@ -35,7 +35,7 @@
 ###  http://www.gnu.org/licenses/gpl.txt
 
 import time
-import urllib
+import urllib2
 import subprocess
 import traceback
 
@@ -74,7 +74,7 @@ def update_stats():
 	try:
 		httpd_stats = {}
 		logging.debug(' opening URL: ' + str(STATUS_URL))
-		f = urllib.urlopen(STATUS_URL, None, 2)
+		f = urllib2.urlopen(STATUS_URL, None, 2)
 
 		for line in f.readlines():
 			diff = False
