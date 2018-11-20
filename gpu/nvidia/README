@@ -8,7 +8,7 @@ Installation instructions:
   For the latest bindings see: http://pypi.python.org/pypi/nvidia-ml-py/ 
   You can do a site install or place it in {libdir}/ganglia/python_modules
 * Copy python_modules/nvidia.py to {libdir}/ganglia/python_modules
-* Copy conf.d/nvidia.pyconf to /etc/ganglia/conf.d
+* Copy conf.d/* to /etc/ganglia/conf.d/
 * Copy graph.d/* to {ganglia_webroot}/graph.d/
 * A demo of what the GPU graphs look like is available here:
   http://ganglia.ddbj.nig.ac.jp/?c=research+month+gpu+queue&h=t135i&m=load_one&r=hour&s=by+name&hc=4&mc=2
