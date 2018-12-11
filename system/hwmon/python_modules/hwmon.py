@@ -16,7 +16,7 @@ def metric_init(params):
     sensors = sorted(glob.glob(os.path.join(root, 'hwmon*')))
 
     for s in sensors:
-        temps = glob.glob(os.path.join(s, 'device/temp*_input'))
+        temps = glob.glob(os.path.join(s, 'temp*_input'))
         # dict values are default labels if no label files exist
         probes = dict(zip(temps, [os.path.basename(x) for x in temps]))
 
