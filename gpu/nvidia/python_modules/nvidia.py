@@ -64,7 +64,11 @@ def build_descriptor(name, call_back, time_max, value_type, units, slope, format
         pass
 
 def get_gpu_num():
-    return int(nvmlDeviceGetCount())
+    try:
+        return int(nvmlDeviceGetCount())
+    except NVMLError:
+        return 0
+
 def get_gpu_use_num(name):
     use_num = 0
     for i in range(get_gpu_num()):
@@ -208,8 +212,6 @@ def metric_init(params):
         nvmlInit()
     except NVMLError, err:
         print "Failed to initialize NVML:", str(err)
-        print "Exiting..."
-        os._exit(1)
 
     default_time_max = 90
 
