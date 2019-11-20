@@ -1,0 +1,29 @@
+#
+# net_latency - A simple Ganglia module that
+# measures network latency.
+#
+# Created by Giorgos Kappes <contact@giorgoskappes.com>
+#
+modules {
+  module {
+    name = "net_latency"
+    language = "python"
+    param refresh_rate {
+      value = '10'
+    }
+
+    param target {
+      value = ''
+    }
+  }
+}
+
+collection_group {
+  collect_every = 15
+  time_threshold = 20
+  metric {
+    name = "net_latency"
+    title = "Network Latency"
+    value_threshold = 2000
+  }
+}
