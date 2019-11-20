@@ -129,6 +129,8 @@ def get_metrics():
         if ( 'use_sudo' in params.keys() and params['use_sudo'] ):
             command.append('sudo')
         command.append(params['ipmitool_bin'])
+        command.append('-I')
+        command.append('lanplus')
         if ( 'ipmi_ip' in params.keys() ):
             command.append("-H")
             command.append(params['ipmi_ip'])
