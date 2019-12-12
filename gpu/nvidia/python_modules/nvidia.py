@@ -214,7 +214,7 @@ def metric_init(params):
     default_time_max = 90
 
     build_descriptor('gpu_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of GPUs', 'gpu')
-    build_descriptor('gpu_use_num', gpu_num_handler, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of Use  GPUs', 'gpu')
+    build_descriptor('gpu_use_num', get_gpu_use_num, default_time_max, 'uint', 'GPUs', 'zero', '%u', 'Total number of Use  GPUs', 'gpu')
     build_descriptor('gpu_driver', gpu_driver_version_handler, default_time_max, 'string', '', 'zero', '%s', 'GPU Driver Version', 'gpu')
 
     for i in range(get_gpu_num()):
