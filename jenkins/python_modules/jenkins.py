@@ -169,17 +169,17 @@ def metric_init(params):
       'value_type': 'float',
       'format': '%.3f',
       'units': 'executors',
-      'description': 'Number of busy executors (master and slaves)'},
+      'description': 'Number of busy executors (main and subordinates)'},
     jenkins_overallload_queue_length = {
       'value_type': 'float',
       'format': '%.3f',
       'units': 'queued items',
-      'description': 'Length of the queue (master and slaves)'},
+      'description': 'Length of the queue (main and subordinates)'},
     jenkins_overallload_total_executors = {
       'value_type': 'float',
       'format': '%.3f',
       'units': 'executors',
-      'description': 'Number of executors (master and slaves)'},
+      'description': 'Number of executors (main and subordinates)'},
     jenkins_jobs_total = {
       'description': 'Total number of jobs'},
     jenkins_jobs_blue = {

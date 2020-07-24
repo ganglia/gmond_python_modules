@@ -133,10 +133,10 @@ def get_rate(name):
 def get_opcounter_rate(name):
     """Return change over time for an opcounter metric"""
 
-    master_rate = get_rate(name)
+    main_rate = get_rate(name)
     repl_rate = get_rate(name.replace('opcounters_', 'opcountersRepl_'))
 
-    return master_rate + repl_rate
+    return main_rate + repl_rate
 
 
 def get_globalLock_ratio(name):
@@ -175,8 +175,8 @@ def get_connections_current_ratio(name):
     return result
 
 
-def get_slave_delay(name):
-    """Return the replica set slave delay"""
+def get_subordinate_delay(name):
+    """Return the replica set subordinate delay"""
 
     # get metrics
     metrics = get_metrics()[0]
@@ -185,17 +185,17 @@ def get_slave_delay(name):
     if 'rs_status_myState' not in metrics['data'] or metrics['data']['rs_status_myState'] != 2:
         result = 0
 
-    # compare my optime with the master's
+    # compare my optime with the main's
     else:
-        master = {}
-        slave = {}
+        main = {}
+        subordinate = {}
         try:
             for member in metrics['data']['rs_status_members']:
                 if member['state'] == 1:
-                    master = member
+                    main = member
                 if member['name'].split(':')[0] == socket.getfqdn():
-                    slave = member
-            result = max(0, master['optime']['t'] - slave['optime']['t']) / 1000
+                    subordinate = member
+            result = max(0, main['optime']['t'] - subordinate['optime']['t']) / 1000
         except KeyError:
             result = 0
 
@@ -454,14 +454,14 @@ def metric_init(lparams):
             'groups': groups
         },
         {
-            'name': NAME_PREFIX + 'slave_delay',
-            'call_back': get_slave_delay,
+            'name': NAME_PREFIX + 'subordinate_delay',
+            'call_back': get_subordinate_delay,
             'time_max': time_max,
             'value_type': 'uint',
             'units': 'Seconds',
             'slope': 'both',
             'format': '%u',
-            'description': 'Replica Set Slave Delay',
+            'description': 'Replica Set Subordinate Delay',
             'groups': groups
         },
         {
