@@ -56,7 +56,7 @@ REPORT_SLAVE  = True
 
 MAX_UPDATE_TIME = 15
 
-def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=True, get_slave=True):
+def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_main=True, get_subordinate=True):
 	"""
 
 	"""
@@ -114,28 +114,28 @@ def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=T
 		# try not to fail ?
 		# BRIGHTHOUSE ENGINE status variables are pretty obscure
 		get_brighthouse_engine = get_brighthouse_engine and variables.has_key('brighthouse_ini_controlmessages')
-		get_master = get_master and variables['log_bin'].lower() == 'on'
+		get_main = get_main and variables['log_bin'].lower() == 'on'
 
 		if get_brighthouse_engine:
 			logging.warn('get_brighthouse_engine status not implemented')
 			
-		master_logs = tuple
-		if get_master:
+		main_logs = tuple
+		if get_main:
 			cursor = conn.cursor(MySQLdb.cursors.Cursor)
 			cursor.execute("SHOW MASTER LOGS")
-			master_logs = cursor.fetchall()
+			main_logs = cursor.fetchall()
 			cursor.close()
 
-		slave_status = {}
-		if get_slave:
+		subordinate_status = {}
+		if get_subordinate:
 			cursor = conn.cursor(MySQLdb.cursors.DictCursor)
 			cursor.execute("SHOW SLAVE STATUS")
 			res = cursor.fetchone()
 			if res:
 				for (k,v) in res.items():
-					slave_status[k.lower()] = v
+					subordinate_status[k.lower()] = v
 			else:
-				get_slave = False
+				get_subordinate = False
 			cursor.close()
 
 		cursor = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -199,8 +199,8 @@ def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=T
 		'select_range',
 		'select_range_check',
 		'select_scan',
-		'slave_open_temp_tables',
-		'slave_retried_transactions',
+		'subordinate_open_temp_tables',
+		'subordinate_retried_transactions',
 		'slow_launch_threads',
 		'slow_queries',
 		'sort_range',
@@ -222,7 +222,7 @@ def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=T
 		'qcache_free_blocks',
 		'qcache_free_memory',
 		'qcache_total_blocks',
-		'slave_open_temp_tables',
+		'subordinate_open_temp_tables',
 		'threads_cached',
 		'threads_connected',
 		'threads_running',
@@ -298,32 +298,32 @@ def update_stats(get_brighthouse=True, get_brighthouse_engine=True, get_master=T
 
 	infobright_stats['open_files_used'] = int(global_status['open_files']) / int(variables['open_files_limit'])
 
-	# process master logs
-	if get_master:
-		infobright_stats['binlog_count'] = len(master_logs)
-		infobright_stats['binlog_space_current'] = master_logs[-1][1]
-		#infobright_stats['binlog_space_total'] = sum((long(s[1]) for s in master_logs))
+	# process main logs
+	if get_main:
+		infobright_stats['binlog_count'] = len(main_logs)
+		infobright_stats['binlog_space_current'] = main_logs[-1][1]
+		#infobright_stats['binlog_space_total'] = sum((long(s[1]) for s in main_logs))
 		infobright_stats['binlog_space_total'] = 0
-		for s in master_logs:
+		for s in main_logs:
 			infobright_stats['binlog_space_total'] += int(s[1])
-		infobright_stats['binlog_space_used'] = float(master_logs[-1][1]) / float(variables['max_binlog_size']) * 100
+		infobright_stats['binlog_space_used'] = float(main_logs[-1][1]) / float(variables['max_binlog_size']) * 100
 
-	# process slave status
-	if get_slave:
-		infobright_stats['slave_exec_master_log_pos'] = slave_status['exec_master_log_pos']
-		#infobright_stats['slave_io'] = 1 if slave_status['slave_io_running'].lower() == "yes" else 0
-		if slave_status['slave_io_running'].lower() == "yes":
-			infobright_stats['slave_io'] = 1
+	# process subordinate status
+	if get_subordinate:
+		infobright_stats['subordinate_exec_main_log_pos'] = subordinate_status['exec_main_log_pos']
+		#infobright_stats['subordinate_io'] = 1 if subordinate_status['subordinate_io_running'].lower() == "yes" else 0
+		if subordinate_status['subordinate_io_running'].lower() == "yes":
+			infobright_stats['subordinate_io'] = 1
 		else:
-			infobright_stats['slave_io'] = 0
-		#infobright_stats['slave_sql'] = 1 if slave_status['slave_sql_running'].lower() =="yes" else 0
-		if slave_status['slave_sql_running'].lower() == "yes":
-			infobright_stats['slave_sql'] = 1
+			infobright_stats['subordinate_io'] = 0
+		#infobright_stats['subordinate_sql'] = 1 if subordinate_status['subordinate_sql_running'].lower() =="yes" else 0
+		if subordinate_status['subordinate_sql_running'].lower() == "yes":
+			infobright_stats['subordinate_sql'] = 1
 		else:
-			infobright_stats['slave_sql'] = 0
-		infobright_stats['slave_lag'] = slave_status['seconds_behind_master']
-		infobright_stats['slave_relay_log_pos'] = slave_status['relay_log_pos']
-		infobright_stats['slave_relay_log_space'] = slave_status['relay_log_space']
+			infobright_stats['subordinate_sql'] = 0
+		infobright_stats['subordinate_lag'] = subordinate_status['seconds_behind_main']
+		infobright_stats['subordinate_relay_log_pos'] = subordinate_status['relay_log_pos']
+		infobright_stats['subordinate_relay_log_space'] = subordinate_status['relay_log_space']
 
 
 	logging.debug('success updating stats')
@@ -370,8 +370,8 @@ def metric_init(params):
 
 	REPORT_BRIGHTHOUSE = str(params.get('get_brighthouse', True)) == "True"
 	REPORT_BRIGHTHOUSE_ENGINE = str(params.get('get_brighthouse_engine', True)) == "True"
-	REPORT_MASTER = str(params.get('get_master', True)) == "True"
-	REPORT_SLAVE  = str(params.get('get_slave', True)) == "True"
+	REPORT_MASTER = str(params.get('get_main', True)) == "True"
+	REPORT_SLAVE  = str(params.get('get_subordinate', True)) == "True"
 
 	logging.debug("init: " + str(params))
 
@@ -391,9 +391,9 @@ def metric_init(params):
 		delta_per_second = True
 
 	mysql_stats_descriptions = {}
-	master_stats_descriptions = {}
+	main_stats_descriptions = {}
  	brighthouse_stats_descriptions = {}
-	slave_stats_descriptions  = {}
+	subordinate_stats_descriptions  = {}
 
 	mysql_stats_descriptions = dict(
 		aborted_clients = {
@@ -652,15 +652,15 @@ def metric_init(params):
 			'units': 'joins',
 		}, 
 
-		slave_open_temp_tables = {
-			'description': 'The number of temporary tables that the slave SQL thread currently has open',
+		subordinate_open_temp_tables = {
+			'description': 'The number of temporary tables that the subordinate SQL thread currently has open',
 			'value_type': 'float',
 			'units': 'tables',
 			'slope': 'both',
 		}, 
 
-		slave_retried_transactions = {
-			'description': 'The total number of times since startup that the replication slave SQL thread has retried transactions',
+		subordinate_retried_transactions = {
+			'description': 'The total number of times since startup that the replication subordinate SQL thread has retried transactions',
 			'value_type': 'float',
 			'units': 'count',
 		}, 
@@ -974,7 +974,7 @@ def metric_init(params):
 
 
 	if REPORT_MASTER:
-		master_stats_descriptions = dict(
+		main_stats_descriptions = dict(
 			binlog_count = {
 				'description': "Number of binary logs",
 				'units': 'logs',
@@ -1002,34 +1002,34 @@ def metric_init(params):
 		)
 
 	if REPORT_SLAVE:
-		slave_stats_descriptions = dict(
-			slave_exec_master_log_pos = {
-				'description': "The position of the last event executed by the SQL thread from the master's binary log",
+		subordinate_stats_descriptions = dict(
+			subordinate_exec_main_log_pos = {
+				'description': "The position of the last event executed by the SQL thread from the main's binary log",
 				'units': 'bytes',
 				'slope': 'both',
 			},
 
-			slave_io = {
-				'description': "Whether the I/O thread is started and has connected successfully to the master",
+			subordinate_io = {
+				'description': "Whether the I/O thread is started and has connected successfully to the main",
 				'value_type': 'uint8',
 				'units': 'True/False',
 				'slope': 'both',
 			},
 
-			slave_lag = {
+			subordinate_lag = {
 				'description': "Replication Lag",
 				'units': 'secs',
 				'slope': 'both',
 			},
 
-			slave_relay_log_pos = {
+			subordinate_relay_log_pos = {
 				'description': "The position up to which the SQL thread has read and executed in the current relay log",
 				'units': 'bytes',
 				'slope': 'both',
 			},
 
-			slave_sql = {
-				'description': "Slave SQL Running",
+			subordinate_sql = {
+				'description': "Subordinate SQL Running",
 				'value_type': 'uint8',
 				'units': 'True/False',
 				'slope': 'both',
@@ -1042,7 +1042,7 @@ def metric_init(params):
 
 	update_stats(REPORT_BRIGHTHOUSE, REPORT_BRIGHTHOUSE_ENGINE, REPORT_MASTER, REPORT_SLAVE)
 
-	for stats_descriptions in (brighthouse_stats_descriptions, master_stats_descriptions, mysql_stats_descriptions, slave_stats_descriptions):
+	for stats_descriptions in (brighthouse_stats_descriptions, main_stats_descriptions, mysql_stats_descriptions, subordinate_stats_descriptions):
 		for label in stats_descriptions:
 			if infobright_stats.has_key(label):
 				format = '%u'
@@ -1089,8 +1089,8 @@ if __name__ == '__main__':
 	parser.add_option("-S", "--socket", dest="unix_socket", help="unix_socket", default="")
 	parser.add_option("--no-brighthouse", dest="get_brighthouse", action="store_false", default=True)
 	parser.add_option("--no-brighthouse-engine", dest="get_brighthouse_engine", action="store_false", default=False)
-	parser.add_option("--no-master", dest="get_master", action="store_false", default=True)
-	parser.add_option("--no-slave", dest="get_slave", action="store_false", default=True)
+	parser.add_option("--no-main", dest="get_main", action="store_false", default=True)
+	parser.add_option("--no-subordinate", dest="get_subordinate", action="store_false", default=True)
 	parser.add_option("-b", "--gmetric-bin", dest="gmetric_bin", help="path to gmetric binary", default="/usr/bin/gmetric")
 	parser.add_option("-c", "--gmond-conf", dest="gmond_conf", help="path to gmond.conf", default="/etc/ganglia/gmond.conf")
 	parser.add_option("-g", "--gmetric", dest="gmetric", help="submit via gmetric", action="store_true", default=False)
@@ -1105,8 +1105,8 @@ if __name__ == '__main__':
 		'port': options.port,
 		'get_brighthouse': options.get_brighthouse,
 		'get_brighthouse_engine': options.get_brighthouse_engine,
-		'get_master': options.get_master,
-		'get_slave': options.get_slave,
+		'get_main': options.get_main,
+		'get_subordinate': options.get_subordinate,
 		'unix_socket': options.unix_socket,
 	})
 
