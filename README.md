@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/ganglia/gmond_python_modules.png)](http://travis-ci.org/ganglia/gmond_python_modules)
+[Build Status](https://secure.travis-ci.org/ganglia/gmond_python_modules.png)](http://travis-ci.org/ganglia/gmond_python_modules)
 
 This is the official repository for hosting all user-contributed Gmond Python DSO metric modules.
 
