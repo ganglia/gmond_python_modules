@@ -1,9 +1,9 @@
-#!/usr/bin/python
-# Name: vmax.py
-# Desc: Ganglia module for polling the VMAX UniSphere REST interface for metrics
-# Author: Evan Fraser evan.fraser@trademe.co.nz
-# Date: July 2014
-# Copyright: GPL
+!/usr/bin/python
+ Name: vmax.py
+ Desc: Ganglia module for polling the VMAX UniSphere REST interface for metrics
+ Author: Evan Fraser evan.fraser@trademe.co.nz
+ Date: July 2014
+ Copyright: GPL
 
 
 import json, os, pprint, re, requests, socket, sys, time
@@ -12,7 +12,7 @@ descriptors = list()
 
 unispherePort = 8443
 
-#This is the minimum interval between querying unisphere for metrics
+This is the minimum interval between querying unisphere for metrics
 METRICS_CACHE_MAX = 300
 
 METRICS = {
@@ -103,8 +103,8 @@ def get_metric(name):
                 print "Short response"
                 pprint.pprint(responseObj) 
 
-            ### Now get the pool based metrics for each vmax.
-            #Start by getting the list of pools
+            Now get the pool based metrics for each vmax.
+            Start by getting the list of pools
             baseurl = 'https://' + vmax_dict[key]['unisphereIP'] + ':' + str(unispherePort) + '/univmax/restapi/performance/ThinPool/keys'
 
             requestObj = {'thinPoolKeyParam': 
@@ -117,12 +117,12 @@ def get_metric(name):
 
             headers = {'content-type': 'application/json','accept':'application/json'} #set the headers for how we want the response
 
-            #make the actual request, specifying the URL, the JSON from above, standard basic auth, the headers and not to verify the SSL cert.
+            make the actual request, specifying the URL, the JSON from above, standard basic auth, the headers and not to verify the SSL cert.
 
             r = requests.post(baseurl, requestJSON, auth=(vmax_dict[key]['user'], vmax_dict[key]['pass']), headers=headers, verify=False)
 
 
-            #take the raw response text and deserialize it into a python object.
+            take the raw response text and deserialize it into a python object.
             try:
                 responseObj = json.loads(r.text)
             except:
@@ -145,10 +145,10 @@ def get_metric(name):
 
                 headers = {'content-type': 'application/json','accept':'application/json'} #set the headers for how we want the response
 
-                #make the actual request, specifying the URL, the JSON from above, standard basic auth, the headers and not to verify the SSL cert.
+                make the actual request, specifying the URL, the JSON from above, standard basic auth, the headers and not to verify the SSL cert.
                 r = requests.post(baseurl, requestJSON, auth=(vmax_dict[key]['user'], vmax_dict[key]['pass']), headers=headers, verify=False)
 
-                #take the raw response text and deserialize it into a python object.
+                take the raw response text and deserialize it into a python object.
                 try:
                     responseObj = json.loads(r.text)
                 except:
@@ -180,14 +180,14 @@ def get_metric(name):
     return METRICS['data'][name]
 
 
-# define_metrics will run an snmp query on an ipaddr, find interfaces, build descriptors and set spoof_host
-# define_metrics is called from metric_init
+define_metrics will run an snmp query on an ipaddr, find interfaces, build descriptors and set spoof_host
+define_metrics is called from metric_init
 def define_metrics(Desc_Skel, unisphereIP, sid, site):
     global vmax_dict
     spoof_string = unisphereIP + ':vmax_' + site
     vmax_name = 'vmax_' + site
 
-    #FE Cache Hits/s
+    FE Cache Hits/s
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_cache_hits',
                 "units"       : "iops",
@@ -195,7 +195,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "iops",
                 "spoof_host"  : spoof_string,
                 }))
-    #FE Read IOPs
+    FE Read IOPs
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_fe_reads',
                 "units"       : "iops",
@@ -203,7 +203,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "iops",
                 "spoof_host"  : spoof_string,
                 }))
-    #FE Write IOPs
+    FE Write IOPs
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_fe_writes',
                 "units"       : "iops",
@@ -211,7 +211,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "iops",
                 "spoof_host"  : spoof_string,
                 }))
-    #Array MB_READ_PER_SEC
+    Array MB_READ_PER_SEC
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_megabytes_read',
                 "units"       : "MB/s",
@@ -219,7 +219,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "Throughput",
                 "spoof_host"  : spoof_string,
                 }))
-    #Array MB_WRITE_PER_SEC
+    Array MB_WRITE_PER_SEC
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_megabytes_written',
                 "units"       : "MB/s",
@@ -227,7 +227,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "Throughput",
                 "spoof_host"  : spoof_string,
                 }))
-    #Array RESPONSE_TIME_READ
+    Array RESPONSE_TIME_READ
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_response_time_read',
                 "units"       : "ms",
@@ -235,7 +235,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "Latency",
                 "spoof_host"  : spoof_string,
                 }))
-    #Array RESPONSE_TIME_WRITE
+    Array RESPONSE_TIME_WRITE
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_response_time_write',
                 "units"       : "ms",
@@ -243,7 +243,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "groups"      : "Latency",
                 "spoof_host"  : spoof_string,
                 }))
-    #Total Volume IO_RATE
+    Total Volume IO_RATE
     descriptors.append(create_desc(Desc_Skel, {
                 "name"        : vmax_name + '_vol_iorate',
                 "units"       : "iops",
@@ -252,7 +252,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                 "spoof_host"  : spoof_string,
                 }))
 
-    ###Perform API query to get list of Thinpools
+    Perform API query to get list of Thinpools
 
     baseurl = 'https://' + unisphereIP + ':8443/univmax/restapi/performance/ThinPool/keys'
 
@@ -298,7 +298,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                     "spoof_host"  : spoof_string,
                     }))
 
-        #BE_RESPONSE_TIME_READ
+        BE_RESPONSE_TIME_READ
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : str(vmax_name + '_' + pool["poolId"] + '_response_time_reads'),
                     "units"       : "ms",
@@ -307,7 +307,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                     "spoof_host"  : spoof_string,
                     }))
 
-        #BE_RESPONSE_TIME_WRITE
+        BE_RESPONSE_TIME_WRITE
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : str(vmax_name + '_' + pool["poolId"] + '_response_time_writes'),
                     "units"       : "ms",
@@ -315,7 +315,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                     "groups"      : "Latency",
                     "spoof_host"  : spoof_string,
                     }))
-        #BE_MB_READ_RATE
+        BE_MB_READ_RATE
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : str(vmax_name + '_' + pool["poolId"] + '_megabytes_read'),
                     "units"       : "MB/s",
@@ -323,7 +323,7 @@ def define_metrics(Desc_Skel, unisphereIP, sid, site):
                     "groups"      : "Throughput",
                     "spoof_host"  : spoof_string,
                     }))
-        #BE_MB_WRITE_RATE
+        BE_MB_WRITE_RATE
         descriptors.append(create_desc(Desc_Skel, {
                     "name"        : str(vmax_name + '_' + pool["poolId"] + '_megabytes_written'),
                     "units"       : "MB/s",
@@ -341,7 +341,7 @@ def metric_init(params):
     print '[switch] Received the following parameters'
     print params
 
-    #Import the params into the global NIPARAMS
+    Import the params into the global NIPARAMS
 
     Desc_Skel = {
         'name'        : 'XXX',
@@ -355,11 +355,11 @@ def metric_init(params):
         'groups'      : 'switch',
         }  
 
-    # Find all the vmax's passed in params    
+    Find all the vmax's passed in params    
     for vmax in vmax_dict:
              # pass skel, ip and name to define_metrics to create descriptors
         descriptors = define_metrics(Desc_Skel, vmax_dict[vmax]['unisphereIP'], vmax_dict[vmax]['sid'], vmax_dict[vmax]['site'])
-    #Return the descriptors back to gmond
+    Return the descriptors back to gmond
     return descriptors
 
 def create_desc(skel, prop):
@@ -373,7 +373,7 @@ def metric_cleanup():
     '''Clean up the metric module.'''
     pass
 
-# For CLI Debuging:
+ For CLI Debuging:
 if __name__ == '__main__':
     params = {
               }
